@@ -1,0 +1,99 @@
+html, body, #pad, #keyboard, #opening, #closed {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: sans;
+}
+
+#pad, #sendbutton, #opening, #closed {
+    background-color: #404040 !important;
+    background-image: url(tex.png);
+}
+
+#opening, #closed {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    color: white;
+    word-wrap: break-word;
+}
+
+#pad {
+    display: flex;
+    flex-direction: column;
+}
+
+#padlabel {
+    color: #424242;
+    text-shadow:
+        -1px -1px 0 #383838,
+        1px -1px 0 #383838,
+        -1px 1px 0 #383838,
+        1px 1px 0 #383838;
+    font-weight: bold;
+    margin-top: auto;
+    margin-bottom: auto;
+    text-align: center;
+    font-size: 4em;
+    word-wrap: break-word;
+}
+
+#fullscreenbutton, #keyboardbutton, #sendbutton {
+    background-color: transparent;
+    border: 1px solid black;
+    border-bottom: none;
+    height: 1.5em;
+    width: 2em;
+    font-size: 2em;
+    color: white;
+}
+
+#fullscreenbutton {
+    border-left: none;
+}
+
+#keyboardbutton {
+    border-right: none;
+    margin-left: auto;
+}
+
+#keyboard {
+    display: flex;
+    flex-direction: row;
+}
+
+#text {
+    flex: 2;
+    border: none;
+    resize: none;
+    font-size: 2em;
+    background-color: white;
+    color: black;
+}
+
+.buttons {
+    display: flex;
+}
+
+#sendbutton {
+    border-right: none;
+    border-top: none;
+    height: 100%;
+}
+
+@media (max-aspect-ratio: 4/3) {
+    #keyboard {
+        flex-direction: column;
+    }
+
+    #sendbutton {
+        border-left: none;
+        border-top: 1px solid black;
+        height: 1.5em;
+        width: 100%;
+    }
+}

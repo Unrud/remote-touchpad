@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>remote-touchpad.desktop</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>AGPL-3.0-or-later</project_license>
+  <name>Remote Touchpad</name>
+  <summary>Control mouse and keyboard from a smartphone</summary>
+  <description>
+    <p>
+      Control mouse and keyboard from the webbrowser of a smartphone (or any other device with a touchscreen).
+      To take control just open the displayed URL or scan the QR code.
+    </p>
+    <p>
+      Supports Linux/X11 and Windows.
+    </p>
+  </description>
+  <url type="bugtracker">https://github.com/Unrud/remote-touchpad/issues</url>
+  <url type="homepage">https://github.com/Unrud/remote-touchpad</url>
+  <developer_name>Unrud</developer_name>
+  <releases>
+    <release version="0.0.1" date="2018-06-23" />
+  </releases>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/0.0.1/screenshots/1.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/0.0.1/screenshots/2.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/0.0.1/screenshots/3.png</image>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1" />
+</component>
