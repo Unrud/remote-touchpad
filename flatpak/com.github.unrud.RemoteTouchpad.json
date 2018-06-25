@@ -16,7 +16,7 @@
     ],
     "modules" : [
         {
-            "name" : "remote-desktop",
+            "name" : "remote-touchpad",
             "sources" : [
                 {
                     "type" : "git",
