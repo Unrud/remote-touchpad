@@ -378,6 +378,10 @@ window.addEventListener("load", function() {
             window.history.back();
         }
     };
+    document.getElementById("reloadbutton").addEventListener("click",
+                                                             function(e) {
+        location.reload();
+    });
     pad.addEventListener("touchstart", handleStart, false);
     pad.addEventListener("touchend", handleEnd, false);
     pad.addEventListener("touchcancel", handleCancel, false);

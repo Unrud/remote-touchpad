@@ -20,6 +20,7 @@ body {
     font-size: 2em;
     color: white;
     word-wrap: break-word;
+    flex-direction: column;
 }
 
 #pad {
@@ -42,14 +43,17 @@ body {
     word-wrap: break-word;
 }
 
-#fullscreenbutton, #keyboardbutton, #sendbutton {
+#fullscreenbutton, #keyboardbutton, #sendbutton, #reloadbutton {
     background-color: transparent;
     border: 1px solid black;
-    border-bottom: none;
     height: 1.5em;
     width: 2em;
     font-size: 2em;
     color: white;
+}
+
+#fullscreenbutton, #keyboardbutton, #sendbutton {
+    border-bottom: none;
 }
 
 #fullscreenbutton {
