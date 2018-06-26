@@ -141,7 +141,7 @@ function calculatePointerAccelerationMult(speed) {
 
 function onDraggingTimeout() {
     draggingTimeout = null;
-    ws.send("PointerButton 1 0");
+    ws.send("b1;0");
 }
 
 function updateMoveAndScroll() {
@@ -161,7 +161,7 @@ function onUpdateTimeout() {
         moveXSum -= moveX;
         moveYSum -= moveY;
         idleUpdates = 0;
-        ws.send("PointerMove " + moveX + " " + moveY);
+        ws.send("m" + moveX + ";" + moveY);
     }
     var scrollX = Math.trunc(scrollXSum);
     var scrollY = Math.trunc(scrollYSum);
@@ -169,7 +169,7 @@ function onUpdateTimeout() {
         scrollXSum -= scrollX;
         scrollYSum -= scrollY;
         idleUpdates = 0;
-        ws.send("PointerScroll " + scrollX + " " + scrollY);
+        ws.send("s" + scrollX + ";" + scrollY);
     }
     if (idleUpdates >= MAX_IDLE_UPDATES) {
         clearInterval(updateTimer);
@@ -222,7 +222,7 @@ function handleEnd(evt) {
     }
     if (ongoingTouches.length == 0 && touchReleasedCount >= 1 &&
             dragging) {
-        ws.send("PointerButton 1 0");
+        ws.send("b1;0");
     }
     if (ongoingTouches.length == 0 && touchReleasedCount >= 1 &&
             !touchMoved && evt.timeStamp - touchStart < TOUCH_TIMEOUT) {
@@ -234,11 +234,11 @@ function handleEnd(evt) {
         }else if (touchReleasedCount == 3) {
             button = 2;
         }
-        ws.send("PointerButton " + button + " 1");
+        ws.send("b" + button + ";1");
         if (button == 1) {
             draggingTimeout = setTimeout(onDraggingTimeout, TOUCH_TIMEOUT);
         } else {
-            ws.send("PointerButton " + button + " 0");
+            ws.send("b" + button + ";0");
         }
     }
 }
@@ -365,7 +365,7 @@ window.addEventListener("load", function() {
      document.getElementById("sendbutton").addEventListener("click",
                                                             function(e) {
         if (text.value != "") {
-            ws.send("KeyboardText " + text.value);
+            ws.send("t" + text.value);
             text.value = "";
         }
         window.history.back();

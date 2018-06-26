@@ -35,6 +35,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 const (
@@ -47,29 +48,35 @@ const (
 )
 
 func processCommand(plugin Plugin, command string) error {
-	commandParts := strings.Split(command, " ")
-	if commandParts[0] == "KeyboardText" {
-		text := strings.Join(commandParts[1:], " ")
+	if len(command) == 0 {
+		return errors.New("empty command")
+	}
+	if command[0] == 't' {
+		text := command[1:]
+		if !utf8.ValidString(text) {
+			return errors.New("invalid utf-8")
+		}
 		return plugin.KeyboardText(text)
 	}
-	if len(commandParts) != 3 {
+	arguments := strings.Split(command[1:], ";")
+	if len(arguments) != 2 {
 		return errors.New("wrong number of arguments")
 	}
-	x, err := strconv.ParseInt(commandParts[1], 10, 32)
+	x, err := strconv.ParseInt(arguments[0], 10, 32)
 	if err != nil {
 		return err
 	}
-	y, err := strconv.ParseInt(commandParts[2], 10, 32)
+	y, err := strconv.ParseInt(arguments[1], 10, 32)
 	if err != nil {
 		return err
 	}
-	if commandParts[0] == "PointerMove" {
+	if command[0] == 'm' {
 		return plugin.PointerMove(int(x), int(y))
 	}
-	if commandParts[0] == "PointerScroll" {
+	if command[0] == 's' {
 		return plugin.PointerScroll(int(x), int(y))
 	}
-	if commandParts[0] == "PointerButton" {
+	if command[0] == 'b' {
 		if x <= 0 || x > 3 {
 			return errors.New("unknown pointer button")
 		}
