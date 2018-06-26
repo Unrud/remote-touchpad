@@ -312,7 +312,11 @@ window.addEventListener("load", function() {
     keyboard.style.display = "none";
     text.value = "";
 
-    ws = new WebSocket("ws://" + location.hostname +
+    var wsProtocol = "wss:";
+    if (location.protocol == "http:") {
+        wsProtocol = "ws:";
+    }
+    ws = new WebSocket(wsProtocol + "//" + location.hostname +
                        (location.port ? ":" + location.port : "") +
                        "/ws");
 
