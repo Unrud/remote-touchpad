@@ -5,6 +5,11 @@ To take control open the displayed URL or scan the QR code.
 
 Supports Linux/X11 and Windows.
 
+## Installation
+
+  * [Flatpak](https://flathub.org/apps/details/com.github.unrud.RemoteTouchpad)
+  * [Windows](https://github.com/Unrud/remote-touchpad/releases/latest)
+
 ## Screenshots
 
 ![screenshot 1](https://raw.githubusercontent.com/Unrud/remote-touchpad/master/screenshots/1.png)
