@@ -45,7 +45,7 @@ const (
 	challengeLength         int           = 8
 	defaultUpdateInterval   int           = 50
 	defaultBind             string        = ":0"
-	version                 string        = "0.0.3"
+	version                 string        = "0.0.4"
 )
 
 func processCommand(plugin Plugin, command string) error {
