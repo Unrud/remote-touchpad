@@ -2,7 +2,7 @@
 <component type="desktop">
   <id>remote-touchpad.desktop</id>
   <metadata_license>CC0-1.0</metadata_license>
-  <project_license>AGPL-3.0-or-later</project_license>
+  <project_license>GPL-3.0-or-later</project_license>
   <name>Remote Touchpad</name>
   <summary>Control mouse and keyboard from a smartphone</summary>
   <description>
