@@ -24,7 +24,6 @@ const MOVE_MULT = 1;
 const SCROLL_MULT = 0.05;
 // [[px/s, mult], ...]
 const POINTER_ACCELERATION = [[0, 0], [87, 1], [173, 1], [553, 2]];
-const UPDATE_INTERVAL = 50;
 const MAX_IDLE_UPDATES = 10;
 
 var ws;
@@ -43,6 +42,7 @@ var scrollYSum = 0;
 var dragging = false;
 var draggingTimeout = null;
 var updateTimer = null;
+var updateInterval = 0;
 var idleUpdates = 0;
 
 function fullscreenEnabled() {
@@ -147,8 +147,8 @@ function onDraggingTimeout() {
 function updateMoveAndScroll() {
     if (updateTimer == null) {
         onUpdateTimeout();
-        if (UPDATE_INTERVAL > 0 && idleUpdates == 0) {
-            updateTimer = setInterval(onUpdateTimeout, UPDATE_INTERVAL);
+        if (updateInterval > 0 && idleUpdates == 0) {
+            updateTimer = setInterval(onUpdateTimeout, updateInterval);
         }
     }
 }
@@ -298,6 +298,20 @@ function challengeResponse(message) {
     return btoa(shaObj.getHMAC("BYTES"));
 }
 
+function processCommand(message) {
+    if (message.charAt(0) == "i") {
+        var x = parseInt(message.substr(1));
+        if (isNaN(x) || x.toString() != message.substr(1) || x < 0) {
+            return false;
+        }
+        updateInterval = x;
+        clearInterval(updateTimer);
+        updateTimer = null;
+        return true;
+    }
+    return false;
+}
+
 window.addEventListener("load", function() {
     var authenticated = false;
     var opening = document.getElementById("opening");
@@ -322,7 +336,9 @@ window.addEventListener("load", function() {
 
     ws.onmessage = function(event) {
         if (authenticated) {
-            ws.close();
+            if (!processCommand(event.data)) {
+                ws.close();
+            }
             return;
         }
         authenticated = true;
