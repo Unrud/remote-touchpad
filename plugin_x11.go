@@ -28,6 +28,8 @@ package main
 import "C"
 import (
 	"errors"
+	"fmt"
+	"os"
 	"sync"
 	"time"
 	"unsafe"
@@ -41,6 +43,11 @@ type x11Plugin struct {
 }
 
 func InitX11Plugin() (Plugin, error) {
+	sessionType := os.Getenv("XDG_SESSION_TYPE")
+	if sessionType != "" && sessionType != "x11" {
+		return nil, UnsupportedPlatformError{errors.New(fmt.Sprintf(
+			"unsupported session type '%v'", sessionType))}
+	}
 	display := C.XOpenDisplay(nil)
 	if display == nil {
 		return nil, UnsupportedPlatformError{
