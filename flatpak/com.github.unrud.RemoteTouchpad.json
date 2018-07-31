@@ -45,7 +45,7 @@
             ],
             "buildsystem" : "simple",
             "build-commands" : [
-                ". /usr/lib/sdk/golang/enable.sh; env GOPATH=\"$(pwd)\" go build github.com/unrud/remote-touchpad",
+                ". /usr/lib/sdk/golang/enable.sh; env GOPATH=\"$(pwd)\" go build -tags x11 github.com/unrud/remote-touchpad",
                 "install -Dm0755 -t /app/bin remote-touchpad",
                 "install -Dm0755 -t /app/bin src/github.com/unrud/remote-touchpad/desktop/remote-touchpad-wait-on-error",
                 "install -Dm0644 -t /app/share/appdata src/github.com/unrud/remote-touchpad/desktop/remote-touchpad.appdata.xml",

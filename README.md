@@ -3,7 +3,7 @@
 Control mouse and keyboard from the webbrowser of a smartphone (or any other device with a touchscreen).
 To take control open the displayed URL or scan the QR code.
 
-Supports Linux/X11 and Windows.
+Supports Windows and X11.
 
 ## Installation
 

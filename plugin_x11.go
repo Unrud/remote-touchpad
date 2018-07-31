@@ -1,4 +1,4 @@
-// +build linux
+// +build x11
 
 /*
  *    Copyright (c) 2018 Unrud<unrud@outlook.com>
