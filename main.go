@@ -79,7 +79,7 @@ func processCommand(plugin Plugin, command string) error {
 	}
 	if command[0] == 'b' {
 		if x <= 0 || x > 3 {
-			return errors.New("unknown pointer button")
+			return errors.New("unsupported pointer button")
 		}
 		b := true
 		if y == 0 {
@@ -87,7 +87,7 @@ func processCommand(plugin Plugin, command string) error {
 		}
 		return plugin.PointerButton(uint(x), b)
 	}
-	return errors.New("unknown command")
+	return errors.New("unsupported command")
 }
 
 type challenge struct {
