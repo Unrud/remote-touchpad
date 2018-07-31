@@ -24,7 +24,6 @@ const MOVE_MULT = 1;
 const SCROLL_MULT = 0.05;
 // [[px/s, mult], ...]
 const POINTER_ACCELERATION = [[0, 0], [87, 1], [173, 1], [553, 2]];
-const MAX_IDLE_UPDATES = 10;
 
 var ws;
 var pad;
@@ -41,9 +40,6 @@ var scrollXSum = 0;
 var scrollYSum = 0;
 var dragging = false;
 var draggingTimeout = null;
-var updateTimer = null;
-var updateInterval = 0;
-var idleUpdates = 0;
 
 function fullscreenEnabled() {
     return (document.fullscreenEnabled ||
@@ -145,22 +141,11 @@ function onDraggingTimeout() {
 }
 
 function updateMoveAndScroll() {
-    if (updateTimer == null) {
-        onUpdateTimeout();
-        if (updateInterval > 0 && idleUpdates == 0) {
-            updateTimer = setInterval(onUpdateTimeout, updateInterval);
-        }
-    }
-}
-
-function onUpdateTimeout() {
-    idleUpdates += 1;
     var moveX = Math.trunc(moveXSum);
     var moveY = Math.trunc(moveYSum);
     if (Math.abs(moveX) >= 1 || Math.abs(moveY) >= 1) {
         moveXSum -= moveX;
         moveYSum -= moveY;
-        idleUpdates = 0;
         ws.send("m" + moveX + ";" + moveY);
     }
     var scrollX = Math.trunc(scrollXSum);
@@ -168,12 +153,7 @@ function onUpdateTimeout() {
     if (Math.abs(scrollX) >= 1 || Math.abs(scrollY) >= 1) {
         scrollXSum -= scrollX;
         scrollYSum -= scrollY;
-        idleUpdates = 0;
         ws.send("s" + scrollX + ";" + scrollY);
-    }
-    if (idleUpdates >= MAX_IDLE_UPDATES) {
-        clearInterval(updateTimer);
-        updateTimer = null;
     }
 }
 
@@ -298,20 +278,6 @@ function challengeResponse(message) {
     return btoa(shaObj.getHMAC("BYTES"));
 }
 
-function processCommand(message) {
-    if (message.charAt(0) == "i") {
-        var x = parseInt(message.substr(1));
-        if (isNaN(x) || x.toString() != message.substr(1) || x < 0) {
-            return false;
-        }
-        updateInterval = x;
-        clearInterval(updateTimer);
-        updateTimer = null;
-        return true;
-    }
-    return false;
-}
-
 window.addEventListener("load", function() {
     var authenticated = false;
     var opening = document.getElementById("opening");
@@ -336,9 +302,7 @@ window.addEventListener("load", function() {
 
     ws.onmessage = function(event) {
         if (authenticated) {
-            if (!processCommand(event.data)) {
-                ws.close();
-            }
+            ws.close();
             return;
         }
         authenticated = true;

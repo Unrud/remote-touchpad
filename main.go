@@ -43,7 +43,6 @@ const (
 	authenticationRateLimit time.Duration = time.Second / 10
 	authenticationRateBurst int           = 10
 	challengeLength         int           = 8
-	defaultUpdateInterval   int           = 50
 	defaultBind             string        = ":0"
 	version                 string        = "0.0.4"
 )
@@ -128,15 +127,13 @@ func secureRandBase64(length int) string {
 func main() {
 	var bind, certFile, keyFile, secret string
 	var showVersion, invert bool
-	var updateInterval int
 	flag.BoolVar(&showVersion, "version", false, "show program's version number and exit")
-	flag.StringVar(&bind, "bind", defaultBind, "bind server to [IP]:PORT")
+	flag.StringVar(&bind, "bind", defaultBind, "bind server to [HOSTNAME]:PORT")
 	flag.StringVar(&secret, "secret", "", "shared secret for client authentication")
 	flag.StringVar(&certFile, "cert", "", "file containing TLS certificate")
 	flag.StringVar(&keyFile, "key", "", "file containing TLS private key")
 	flag.BoolVar(&invert, "invert", false, "use inverse colors for QR code")
-	flag.IntVar(&updateInterval, "interval", defaultUpdateInterval,
-		"mouse polling interval in milliseconds")
+	flag.Int("interval", 0, "obsolete, not used anymore")
 	flag.Parse()
 	if showVersion {
 		fmt.Println(version)
@@ -151,9 +148,6 @@ func main() {
 	tls := certFile != "" && keyFile != ""
 	if secret == "" {
 		secret = secureRandBase64(defaultSecretLength)
-	}
-	if updateInterval < 0 {
-		log.Fatal("interval must be greater or equal to zero")
 	}
 	var plugin Plugin
 	var pluginName string
@@ -208,7 +202,6 @@ func main() {
 		if !challenge.verify(message) {
 			return
 		}
-		websocket.Message.Send(ws, fmt.Sprintf("i%d", updateInterval))
 		for {
 			if err := websocket.Message.Receive(ws, &message); err != nil {
 				return
