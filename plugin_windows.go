@@ -75,7 +75,7 @@ func InitWindowsPlugin() (Plugin, error) {
 	p.userDLL = syscall.NewLazyDLL("user32.dll")
 	p.sendInputProc = p.userDLL.NewProc("SendInput")
 	if err := p.sendInputProc.Find(); err != nil {
-		return nil, UnsupportedPlatformError{"Windows", err.Error()}
+		return nil, UnsupportedPlatformError{err}
 	}
 	return p, nil
 }

@@ -21,6 +21,8 @@
 
 package main
 
+import "errors"
+
 func InitWindowsPlugin() (Plugin, error) {
-	return nil, UnsupportedPlatformError{"Windows", "disabled"}
+	return nil, UnsupportedPlatformError{errors.New("disabled")}
 }

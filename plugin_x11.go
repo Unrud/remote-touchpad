@@ -43,7 +43,8 @@ type x11Plugin struct {
 func InitX11Plugin() (Plugin, error) {
 	display := C.XOpenDisplay(nil)
 	if display == nil {
-		return nil, UnsupportedPlatformError{"X11", "failed to connect to X server"}
+		return nil, UnsupportedPlatformError{
+			errors.New("failed to connect to X server")}
 	}
 	return &x11Plugin{display: display}, nil
 }

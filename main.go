@@ -156,16 +156,18 @@ func main() {
 		log.Fatal("interval must be greater or equal to zero")
 	}
 	var plugin Plugin
+	var pluginName string
 	platformErrors := ""
-	for _, f := range Plugins {
+	for _, pluginInfo := range Plugins {
+		pluginName = pluginInfo.Name
 		var err error
-		plugin, err = f()
+		plugin, err = pluginInfo.Init()
 		if err == nil {
 			break
 		} else if _, ok := err.(UnsupportedPlatformError); ok {
-			platformErrors += err.Error() + "\n"
+			platformErrors += fmt.Sprintf("%s plugin: %v\n", pluginName, err)
 		} else {
-			log.Fatal(err)
+			log.Fatal(fmt.Sprintf("%s plugin: %v", pluginName, err))
 		}
 	}
 	if plugin == nil {
@@ -212,6 +214,7 @@ func main() {
 				return
 			}
 			if err := processCommand(plugin, message); err != nil {
+				log.Print(fmt.Sprintf("%s plugin: %v", pluginName, err))
 				return
 			}
 		}

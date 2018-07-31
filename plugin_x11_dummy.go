@@ -21,6 +21,8 @@
 
 package main
 
+import "errors"
+
 func InitX11Plugin() (Plugin, error) {
-	return nil, UnsupportedPlatformError{"X11", "disabled"}
+	return nil, UnsupportedPlatformError{errors.New("disabled")}
 }

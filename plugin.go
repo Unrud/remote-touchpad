@@ -19,20 +19,22 @@
 
 package main
 
-import "fmt"
+type PluginInfo struct {
+	Name string
+	Init func() (Plugin, error)
+}
 
-var Plugins [](func() (Plugin, error)) = [](func() (Plugin, error)){
-	InitX11Plugin,
-	InitWindowsPlugin,
+var Plugins []PluginInfo = []PluginInfo{
+	{"X11", InitX11Plugin},
+	{"Windows", InitWindowsPlugin},
 }
 
 type UnsupportedPlatformError struct {
-	name    string
-	message string
+	err error
 }
 
 func (e UnsupportedPlatformError) Error() string {
-	return fmt.Sprintf("%s plugin: %s", e.name, e.message)
+	return e.err.Error()
 }
 
 type Plugin interface {
