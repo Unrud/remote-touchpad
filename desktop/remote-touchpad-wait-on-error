@@ -1,0 +1,8 @@
+#!/bin/bash
+
+remote-touchpad "$@"
+if [ $? -eq 1 ]; then
+	echo
+	read -n 1 -s -r -p "Press any key to close"
+	echo
+fi

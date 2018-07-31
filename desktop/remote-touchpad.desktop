@@ -4,6 +4,6 @@ Type=Application
 Name=Remote Touchpad
 Comment=Control mouse and keyboard from a smartphone
 Terminal=true
-Exec=remote-touchpad
+Exec=remote-touchpad-wait-on-error
 Icon=remote-touchpad
 Categories=Network;RemoteAccess;ConsoleOnly;
