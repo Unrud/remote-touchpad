@@ -42,5 +42,6 @@ type Plugin interface {
 	KeyboardText(text string) error
 	PointerButton(button uint, press bool) error
 	PointerMove(deltaX, deltaY int) error
-	PointerScroll(stepsHorizontal, stepsVertical int) error
+	PointerScroll(deltaHorizontal, deltaVertical int) error
+	PointerScrollFinish() error
 }

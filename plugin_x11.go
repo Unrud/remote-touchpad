@@ -35,11 +35,15 @@ import (
 	"unsafe"
 )
 
-const typingDelay time.Duration = 100 * time.Millisecond
+const (
+	typingDelay time.Duration = 100 * time.Millisecond
+	scrollDiv   int           = 20
+)
 
 type x11Plugin struct {
-	display *C.Display
-	lock    sync.Mutex
+	display                          *C.Display
+	lock                             sync.Mutex
+	scrollHorizontal, scrollVertical int
 }
 
 func InitX11Plugin() (Plugin, error) {
@@ -157,7 +161,13 @@ func (p *x11Plugin) PointerMove(deltaX, deltaY int) error {
 	return nil
 }
 
-func (p *x11Plugin) PointerScroll(stepsHorizontal, stepsVertical int) error {
+func (p *x11Plugin) PointerScroll(deltaHorizontal, deltaVertical int) error {
+	p.lock.Lock()
+	stepsHorizontal := (p.scrollHorizontal + deltaHorizontal) / scrollDiv
+	stepsVertical := (p.scrollVertical + deltaVertical) / scrollDiv
+	p.scrollHorizontal = (p.scrollHorizontal + deltaHorizontal) % scrollDiv
+	p.scrollVertical = (p.scrollVertical + deltaVertical) % scrollDiv
+	p.lock.Unlock()
 	var buttonHorizontal uint = 7
 	if stepsHorizontal < 0 {
 		buttonHorizontal = 6
@@ -184,5 +194,13 @@ func (p *x11Plugin) PointerScroll(stepsHorizontal, stepsVertical int) error {
 			return err
 		}
 	}
+	return nil
+}
+
+func (p *x11Plugin) PointerScrollFinish() error {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	p.scrollHorizontal = 0
+	p.scrollVertical = 0
 	return nil
 }

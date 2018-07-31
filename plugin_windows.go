@@ -44,7 +44,7 @@ const (
 	mouseeventfWheel      uint32 = 0x800
 	mouseeventfHwheel     uint32 = 0x1000
 
-	wheelDelta int = 120
+	scrollMult int = 6
 )
 
 type mouseInput struct {
@@ -146,20 +146,20 @@ func (p *windowsPlugin) PointerMove(deltaX, deltaY int) error {
 	return nil
 }
 
-func (p *windowsPlugin) PointerScroll(stepsHorizontal, stepsVertical int) error {
+func (p *windowsPlugin) PointerScroll(deltaHorizontal, deltaVertical int) error {
 	inputs := make([]mouseInput, 0, 2)
-	if stepsHorizontal != 0 {
+	if deltaHorizontal != 0 {
 		inputs = append(inputs, mouseInput{
 			typ:       inputMouse,
 			dwFlags:   mouseeventfHwheel,
-			mouseData: uint32(stepsHorizontal * wheelDelta),
+			mouseData: uint32(deltaHorizontal * scrollMult),
 		})
 	}
-	if stepsVertical != 0 {
+	if deltaVertical != 0 {
 		inputs = append(inputs, mouseInput{
 			typ:       inputMouse,
 			dwFlags:   mouseeventfWheel,
-			mouseData: uint32(stepsVertical * wheelDelta),
+			mouseData: uint32(deltaVertical * scrollMult),
 		})
 	}
 	if len(inputs) == 0 {
@@ -170,5 +170,9 @@ func (p *windowsPlugin) PointerScroll(stepsHorizontal, stepsVertical int) error 
 		unsafe.Sizeof(inputs[0])); int(r) != len(inputs) {
 		return err
 	}
+	return nil
+}
+
+func (p *windowsPlugin) PointerScrollFinish() error {
 	return nil
 }

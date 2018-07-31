@@ -51,6 +51,9 @@ func processCommand(plugin Plugin, command string) error {
 	if len(command) == 0 {
 		return errors.New("empty command")
 	}
+	if command == "sf" {
+		return plugin.PointerScrollFinish()
+	}
 	if command[0] == 't' {
 		text := command[1:]
 		if !utf8.ValidString(text) {

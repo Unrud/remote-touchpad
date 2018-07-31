@@ -20,8 +20,6 @@
  // [1 Touch, 2 Touches, 3 Touches]
 const TOUCH_MOVE_THRESHOLD = [10, 15, 15];
 const TOUCH_TIMEOUT = 250;
-const MOVE_MULT = 1;
-const SCROLL_MULT = 0.05;
 // [[px/s, mult], ...]
 const POINTER_ACCELERATION = [[0, 0], [87, 1], [173, 1], [553, 2]];
 
@@ -40,6 +38,7 @@ var scrollXSum = 0;
 var scrollYSum = 0;
 var dragging = false;
 var draggingTimeout = null;
+var scrolling = false;
 
 function fullscreenEnabled() {
     return (document.fullscreenEnabled ||
@@ -153,6 +152,7 @@ function updateMoveAndScroll() {
     if (Math.abs(scrollX) >= 1 || Math.abs(scrollY) >= 1) {
         scrollXSum -= scrollX;
         scrollYSum -= scrollY;
+        scrolling = true;
         ws.send("s" + scrollX + ";" + scrollY);
     }
 }
@@ -183,6 +183,10 @@ function handleStart(evt) {
             draggingTimeout = null;
             dragging = true;
         }
+        if (scrolling) {
+            ws.send("sf");
+            scrolling = false;
+        }
     }
 }
 
@@ -196,6 +200,10 @@ function handleEnd(evt) {
         ongoingTouches.splice(idx, 1);
         touchReleasedCount++;
         touchLastEnd = evt.timeStamp;
+        if (scrolling) {
+            ws.send("sf");
+            scrolling = false;
+        }
     }
     if (touchReleasedCount > TOUCH_MOVE_THRESHOLD.length) {
         touchMoved = true;
@@ -234,6 +242,10 @@ function handleCancel(evt) {
         touchReleasedCount++;
         touchLastEnd = evt.timeStamp;
         touchMoved = true;
+        if (scrolling) {
+            ws.send("sf");
+            scrolling = false;
+        }
     }
 }
 
@@ -261,11 +273,11 @@ function handleMove(evt) {
     }
     if (touchMoved && evt.timeStamp - touchLastEnd >= TOUCH_TIMEOUT) {
         if (ongoingTouches.length == 1 || dragging) {
-            moveXSum += sumX * MOVE_MULT;
-            moveYSum += sumY * MOVE_MULT;
+            moveXSum += sumX;
+            moveYSum += sumY;
         } else if (ongoingTouches.length == 2) {
-            scrollXSum -= sumX * SCROLL_MULT;
-            scrollYSum -= sumY * SCROLL_MULT;
+            scrollXSum -= sumX;
+            scrollYSum -= sumY;
         }
         updateMoveAndScroll();
     }
