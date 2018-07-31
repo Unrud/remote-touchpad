@@ -98,7 +98,9 @@ func (p *windowsPlugin) KeyboardText(text string) error {
 			inputs[i].dwFlags |= keyeventfKeyup
 		}
 	}
-	if r, _, err := p.sendInputProc.Call(uintptr(len(inputs)), uintptr(unsafe.Pointer(&inputs[0])), unsafe.Sizeof(inputs[0])); int(r) != len(inputs) {
+	if r, _, err := p.sendInputProc.Call(uintptr(len(inputs)),
+		uintptr(unsafe.Pointer(&inputs[0])),
+		unsafe.Sizeof(inputs[0])); int(r) != len(inputs) {
 		return err
 	}
 	return nil
@@ -124,7 +126,8 @@ func (p *windowsPlugin) PointerButton(button uint, press bool) error {
 	} else if button == 3 {
 		input.dwFlags = mouseeventfRightup
 	}
-	if r, _, err := p.sendInputProc.Call(1, uintptr(unsafe.Pointer(&input)), unsafe.Sizeof(input)); int(r) != 1 {
+	if r, _, err := p.sendInputProc.Call(1, uintptr(unsafe.Pointer(&input)),
+		unsafe.Sizeof(input)); int(r) != 1 {
 		return err
 	}
 	return nil
@@ -137,7 +140,8 @@ func (p *windowsPlugin) PointerMove(deltaX, deltaY int) error {
 		dy:      int32(deltaY),
 		dwFlags: mouseeventfMove,
 	}
-	if r, _, err := p.sendInputProc.Call(1, uintptr(unsafe.Pointer(&input)), unsafe.Sizeof(input)); int(r) != 1 {
+	if r, _, err := p.sendInputProc.Call(1, uintptr(unsafe.Pointer(&input)),
+		unsafe.Sizeof(input)); int(r) != 1 {
 		return err
 	}
 	return nil
@@ -162,7 +166,9 @@ func (p *windowsPlugin) PointerScroll(stepsHorizontal, stepsVertical int) error 
 	if len(inputs) == 0 {
 		return nil
 	}
-	if r, _, err := p.sendInputProc.Call(uintptr(len(inputs)), uintptr(unsafe.Pointer(&inputs[0])), unsafe.Sizeof(inputs[0])); int(r) != len(inputs) {
+	if r, _, err := p.sendInputProc.Call(uintptr(len(inputs)),
+		uintptr(unsafe.Pointer(&inputs[0])),
+		unsafe.Sizeof(inputs[0])); int(r) != len(inputs) {
 		return err
 	}
 	return nil

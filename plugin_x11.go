@@ -71,7 +71,8 @@ func (p *x11Plugin) KeyboardText(text string) error {
 	var minKeycodes, maxKeycodes C.int
 	C.XDisplayKeycodes(p.display, &minKeycodes, &maxKeycodes)
 	var keysymsPerKeycode C.int
-	keysyms := C.XGetKeyboardMapping(p.display, C.KeyCode(minKeycodes), maxKeycodes-minKeycodes+1, &keysymsPerKeycode)
+	keysyms := C.XGetKeyboardMapping(p.display, C.KeyCode(minKeycodes),
+		maxKeycodes-minKeycodes+1, &keysymsPerKeycode)
 	if keysyms == nil {
 		return errors.New("failed to get keyboard mapping")
 	}
@@ -79,8 +80,10 @@ func (p *x11Plugin) KeyboardText(text string) error {
 keycodes:
 	for keycode := C.KeyCode(minKeycodes); keycode <= C.KeyCode(maxKeycodes); keycode++ {
 		for i := 0; i < int(keysymsPerKeycode); i++ {
-			keysymsIndex := int(keycode-C.KeyCode(minKeycodes))*int(keysymsPerKeycode) + i
-			keysym := *(*C.KeySym)(unsafe.Pointer(uintptr(unsafe.Pointer(keysyms)) + uintptr(keysymsIndex)*unsafe.Sizeof(*keysyms)))
+			keysymsIndex := int(keycode-
+				C.KeyCode(minKeycodes))*int(keysymsPerKeycode) + i
+			keysym := *(*C.KeySym)(unsafe.Pointer(uintptr(unsafe.Pointer(keysyms)) +
+				uintptr(keysymsIndex)*unsafe.Sizeof(*keysyms)))
 			if keysym != 0 {
 				continue keycodes
 			}
@@ -98,7 +101,8 @@ keycodes:
 		for i := range keycodeMapping {
 			keycodeMapping[i] = keysym
 		}
-		C.XChangeKeyboardMapping(p.display, C.int(emptyKeycode), keysymsPerKeycode, (*C.KeySym)(unsafe.Pointer(&keycodeMapping[0])), 1)
+		C.XChangeKeyboardMapping(p.display, C.int(emptyKeycode), keysymsPerKeycode,
+			(*C.KeySym)(unsafe.Pointer(&keycodeMapping[0])), 1)
 		C.XTestFakeKeyEvent(p.display, C.uint(emptyKeycode), C.True, 0)
 		C.XTestFakeKeyEvent(p.display, C.uint(emptyKeycode), C.False, 0)
 		// race condition!
@@ -108,7 +112,8 @@ keycodes:
 	for i := range keycodeMapping {
 		keycodeMapping[i] = 0
 	}
-	C.XChangeKeyboardMapping(p.display, C.int(emptyKeycode), keysymsPerKeycode, (*C.KeySym)(unsafe.Pointer(&keycodeMapping[0])), 1)
+	C.XChangeKeyboardMapping(p.display, C.int(emptyKeycode), keysymsPerKeycode,
+		(*C.KeySym)(unsafe.Pointer(&keycodeMapping[0])), 1)
 	C.XFlush(p.display)
 	return nil
 }

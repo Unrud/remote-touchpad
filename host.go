@@ -61,7 +61,8 @@ func FindDefaultHost() string {
 			if fallbackAddr == "" {
 				fallbackAddr = ip.String()
 			}
-			for _, linkLocalPrefix := range []string{"169.254.", "fe8", "fe9", "fea", "feb"} {
+			for _, linkLocalPrefix := range []string{
+				"169.254.", "fe8", "fe9", "fea", "feb"} {
 				if strings.HasPrefix(ip.String(), linkLocalPrefix) {
 					continue addrs
 				}
