@@ -38,6 +38,12 @@
                 },
                 {
                     "type" : "git",
+                    "url" : "https://anonscm.debian.org/git/pkg-go/packages/golang-dbus.git",
+                    "commit" : "79d96b151df08809558c825f8a75188826e8e228",
+                    "dest" : "src/anonscm.debian.org/git/pkg-go/packages/golang-dbus.git"
+                },
+                {
+                    "type" : "git",
                     "path" : "..",
                     "branch" : "master",
                     "dest" : "src/github.com/unrud/remote-touchpad"
@@ -45,7 +51,7 @@
             ],
             "buildsystem" : "simple",
             "build-commands" : [
-                ". /usr/lib/sdk/golang/enable.sh; env GOPATH=\"$(pwd)\" go build -tags x11 github.com/unrud/remote-touchpad",
+                ". /usr/lib/sdk/golang/enable.sh; env GOPATH=\"$(pwd)\" go build -tags 'portal x11' github.com/unrud/remote-touchpad",
                 "install -Dm0755 -t /app/bin remote-touchpad",
                 "install -Dm0755 -t /app/bin src/github.com/unrud/remote-touchpad/desktop/remote-touchpad-wait-on-error",
                 "install -Dm0644 -t /app/share/appdata src/github.com/unrud/remote-touchpad/desktop/remote-touchpad.appdata.xml",

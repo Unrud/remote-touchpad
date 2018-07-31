@@ -11,7 +11,7 @@
       To take control open the displayed URL or scan the QR code.
     </p>
     <p>
-      Supports Windows and X11.
+      Supports Flatpak&apos;s RemoteDesktop portal (experimental), Windows and X11.
     </p>
   </description>
   <url type="bugtracker">https://github.com/Unrud/remote-touchpad/issues</url>

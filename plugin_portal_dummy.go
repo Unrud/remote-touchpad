@@ -1,3 +1,5 @@
+// +build !portal
+
 /*
  *    Copyright (c) 2018 Unrud<unrud@outlook.com>
  *
@@ -19,30 +21,8 @@
 
 package main
 
-type PluginInfo struct {
-	Name string
-	Init func() (Plugin, error)
-}
+import "errors"
 
-var Plugins []PluginInfo = []PluginInfo{
-	{"X11", InitX11Plugin},
-	{"RemoteDesktop portal", InitPortalPlugin},
-	{"Windows", InitWindowsPlugin},
-}
-
-type UnsupportedPlatformError struct {
-	err error
-}
-
-func (e UnsupportedPlatformError) Error() string {
-	return e.err.Error()
-}
-
-type Plugin interface {
-	Close() error
-	KeyboardText(text string) error
-	PointerButton(button uint, press bool) error
-	PointerMove(deltaX, deltaY int) error
-	PointerScroll(deltaHorizontal, deltaVertical int) error
-	PointerScrollFinish() error
+func InitPortalPlugin() (Plugin, error) {
+	return nil, UnsupportedPlatformError{errors.New("disabled")}
 }
