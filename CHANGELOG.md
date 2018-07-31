@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.5 (2018-07-31)
+
+  * remove mouse polling interval
+  * add support for "pixel-perfect" scrolling
+  * add experimental support for Flatpak's RemoteDesktop portal
+  * X11 plugin: check session type
+  * improve error logging
+
 ## 0.0.4 (2018-07-22)
 
   * add setting for mouse polling interval

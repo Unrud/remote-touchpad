@@ -18,6 +18,15 @@
   <url type="homepage">https://github.com/Unrud/remote-touchpad</url>
   <developer_name>Unrud</developer_name>
   <releases>
+    <release version="0.0.5" date="2018-07-31">
+​      <ul>
+        <li>remove mouse polling interval</li>
+        <li>add support for &quot;pixel-perfect&quot; scrolling</li>
+        <li>add experimental support for Flatpak&apos;s RemoteDesktop portal</li>
+        <li>X11 plugin: check session type</li>
+        <li>improve error logging</li>
+      </ul>
+    </release>
     <release version="0.0.4" date="2018-07-22">
 ​      <ul>
         <li>add setting for mouse polling interval</li>
@@ -39,13 +48,13 @@
   </releases>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/0.0.4/screenshots/1.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/0.0.5/screenshots/1.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/0.0.4/screenshots/2.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/0.0.5/screenshots/2.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/0.0.4/screenshots/3.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/0.0.5/screenshots/3.png</image>
     </screenshot>
   </screenshots>
   <content_rating type="oars-1.1" />
