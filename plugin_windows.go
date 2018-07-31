@@ -107,9 +107,6 @@ func (p *windowsPlugin) KeyboardText(text string) error {
 }
 
 func (p *windowsPlugin) PointerButton(button uint, press bool) error {
-	if button == 0 || button > 3 {
-		return errors.New("unsupported pointer button")
-	}
 	input := mouseInput{
 		typ: inputMouse,
 	}
@@ -125,6 +122,8 @@ func (p *windowsPlugin) PointerButton(button uint, press bool) error {
 		input.dwFlags = mouseeventfRightdown
 	} else if button == 3 {
 		input.dwFlags = mouseeventfRightup
+	} else {
+		return errors.New("unsupported pointer button")
 	}
 	if r, _, err := p.sendInputProc.Call(1, uintptr(unsafe.Pointer(&input)),
 		unsafe.Sizeof(input)); int(r) != 1 {
