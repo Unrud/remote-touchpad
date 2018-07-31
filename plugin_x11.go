@@ -76,6 +76,7 @@ func (p *x11Plugin) KeyboardText(text string) error {
 	if keysyms == nil {
 		return errors.New("failed to get keyboard mapping")
 	}
+	defer C.XFree(unsafe.Pointer(keysyms))
 	emptyKeycode := C.KeyCode(0)
 keycodes:
 	for keycode := C.KeyCode(minKeycodes); keycode <= C.KeyCode(maxKeycodes); keycode++ {
@@ -91,11 +92,18 @@ keycodes:
 		emptyKeycode = keycode
 		break
 	}
-	C.XFree(unsafe.Pointer(keysyms))
 	if emptyKeycode == 0 {
 		return errors.New("no empty keycode found")
 	}
 	keycodeMapping := make([]C.KeySym, keysymsPerKeycode)
+	defer func() {
+		for i := range keycodeMapping {
+			keycodeMapping[i] = 0
+		}
+		C.XChangeKeyboardMapping(p.display, C.int(emptyKeycode), keysymsPerKeycode,
+			(*C.KeySym)(unsafe.Pointer(&keycodeMapping[0])), 1)
+		C.XFlush(p.display)
+	}()
 	for _, runeValue := range text {
 		keysym := C.KeySym(0x01000000 + runeValue)
 		for i := range keycodeMapping {
@@ -109,12 +117,6 @@ keycodes:
 		C.XFlush(p.display)
 		time.Sleep(typingDelay)
 	}
-	for i := range keycodeMapping {
-		keycodeMapping[i] = 0
-	}
-	C.XChangeKeyboardMapping(p.display, C.int(emptyKeycode), keysymsPerKeycode,
-		(*C.KeySym)(unsafe.Pointer(&keycodeMapping[0])), 1)
-	C.XFlush(p.display)
 	return nil
 }
 
