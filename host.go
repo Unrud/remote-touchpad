@@ -25,8 +25,8 @@ import (
 	"strings"
 )
 
-func FindDefaultHost() string {
-	fallbackAddr := ""
+func FindDefaultHost() (host string) {
+	host = "localhost"
 	for _, publicIP := range []string{"2001:4860:4860::8888", "8.8.8.8"} {
 		addr := fmt.Sprintf("[%s]:80", publicIP)
 		conn, err := net.Dial("udp", addr)
@@ -34,15 +34,15 @@ func FindDefaultHost() string {
 			continue
 		}
 		conn.Close()
-		host, _, err := net.SplitHostPort(conn.LocalAddr().String())
+		host, _, err = net.SplitHostPort(conn.LocalAddr().String())
 		if err != nil {
-			continue
+			panic(err)
 		}
-		return host
+		return
 	}
 	interfaces, err := net.Interfaces()
 	if err != nil {
-		goto fallback
+		return
 	}
 	for _, inter := range interfaces {
 		if inter.Flags&net.FlagUp == 0 || inter.Flags&net.FlagLoopback != 0 {
@@ -58,8 +58,8 @@ func FindDefaultHost() string {
 			if err != nil {
 				continue
 			}
-			if fallbackAddr == "" {
-				fallbackAddr = ip.String()
+			if host == "localhost" {
+				host = ip.String()
 			}
 			for _, linkLocalPrefix := range []string{
 				"169.254.", "fe8", "fe9", "fea", "feb"} {
@@ -71,9 +71,5 @@ func FindDefaultHost() string {
 		}
 
 	}
-fallback:
-	if fallbackAddr != "" {
-		return fallbackAddr
-	}
-	return "localhost"
+	return
 }
