@@ -22,7 +22,7 @@
 package main
 
 import (
-	dbus "anonscm.debian.org/git/pkg-go/packages/golang-dbus.git"
+	dbus "salsa.debian.org/go-team/packages/golang-dbus.git"
 	"errors"
 	"fmt"
 	"sync"

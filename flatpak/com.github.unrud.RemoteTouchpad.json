@@ -38,9 +38,9 @@
                 },
                 {
                     "type" : "git",
-                    "url" : "https://anonscm.debian.org/git/pkg-go/packages/golang-dbus.git",
+                    "url" : "https://salsa.debian.org/go-team/packages/golang-dbus.git",
                     "commit" : "79d96b151df08809558c825f8a75188826e8e228",
-                    "dest" : "src/anonscm.debian.org/git/pkg-go/packages/golang-dbus.git"
+                    "dest" : "src/salsa.debian.org/go-team/packages/golang-dbus.git"
                 },
                 {
                     "type" : "git",
