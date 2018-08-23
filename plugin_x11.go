@@ -117,9 +117,12 @@ keycodes:
 		C.XFlush(p.display)
 	}()
 	for _, runeValue := range text {
-		keysym := C.KeySym(0x01000000 + runeValue)
+		keysym, err := runeToKeysym(runeValue)
+		if err != nil {
+			return err
+		}
 		for i := range keycodeMapping {
-			keycodeMapping[i] = keysym
+			keycodeMapping[i] = C.KeySym(keysym)
 		}
 		C.XChangeKeyboardMapping(p.display, C.int(emptyKeycode), keysymsPerKeycode,
 			(*C.KeySym)(unsafe.Pointer(&keycodeMapping[0])), 1)

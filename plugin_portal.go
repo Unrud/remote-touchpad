@@ -193,7 +193,10 @@ func (p *portalPlugin) KeyboardText(text string) error {
 	}
 	inVardict := make(map[string]dbus.Variant)
 	for _, runeValue := range text {
-		keysym := int32(0x01000000 + runeValue)
+		keysym, err := runeToKeysym(runeValue)
+		if err != nil {
+			return err
+		}
 		for _, state := range [...]uint32{btnPressed, btnReleased} {
 			if err := p.remoteDesktop.Call(
 				"org.freedesktop.portal.RemoteDesktop.NotifyKeyboardKeysym",
