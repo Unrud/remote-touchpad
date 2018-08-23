@@ -21,35 +21,41 @@ package main
 
 import qrcode "github.com/skip2/go-qrcode"
 
-func GenerateQRCode(message string, invert bool) (string, error) {
+func GenerateQRCode(message string, colorize bool) (string, error) {
 	q, err := qrcode.New(message, qrcode.Medium)
 	if err != nil {
 		return "", err
 	}
-	return qrCodeToString(q.Bitmap(), invert), nil
+	return qrCodeToString(q.Bitmap(), colorize), nil
 }
 
-func qrCodeToString(bits [][]bool, invert bool) string {
+func qrCodeToString(bits [][]bool, colorize bool) string {
 	s := ""
 	for y := -1; y < len(bits); y += 2 {
+		if colorize {
+			s += terminalForegroundWhite + terminalBackgroundBlack
+		}
 		for x := range bits[0] {
-			upper := !invert
+			upper := false
 			if 0 <= y && y < len(bits) {
 				upper = bits[y][x]
 			}
-			lower := !invert
+			lower := false
 			if 0 <= y+1 && y+1 < len(bits) {
 				lower = bits[y+1][x]
 			}
-			if upper != invert && lower != invert {
+			if upper && lower {
 				s += " "
-			} else if upper == invert && lower != invert {
+			} else if !upper && lower {
 				s += "▀"
-			} else if upper != invert && lower == invert {
+			} else if upper && !lower {
 				s += "▄"
 			} else {
 				s += "█"
 			}
+		}
+		if colorize {
+			s += terminalForegroundReset + terminalBackgroundReset
 		}
 		s += "\n"
 	}

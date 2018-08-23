@@ -32,6 +32,7 @@ import (
 	mathrand "math/rand"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -129,13 +130,13 @@ func secureRandBase64(length int) string {
 
 func main() {
 	var bind, certFile, keyFile, secret string
-	var showVersion, invert bool
+	var showVersion bool
 	flag.BoolVar(&showVersion, "version", false, "show program's version number and exit")
 	flag.StringVar(&bind, "bind", defaultBind, "bind server to [HOSTNAME]:PORT")
 	flag.StringVar(&secret, "secret", "", "shared secret for client authentication")
 	flag.StringVar(&certFile, "cert", "", "file containing TLS certificate")
 	flag.StringVar(&keyFile, "key", "", "file containing TLS private key")
-	flag.BoolVar(&invert, "invert", false, "use inverse colors for QR code")
+	flag.Bool("invert", false, "obsolete, not used anymore")
 	flag.Int("interval", 0, "obsolete, not used anymore")
 	flag.Parse()
 	if showVersion {
@@ -225,7 +226,7 @@ func main() {
 	}
 	url := fmt.Sprintf("%s://%s/#%s\n", scheme, domain, secret)
 	readyMsg := "ready: " + url
-	qrCode, _ := GenerateQRCode(url, invert)
+	qrCode, _ := GenerateQRCode(url, terminalSupportsColor(os.Stderr.Fd()))
 	readyMsg += qrCode
 	if !tls {
 		readyMsg += ("" +
