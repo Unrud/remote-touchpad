@@ -36,7 +36,7 @@ import (
 )
 
 const (
-	typingDelay time.Duration = 100 * time.Millisecond
+	typingDelay time.Duration = 250 * time.Millisecond
 	scrollDiv   int           = 20
 )
 
