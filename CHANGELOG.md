@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.6 (2018-08-23)
+
+  * use colors in terminal for QR qode
+  * remove ``-invert`` command line argument
+  * mitigate race condition when typing text on X11
+  * improve KeySyms used for text on X11 and Flatpak's RemoteDesktop portal
+  * normalize line endings
+
 ## 0.0.5 (2018-07-31)
 
   * remove mouse polling interval
