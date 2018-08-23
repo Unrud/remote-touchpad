@@ -47,6 +47,11 @@ const (
 	scrollMult int = 6
 )
 
+var (
+	user32DLL     = syscall.NewLazyDLL("user32.dll")
+	sendInputProc = user32DLL.NewProc("SendInput")
+)
+
 type mouseInput struct {
 	typ uintptr // HACK: padded uint32
 
@@ -65,16 +70,11 @@ type keybdInput struct {
 	padding [8]byte
 }
 
-type windowsPlugin struct {
-	userDLL       *syscall.LazyDLL
-	sendInputProc *syscall.LazyProc
-}
+type windowsPlugin struct{}
 
 func InitWindowsPlugin() (Plugin, error) {
 	p := &windowsPlugin{}
-	p.userDLL = syscall.NewLazyDLL("user32.dll")
-	p.sendInputProc = p.userDLL.NewProc("SendInput")
-	if err := p.sendInputProc.Find(); err != nil {
+	if err := sendInputProc.Find(); err != nil {
 		return nil, UnsupportedPlatformError{err}
 	}
 	return p, nil
@@ -98,7 +98,7 @@ func (p *windowsPlugin) KeyboardText(text string) error {
 			inputs[i].dwFlags |= keyeventfKeyup
 		}
 	}
-	if r, _, err := p.sendInputProc.Call(uintptr(len(inputs)),
+	if r, _, err := sendInputProc.Call(uintptr(len(inputs)),
 		uintptr(unsafe.Pointer(&inputs[0])),
 		unsafe.Sizeof(inputs[0])); int(r) != len(inputs) {
 		return err
@@ -125,7 +125,7 @@ func (p *windowsPlugin) PointerButton(button uint, press bool) error {
 	} else {
 		return errors.New("unsupported pointer button")
 	}
-	if r, _, err := p.sendInputProc.Call(1, uintptr(unsafe.Pointer(&input)),
+	if r, _, err := sendInputProc.Call(1, uintptr(unsafe.Pointer(&input)),
 		unsafe.Sizeof(input)); int(r) != 1 {
 		return err
 	}
@@ -139,7 +139,7 @@ func (p *windowsPlugin) PointerMove(deltaX, deltaY int) error {
 		dy:      int32(deltaY),
 		dwFlags: mouseeventfMove,
 	}
-	if r, _, err := p.sendInputProc.Call(1, uintptr(unsafe.Pointer(&input)),
+	if r, _, err := sendInputProc.Call(1, uintptr(unsafe.Pointer(&input)),
 		unsafe.Sizeof(input)); int(r) != 1 {
 		return err
 	}
@@ -165,7 +165,7 @@ func (p *windowsPlugin) PointerScroll(deltaHorizontal, deltaVertical int) error 
 	if len(inputs) == 0 {
 		return nil
 	}
-	if r, _, err := p.sendInputProc.Call(uintptr(len(inputs)),
+	if r, _, err := sendInputProc.Call(uintptr(len(inputs)),
 		uintptr(unsafe.Pointer(&inputs[0])),
 		unsafe.Sizeof(inputs[0])); int(r) != len(inputs) {
 		return err
