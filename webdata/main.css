@@ -101,3 +101,12 @@ body {
         width: 100%;
     }
 }
+
+@font-face {
+    font-family: "icon";
+    src: url("icon.woff") format("woff");
+}
+
+.icon {
+    font-family: "icon";
+}
