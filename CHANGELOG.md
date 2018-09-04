@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.7 (2018-09-04)
+
+  * use custom font for icons
+
 ## 0.0.6 (2018-08-23)
 
   * use colors in terminal for QR qode
