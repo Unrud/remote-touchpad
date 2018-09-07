@@ -258,9 +258,11 @@ function handleMove(evt) {
         if (idx < 0) {
             continue;
         }
-        var dist = Math.sqrt(Math.pow(touches[i].pageX - ongoingTouches[idx].pageXStart, 2) + Math.pow(touches[i].pageY - ongoingTouches[idx].pageYStart, 2));
-        if (ongoingTouches.length > TOUCH_MOVE_THRESHOLD.length || dist > TOUCH_MOVE_THRESHOLD[ongoingTouches.length - 1]) {
-            touchMoved = true;
+        if (!touchMoved) {
+            var dist = Math.sqrt(Math.pow(touches[i].pageX - ongoingTouches[idx].pageXStart, 2) + Math.pow(touches[i].pageY - ongoingTouches[idx].pageYStart, 2));
+            if (ongoingTouches.length > TOUCH_MOVE_THRESHOLD.length || dist > TOUCH_MOVE_THRESHOLD[ongoingTouches.length - 1] || evt.timeStamp - touchStart >= TOUCH_TIMEOUT) {
+                touchMoved = true;
+            }
         }
         var dx = touches[i].pageX - ongoingTouches[idx].pageX;
         var dy = touches[i].pageY - ongoingTouches[idx].pageY;
