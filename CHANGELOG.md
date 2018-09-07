@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.8 (2018-09-07)
+
+  * enable pointer movement after timeout
+
 ## 0.0.7 (2018-09-04)
 
   * use custom font for icons
