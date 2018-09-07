@@ -1,4 +1,9 @@
-html, body, #pad, #keyboard, #opening, #closed {
+html,
+body,
+#pad,
+#keyboard,
+#opening,
+#closed {
     width: 100%;
     height: 100%;
     margin: 0;
@@ -8,12 +13,16 @@ body {
     font-family: sans;
 }
 
-#pad, #sendbutton, #opening, #closed {
+#pad,
+#sendbutton,
+#opening,
+#closed {
     background-color: #404040 !important;
     background-image: url(tex.png);
 }
 
-#opening, #closed {
+#opening,
+#closed {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -44,7 +53,10 @@ body {
     word-wrap: break-word;
 }
 
-#fullscreenbutton, #keyboardbutton, #sendbutton, #reloadbutton {
+#fullscreenbutton,
+#keyboardbutton,
+#sendbutton,
+#reloadbutton {
     background-color: transparent;
     border: 1px solid black;
     height: 1.5em;
@@ -53,7 +65,9 @@ body {
     color: white;
 }
 
-#fullscreenbutton, #keyboardbutton, #sendbutton {
+#fullscreenbutton,
+#keyboardbutton,
+#sendbutton {
     border-bottom: none;
 }
 

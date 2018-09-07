@@ -16,12 +16,16 @@
  *   You should have received a copy of the GNU General Public License
  *   along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
-
- // [1 Touch, 2 Touches, 3 Touches]
+// [1 Touch, 2 Touches, 3 Touches]
 const TOUCH_MOVE_THRESHOLD = [10, 15, 15];
 const TOUCH_TIMEOUT = 250;
 // [[px/s, mult], ...]
-const POINTER_ACCELERATION = [[0, 0], [87, 1], [173, 1], [553, 2]];
+const POINTER_ACCELERATION = [
+    [0, 0],
+    [87, 1],
+    [173, 1],
+    [553, 2]
+];
 
 var ws;
 var pad;
@@ -124,12 +128,12 @@ function calculatePointerAccelerationMult(speed) {
         if (i == 0) {
             return a2;
         }
-        s1 = POINTER_ACCELERATION[i-1][0];
-        a1 = POINTER_ACCELERATION[i-1][1];
-        return ((speed-s1) / (s2-s1)) * (a2-a1) + a1;
+        s1 = POINTER_ACCELERATION[i - 1][0];
+        a1 = POINTER_ACCELERATION[i - 1][1];
+        return ((speed - s1) / (s2 - s1)) * (a2 - a1) + a1;
     }
     if (POINTER_ACCELERATION.length > 0) {
-        return POINTER_ACCELERATION[POINTER_ACCELERATION.length-1][1];
+        return POINTER_ACCELERATION[POINTER_ACCELERATION.length - 1][1];
     }
     return 1;
 }
@@ -209,17 +213,17 @@ function handleEnd(evt) {
         touchMoved = true;
     }
     if (ongoingTouches.length == 0 && touchReleasedCount >= 1 &&
-            dragging) {
+        dragging) {
         ws.send("b1;0");
     }
     if (ongoingTouches.length == 0 && touchReleasedCount >= 1 &&
-            !touchMoved && evt.timeStamp - touchStart < TOUCH_TIMEOUT) {
+        !touchMoved && evt.timeStamp - touchStart < TOUCH_TIMEOUT) {
         var button = 0;
         if (touchReleasedCount == 1) {
             button = 1;
         } else if (touchReleasedCount == 2) {
             button = 3;
-        }else if (touchReleasedCount == 3) {
+        } else if (touchReleasedCount == 3) {
             button = 2;
         }
         ws.send("b" + button + ";1");
@@ -259,8 +263,11 @@ function handleMove(evt) {
             continue;
         }
         if (!touchMoved) {
-            var dist = Math.sqrt(Math.pow(touches[i].pageX - ongoingTouches[idx].pageXStart, 2) + Math.pow(touches[i].pageY - ongoingTouches[idx].pageYStart, 2));
-            if (ongoingTouches.length > TOUCH_MOVE_THRESHOLD.length || dist > TOUCH_MOVE_THRESHOLD[ongoingTouches.length - 1] || evt.timeStamp - touchStart >= TOUCH_TIMEOUT) {
+            var dist = Math.sqrt(Math.pow(touches[i].pageX - ongoingTouches[idx].pageXStart, 2) +
+                Math.pow(touches[i].pageY - ongoingTouches[idx].pageYStart, 2));
+            if (ongoingTouches.length > TOUCH_MOVE_THRESHOLD.length ||
+                dist > TOUCH_MOVE_THRESHOLD[ongoingTouches.length - 1] ||
+                evt.timeStamp - touchStart >= TOUCH_TIMEOUT) {
                 touchMoved = true;
             }
         }
@@ -311,8 +318,8 @@ window.addEventListener("load", function() {
         wsProtocol = "ws:";
     }
     ws = new WebSocket(wsProtocol + "//" + location.hostname +
-                       (location.port ? ":" + location.port : "") +
-                       "/ws");
+        (location.port ? ":" + location.port : "") +
+        "/ws");
 
     ws.onmessage = function(event) {
         if (authenticated) {
@@ -328,9 +335,9 @@ window.addEventListener("load", function() {
         } else {
             pad.style.display = "flex";
         }
-     };
+    };
 
-     ws.onclose = function() {
+    ws.onclose = function() {
         if (fullscreenElement()) {
             exitFullscreen();
         }
@@ -338,18 +345,18 @@ window.addEventListener("load", function() {
         pad.style.display = "none";
         keyboard.style.display = "none"
         closed.style.display = "flex";
-     };
+    };
 
     document.getElementById("keyboardbutton").addEventListener("click",
-                                                               function(e) {
-        if (fullscreenElement()) {
-            exitFullscreen();
-        }
-        pad.style.display = "none";
-        keyboard.style.display = "flex";
-        text.focus();
-        history.pushState("keyboard", "Remote Keyboard");
-    });
+        function(e) {
+            if (fullscreenElement()) {
+                exitFullscreen();
+            }
+            pad.style.display = "none";
+            keyboard.style.display = "flex";
+            text.focus();
+            history.pushState("keyboard", "Remote Keyboard");
+        });
     if (!fullscreenEnabled()) {
         fullscreenbutton.style.display = "none";
     }
@@ -360,14 +367,14 @@ window.addEventListener("load", function() {
             requestFullscreen(pad);
         }
     });
-     document.getElementById("sendbutton").addEventListener("click",
-                                                            function(e) {
-        if (text.value != "") {
-            ws.send("t" + text.value);
-            text.value = "";
-        }
-        window.history.back();
-    });
+    document.getElementById("sendbutton").addEventListener("click",
+        function(e) {
+            if (text.value != "") {
+                ws.send("t" + text.value);
+                text.value = "";
+            }
+            window.history.back();
+        });
     window.onpopstate = function(event) {
         if (keyboard.style.display == "flex") {
             pad.style.display = "flex";
@@ -377,9 +384,9 @@ window.addEventListener("load", function() {
         }
     };
     document.getElementById("reloadbutton").addEventListener("click",
-                                                             function(e) {
-        location.reload();
-    });
+        function(e) {
+            location.reload();
+        });
     pad.addEventListener("touchstart", handleStart, false);
     pad.addEventListener("touchend", handleEnd, false);
     pad.addEventListener("touchcancel", handleCancel, false);
