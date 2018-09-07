@@ -29,12 +29,13 @@ body {
 }
 
 #padlabel {
-    color: #424242;
+    color: gray;
     text-shadow:
-        -1px -1px 0 #383838,
-        1px -1px 0 #383838,
-        -1px 1px 0 #383838,
-        1px 1px 0 #383838;
+        -1px -1px 0 black,
+        1px -1px 0 black,
+        -1px 1px 0 black,
+        1px 1px 0 black;
+    opacity: 0.08;
     font-weight: bold;
     margin-top: auto;
     margin-bottom: auto;
