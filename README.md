@@ -17,3 +17,5 @@ Supports Flatpak's RemoteDesktop portal (experimental), Windows and X11.
 ![screenshot 2](https://raw.githubusercontent.com/Unrud/remote-touchpad/master/screenshots/2.png)
 
 ![screenshot 3](https://raw.githubusercontent.com/Unrud/remote-touchpad/master/screenshots/3.png)
+
+![screenshot 4](https://raw.githubusercontent.com/Unrud/remote-touchpad/master/screenshots/4.png)
