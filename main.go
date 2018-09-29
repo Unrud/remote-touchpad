@@ -45,7 +45,7 @@ const (
 	authenticationRateBurst int           = 10
 	challengeLength         int           = 8
 	defaultBind             string        = ":0"
-	version                 string        = "0.0.8"
+	version                 string        = "0.0.9"
 )
 
 func processCommand(plugin Plugin, command string) error {
