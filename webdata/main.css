@@ -1,48 +1,47 @@
+@font-face {
+    font-family: "icon";
+    src: url("icon.woff") format("woff");
+}
+
 html,
 body,
-#pad,
-#keyboard,
-#keys,
-#opening,
-#closed {
+body > div {
     width: 100%;
     height: 100%;
     margin: 0;
 }
 
-body {
-    font-family: sans;
-}
-
-#pad,
-#keys,
-#sendbutton,
-#opening,
-#closed {
+body > div {
     background-color: #404040 !important;
     background-image: url(tex.png);
+    font-family: sans;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 #opening,
 #closed,
-#keys,
-#pad {
-    display: flex;
-    flex-direction: column;
-}
-
-#opening,
-#closed {
-    justify-content: center;
+#keys {
     align-items: center;
-    font-size: 2em;
-    color: white;
-    word-wrap: break-word;
 }
 
 #keys {
     justify-content: flex-end;
-    align-items: center;
+}
+
+#keyboard {
+    flex-direction: row;
+}
+
+p {
+    font-size: 2rem;
+    color: white;
+    word-wrap: break-word;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 #padlabel {
@@ -67,23 +66,22 @@ body {
     }
 }
 
-#keysbutton,
-#fullscreenbutton,
-#keyboardbutton,
-#sendbutton,
-#reloadbutton,
-#prevtrackbutton,
-#playpausebutton,
-#nexttrackbutton,
-#volumedownbutton,
-#volumemutebutton,
-#volumeupbutton {
+.buttons {
+    display: flex;
+}
+
+button {
     background-color: transparent;
     border: 1px solid black;
     height: 1.5em;
     width: 2em;
-    font-size: 2em;
+    font-size: 2rem;
     color: white;
+    font-family: "icon";
+}
+
+button:focus {
+    outline: none;
 }
 
 #fullscreenbutton,
@@ -95,7 +93,7 @@ body {
 #keysbutton,
 #fullscreenbutton,
 #playpausebutton,
-#mutebutton {
+#volumemutebutton {
     border-left: none;
 }
 
@@ -104,7 +102,7 @@ body {
 }
 
 #playpausebutton,
-#mutebutton,
+#volumemutebutton,
 #keyboardbutton {
     border-right: none;
 }
@@ -113,22 +111,18 @@ body {
     margin-left: auto;
 }
 
-#keyboard {
-    display: flex;
-    flex-direction: row;
+#reloadbutton {
+    font-size: 4rem;
 }
 
-#text {
+textarea {
     flex: 2;
     border: none;
     resize: none;
-    font-size: 2em;
+    font-size: 2rem;
     background-color: white;
     color: black;
-}
-
-.buttons {
-    display: flex;
+    margin: 0;
 }
 
 #sendbutton {
@@ -169,24 +163,4 @@ body {
         height: 1.5em;
         width: 100%;
     }
-}
-
-@font-face {
-    font-family: "icon";
-    src: url("icon.woff") format("woff");
-}
-
-.icon {
-    font-family: "icon";
-}
-
-p {
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-button:focus {
-    outline: none;
 }
