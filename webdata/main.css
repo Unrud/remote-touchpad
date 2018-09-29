@@ -49,8 +49,14 @@ body {
     margin-top: auto;
     margin-bottom: auto;
     text-align: center;
-    font-size: 4em;
+    font-size: 4rem;
     word-wrap: break-word;
+}
+
+@media (max-width: 32rem) {
+    #padlabel {
+        font-size: 13vw;
+    }
 }
 
 #fullscreenbutton,
