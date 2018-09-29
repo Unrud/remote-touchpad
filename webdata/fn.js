@@ -16,6 +16,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 // [1 Touch, 2 Touches, 3 Touches]
 const TOUCH_MOVE_THRESHOLD = [10, 15, 15];
 const TOUCH_TIMEOUT = 250;
@@ -343,7 +344,7 @@ window.addEventListener("load", function() {
         }
         opening.style.display = "none";
         pad.style.display = "none";
-        keyboard.style.display = "none"
+        keyboard.style.display = "none";
         closed.style.display = "flex";
     };
 
@@ -355,7 +356,7 @@ window.addEventListener("load", function() {
             pad.style.display = "none";
             keyboard.style.display = "flex";
             text.focus();
-            history.pushState("keyboard", "Remote Keyboard");
+            history.pushState("keyboard", "");
         });
     if (!fullscreenEnabled()) {
         fullscreenbutton.style.display = "none";
