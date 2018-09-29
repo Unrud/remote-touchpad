@@ -20,8 +20,8 @@
 package main
 
 const (
-	terminalForegroundWhite string = "\033[37m"
-	terminalForegroundReset string = "\033[39m"
-	terminalBackgroundBlack string = "\033[40m"
-	terminalBackgroundReset string = "\033[49m"
+	TerminalForegroundWhite string = "\033[37m"
+	TerminalForegroundReset string = "\033[39m"
+	TerminalBackgroundBlack string = "\033[40m"
+	TerminalBackgroundReset string = "\033[49m"
 )

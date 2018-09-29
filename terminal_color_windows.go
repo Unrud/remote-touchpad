@@ -32,7 +32,7 @@ var (
 	setConsoleModeProc = kernel32DLL.NewProc("SetConsoleMode")
 )
 
-func terminalSupportsColor(fd uintptr) bool {
+func TerminalSupportsColor(fd uintptr) bool {
 	r, _, _ := setConsoleModeProc.Call(fd, uintptr(enableProcessedOuput|
 		enableWrapAtEolOutput|enableVirtualTerminalProcessing))
 	return r != 0

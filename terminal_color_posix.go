@@ -24,6 +24,6 @@ package main
 // #include <unistd.h>
 import "C"
 
-func terminalSupportsColor(fd uintptr) bool {
+func TerminalSupportsColor(fd uintptr) bool {
 	return C.isatty(C.int(fd)) != 0
 }

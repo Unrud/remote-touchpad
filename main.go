@@ -244,7 +244,7 @@ func main() {
 	}
 	url := fmt.Sprintf("%s://%s/#%s\n", scheme, domain, secret)
 	readyMsg := "ready: " + url
-	qrCode, _ := GenerateQRCode(url, terminalSupportsColor(os.Stderr.Fd()))
+	qrCode, _ := GenerateQRCode(url, TerminalSupportsColor(os.Stderr.Fd()))
 	readyMsg += qrCode
 	if !tls {
 		readyMsg += ("" +

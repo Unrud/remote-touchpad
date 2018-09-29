@@ -33,7 +33,7 @@ func qrCodeToString(bits [][]bool, colorize bool) string {
 	s := ""
 	for y := -1; y < len(bits); y += 2 {
 		if colorize {
-			s += terminalForegroundWhite + terminalBackgroundBlack
+			s += TerminalForegroundWhite + TerminalBackgroundBlack
 		}
 		for x := range bits[0] {
 			upper := false
@@ -55,7 +55,7 @@ func qrCodeToString(bits [][]bool, colorize bool) string {
 			}
 		}
 		if colorize {
-			s += terminalForegroundReset + terminalBackgroundReset
+			s += TerminalForegroundReset + TerminalBackgroundReset
 		}
 		s += "\n"
 	}
