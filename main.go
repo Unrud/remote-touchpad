@@ -84,14 +84,14 @@ func processCommand(plugin Plugin, command string) error {
 		return plugin.PointerScroll(int(x), int(y))
 	}
 	if command[0] == 'b' {
-		if x <= 0 || x > 3 {
+		if x < 0 || x >= int64(PointerButtonLimit) {
 			return errors.New("unsupported pointer button")
 		}
 		b := true
 		if y == 0 {
 			b = false
 		}
-		return plugin.PointerButton(uint(x), b)
+		return plugin.PointerButton(PointerButton(x), b)
 	}
 	return errors.New("unsupported command")
 }

@@ -106,21 +106,19 @@ func (p *windowsPlugin) KeyboardText(text string) error {
 	return nil
 }
 
-func (p *windowsPlugin) PointerButton(button uint, press bool) error {
-	input := mouseInput{
-		typ: inputMouse,
-	}
-	if button == 1 && press {
+func (p *windowsPlugin) PointerButton(button PointerButton, press bool) error {
+	input := mouseInput{typ: inputMouse}
+	if button == PointerButtonLeft && press {
 		input.dwFlags = mouseeventfLeftdown
-	} else if button == 1 {
+	} else if button == PointerButtonLeft {
 		input.dwFlags = mouseeventfLeftup
-	} else if button == 2 && press {
+	} else if button == PointerButtonMiddle && press {
 		input.dwFlags = mouseeventfMiddledown
-	} else if button == 2 {
+	} else if button == PointerButtonMiddle {
 		input.dwFlags = mouseeventfMiddleup
-	} else if button == 3 && press {
+	} else if button == PointerButtonRight && press {
 		input.dwFlags = mouseeventfRightdown
-	} else if button == 3 {
+	} else if button == PointerButtonRight {
 		input.dwFlags = mouseeventfRightup
 	} else {
 		return errors.New("unsupported pointer button")

@@ -28,6 +28,10 @@ const POINTER_ACCELERATION = [
     [553, 2]
 ];
 
+const POINTER_BUTTON_LEFT = 0;
+const POINTER_BUTTON_RIGHT = 1;
+const POINTER_BUTTON_MIDDLE = 2;
+
 var ws;
 var pad;
 var padlabel;
@@ -141,7 +145,7 @@ function calculatePointerAccelerationMult(speed) {
 
 function onDraggingTimeout() {
     draggingTimeout = null;
-    ws.send("b1;0");
+    ws.send("b" + POINTER_BUTTON_LEFT + ";0");
 }
 
 function updateMoveAndScroll() {
@@ -215,20 +219,20 @@ function handleEnd(evt) {
     }
     if (ongoingTouches.length == 0 && touchReleasedCount >= 1 &&
         dragging) {
-        ws.send("b1;0");
+        ws.send("b" + POINTER_BUTTON_LEFT + ";0");
     }
     if (ongoingTouches.length == 0 && touchReleasedCount >= 1 &&
         !touchMoved && evt.timeStamp - touchStart < TOUCH_TIMEOUT) {
         var button = 0;
         if (touchReleasedCount == 1) {
-            button = 1;
+            button = POINTER_BUTTON_LEFT;
         } else if (touchReleasedCount == 2) {
-            button = 3;
+            button = POINTER_BUTTON_RIGHT;
         } else if (touchReleasedCount == 3) {
-            button = 2;
+            button = POINTER_BUTTON_MIDDLE;
         }
         ws.send("b" + button + ";1");
-        if (button == 1) {
+        if (button == POINTER_BUTTON_LEFT) {
             draggingTimeout = setTimeout(onDraggingTimeout, TOUCH_TIMEOUT);
         } else {
             ws.send("b" + button + ";0");

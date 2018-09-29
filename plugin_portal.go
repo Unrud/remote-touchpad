@@ -208,18 +208,18 @@ func (p *portalPlugin) KeyboardText(text string) error {
 	return nil
 }
 
-func (p *portalPlugin) PointerButton(button uint, press bool) error {
+func (p *portalPlugin) PointerButton(button PointerButton, press bool) error {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
 	if p.bus == nil {
 		return errors.New("dbus connection closed")
 	}
 	var btn int32
-	if button == 1 {
+	if button == PointerButtonLeft {
 		btn = btnLeft
-	} else if button == 2 {
+	} else if button == PointerButtonMiddle {
 		btn = btnMiddle
-	} else if button == 3 {
+	} else if button == PointerButtonRight {
 		btn = btnRight
 	} else {
 		return errors.New("unsupported pointer button")

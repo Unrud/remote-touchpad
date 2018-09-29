@@ -135,7 +135,7 @@ keycodes:
 	return nil
 }
 
-func (p *x11Plugin) PointerButton(button uint, press bool) error {
+func (p *x11Plugin) sendButton(button uint, press bool) error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	if p.display == nil {
@@ -151,6 +151,19 @@ func (p *x11Plugin) PointerButton(button uint, press bool) error {
 	C.XTestFakeButtonEvent(p.display, C.uint(button), pressC, 0)
 	C.XFlush(p.display)
 	return nil
+}
+
+func (p *x11Plugin) PointerButton(button PointerButton, press bool) error {
+	if button == PointerButtonLeft {
+		return p.sendButton(1, press)
+	}
+	if button == PointerButtonRight {
+		return p.sendButton(3, press)
+	}
+	if button == PointerButtonMiddle {
+		return p.sendButton(2, press)
+	}
+	return errors.New("unsupported pointer button")
 }
 
 func (p *x11Plugin) PointerMove(deltaX, deltaY int) error {
@@ -177,10 +190,10 @@ func (p *x11Plugin) PointerScroll(deltaHorizontal, deltaVertical int) error {
 		stepsHorizontal = -stepsHorizontal
 	}
 	for i := 0; i < stepsHorizontal; i++ {
-		if err := p.PointerButton(buttonHorizontal, true); err != nil {
+		if err := p.sendButton(buttonHorizontal, true); err != nil {
 			return err
 		}
-		if err := p.PointerButton(buttonHorizontal, false); err != nil {
+		if err := p.sendButton(buttonHorizontal, false); err != nil {
 			return err
 		}
 	}
@@ -190,10 +203,10 @@ func (p *x11Plugin) PointerScroll(deltaHorizontal, deltaVertical int) error {
 		stepsVertical = -stepsVertical
 	}
 	for i := 0; i < stepsVertical; i++ {
-		if err := p.PointerButton(buttonVertical, true); err != nil {
+		if err := p.sendButton(buttonVertical, true); err != nil {
 			return err
 		}
-		if err := p.PointerButton(buttonVertical, false); err != nil {
+		if err := p.sendButton(buttonVertical, false); err != nil {
 			return err
 		}
 	}

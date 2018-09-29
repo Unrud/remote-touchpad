@@ -19,6 +19,15 @@
 
 package main
 
+type PointerButton int
+
+const (
+	PointerButtonLeft PointerButton = iota
+	PointerButtonRight
+	PointerButtonMiddle
+	PointerButtonLimit
+)
+
 type PluginInfo struct {
 	Name string
 	Init func() (Plugin, error)
@@ -41,7 +50,7 @@ func (e UnsupportedPlatformError) Error() string {
 type Plugin interface {
 	Close() error
 	KeyboardText(text string) error
-	PointerButton(button uint, press bool) error
+	PointerButton(button PointerButton, press bool) error
 	PointerMove(deltaX, deltaY int) error
 	PointerScroll(deltaHorizontal, deltaVertical int) error
 	PointerScrollFinish() error
