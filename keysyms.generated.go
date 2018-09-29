@@ -1,6 +1,6 @@
 package main
 
-var keysymsMap = map[rune]int32{
+var keysymsMap = map[rune]Keysym{
 	0x0008: 0x0000ff08,
 	0x0009: 0x0000ff09,
 	0x000a: 0x0000ff0a,

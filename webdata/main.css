@@ -2,6 +2,7 @@ html,
 body,
 #pad,
 #keyboard,
+#keys,
 #opening,
 #closed {
     width: 100%;
@@ -14,6 +15,7 @@ body {
 }
 
 #pad,
+#keys,
 #sendbutton,
 #opening,
 #closed {
@@ -22,19 +24,25 @@ body {
 }
 
 #opening,
-#closed {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2em;
-    color: white;
-    word-wrap: break-word;
-    flex-direction: column;
-}
-
+#closed,
+#keys,
 #pad {
     display: flex;
     flex-direction: column;
+}
+
+#opening,
+#closed {
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
+    color: white;
+    word-wrap: break-word;
+}
+
+#keys {
+    justify-content: flex-end;
+    align-items: center;
 }
 
 #padlabel {
@@ -59,10 +67,17 @@ body {
     }
 }
 
+#keysbutton,
 #fullscreenbutton,
 #keyboardbutton,
 #sendbutton,
-#reloadbutton {
+#reloadbutton,
+#prevtrackbutton,
+#playpausebutton,
+#nexttrackbutton,
+#volumedownbutton,
+#volumemutebutton,
+#volumeupbutton {
     background-color: transparent;
     border: 1px solid black;
     height: 1.5em;
@@ -77,12 +92,24 @@ body {
     border-bottom: none;
 }
 
-#fullscreenbutton {
+#keysbutton,
+#fullscreenbutton,
+#playpausebutton,
+#mutebutton {
     border-left: none;
 }
 
+#keysbutton {
+    border-top: none;
+}
+
+#playpausebutton,
+#mutebutton,
 #keyboardbutton {
     border-right: none;
+}
+
+#keyboardbutton {
     margin-left: auto;
 }
 
@@ -108,6 +135,27 @@ body {
     border-right: none;
     border-top: none;
     height: 100%;
+}
+
+#keys > .buttons {
+    margin-bottom: 0.5rem;
+}
+
+#keys > .buttons > button {
+    height: 6rem;
+    width: 8rem;
+}
+
+@media (max-width: 25rem) {
+    #keys > .buttons > button {
+        width: calc(0.33 * (100vw - 1rem));
+    }
+}
+
+@media (max-height: 13.5rem) {
+    #keys > .buttons > button {
+        height: calc(0.5 * (100vh - 1.5rem));
+    }
 }
 
 @media (max-aspect-ratio: 4/3) {

@@ -32,6 +32,13 @@ const POINTER_BUTTON_LEFT = 0;
 const POINTER_BUTTON_RIGHT = 1;
 const POINTER_BUTTON_MIDDLE = 2;
 
+const KEY_VOLUME_MUTE = 0;
+const KEY_VOLUME_DOWN = 1;
+const KEY_VOLUME_UP = 2;
+const KEY_MEDIA_PLAY_PAUSE = 3;
+const KEY_MEDIA_PREV_TRACK = 4;
+const KEY_MEDIA_NEXT_TRACK = 5;
+
 var ws;
 var pad;
 var padlabel;
@@ -310,11 +317,13 @@ window.addEventListener("load", function() {
     var closed = document.getElementById("closed");
     pad = document.getElementById("pad");
     padlabel = document.getElementById("padlabel");
+    var keys = document.getElementById("keys");
     var keyboard = document.getElementById("keyboard");
     var fullscreenbutton = document.getElementById("fullscreenbutton");
     var text = document.getElementById("text");
     closed.style.display = "none";
     pad.style.display = "none";
+    keys.style.display = "none";
     keyboard.style.display = "none";
     text.value = "";
 
@@ -337,6 +346,8 @@ window.addEventListener("load", function() {
         if (history.state == "keyboard") {
             keyboard.style.display = "flex";
             text.focus();
+        } else if (history.state == "keys") {
+            keys.style.display = "flex";
         } else {
             pad.style.display = "flex";
         }
@@ -348,10 +359,17 @@ window.addEventListener("load", function() {
         }
         opening.style.display = "none";
         pad.style.display = "none";
+        keys.style.display = "none";
         keyboard.style.display = "none";
         closed.style.display = "flex";
     };
 
+    document.getElementById("keysbutton").addEventListener("click",
+        function(e) {
+            pad.style.display = "none";
+            keys.style.display = "flex";
+            history.pushState("keys", "");
+        });
     document.getElementById("keyboardbutton").addEventListener("click",
         function(e) {
             if (fullscreenElement()) {
@@ -372,6 +390,17 @@ window.addEventListener("load", function() {
             requestFullscreen(pad);
         }
     });
+    [{id: "prevtrackbutton", key: KEY_MEDIA_PREV_TRACK},
+     {id: "playpausebutton", key: KEY_MEDIA_PLAY_PAUSE},
+     {id: "nexttrackbutton", key: KEY_MEDIA_NEXT_TRACK},
+     {id: "volumedownbutton", key: KEY_VOLUME_DOWN},
+     {id: "volumemutebutton", key: KEY_VOLUME_MUTE},
+     {id: "volumeupbutton", key: KEY_VOLUME_UP}].forEach(function(o) {
+        document.getElementById(o.id).addEventListener("click",
+            function(e) {
+                ws.send("k" + o.key);
+            });
+     });
     document.getElementById("sendbutton").addEventListener("click",
         function(e) {
             if (text.value != "") {
@@ -381,8 +410,10 @@ window.addEventListener("load", function() {
             window.history.back();
         });
     window.onpopstate = function(event) {
-        if (keyboard.style.display == "flex") {
+        if (keyboard.style.display == "flex" ||
+                keys.style.display == "flex") {
             pad.style.display = "flex";
+            keys.style.display = "none";
             keyboard.style.display = "none";
         } else {
             window.history.back();

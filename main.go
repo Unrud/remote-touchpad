@@ -66,12 +66,19 @@ func processCommand(plugin Plugin, command string) error {
 		return plugin.KeyboardText(text)
 	}
 	arguments := strings.Split(command[1:], ";")
-	if len(arguments) != 2 {
+	if command[0] == 'k' && len(arguments) != 1 ||
+		command[0] != 'k' && len(arguments) != 2 {
 		return errors.New("wrong number of arguments")
 	}
 	x, err := strconv.ParseInt(arguments[0], 10, 32)
 	if err != nil {
 		return err
+	}
+	if command[0] == 'k' {
+		if x < 0 || x >= int64(KeyLimit) {
+			return errors.New("unsupported key")
+		}
+		return plugin.KeyboardKey(Key(x))
 	}
 	y, err := strconv.ParseInt(arguments[1], 10, 32)
 	if err != nil {

@@ -20,12 +20,23 @@
 package main
 
 type PointerButton int
+type Key int
 
 const (
 	PointerButtonLeft PointerButton = iota
 	PointerButtonRight
 	PointerButtonMiddle
 	PointerButtonLimit
+)
+
+const (
+	KeyVolumeMute Key = iota
+	KeyVolumeDown
+	KeyVolumeUp
+	KeyMediaPlayPause
+	KeyMediaPrevTrack
+	KeyMediaNextTrack
+	KeyLimit
 )
 
 type PluginInfo struct {
@@ -50,6 +61,7 @@ func (e UnsupportedPlatformError) Error() string {
 type Plugin interface {
 	Close() error
 	KeyboardText(text string) error
+	KeyboardKey(key Key) error
 	PointerButton(button PointerButton, press bool) error
 	PointerMove(deltaX, deltaY int) error
 	PointerScroll(deltaHorizontal, deltaVertical int) error

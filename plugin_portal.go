@@ -185,18 +185,14 @@ func (p *portalPlugin) Close() error {
 	return nil
 }
 
-func (p *portalPlugin) KeyboardText(text string) error {
+func (p *portalPlugin) keyboardKeys(keys []Keysym) error {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
 	if p.bus == nil {
 		return errors.New("dbus connection closed")
 	}
 	inVardict := make(map[string]dbus.Variant)
-	for _, runeValue := range text {
-		keysym, err := runeToKeysym(runeValue)
-		if err != nil {
-			return err
-		}
+	for _, keysym := range keys {
 		for _, state := range [...]uint32{btnPressed, btnReleased} {
 			if err := p.remoteDesktop.Call(
 				"org.freedesktop.portal.RemoteDesktop.NotifyKeyboardKeysym",
@@ -206,6 +202,27 @@ func (p *portalPlugin) KeyboardText(text string) error {
 		}
 	}
 	return nil
+}
+
+func (p *portalPlugin) KeyboardText(text string) error {
+	keys := make([]Keysym, 0, len(text))
+	for _, runeValue := range text {
+		keysym, err := RuneToKeysym(runeValue)
+		if err != nil {
+			return err
+		}
+		keys = append(keys, keysym)
+	}
+	return p.keyboardKeys(keys)
+}
+
+func (p *portalPlugin) KeyboardKey(key Key) error {
+	keysym, err := KeyToKeysym(key)
+	if err != nil {
+		return err
+	}
+	keys := [...]Keysym{keysym}
+	return p.keyboardKeys(keys[:])
 }
 
 func (p *portalPlugin) PointerButton(button PointerButton, press bool) error {

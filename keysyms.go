@@ -23,7 +23,18 @@ package main
 
 import "errors"
 
-func runeToKeysym(runeValue rune) (int32, error) {
+type Keysym int32
+
+const (
+	xf86AudioLowerVolume Keysym = 0x1008ff11
+	xf86AudioMute        Keysym = 0x1008ff12
+	xf86AudioRaiseVolume Keysym = 0x1008ff13
+	xf86AudioPlay        Keysym = 0x1008ff14
+	xf86AudioPrev        Keysym = 0x1008ff16
+	xf86AudioNext        Keysym = 0x1008ff17
+)
+
+func RuneToKeysym(runeValue rune) (Keysym, error) {
 	if runeValue == '\n' {
 		runeValue = '\r'
 	}
@@ -33,7 +44,29 @@ func runeToKeysym(runeValue rune) (int32, error) {
 			return 0, errors.New("rune not mappend to keysym and " +
 				"out of range for direct unicode mapping")
 		}
-		keysym = 0x01000000 + runeValue
+		keysym = Keysym(0x01000000 + runeValue)
 	}
 	return keysym, nil
+}
+
+func KeyToKeysym(key Key) (Keysym, error) {
+	if key == KeyVolumeMute {
+		return xf86AudioMute, nil
+	}
+	if key == KeyVolumeDown {
+		return xf86AudioLowerVolume, nil
+	}
+	if key == KeyVolumeUp {
+		return xf86AudioRaiseVolume, nil
+	}
+	if key == KeyMediaPlayPause {
+		return xf86AudioPlay, nil
+	}
+	if key == KeyMediaPrevTrack {
+		return xf86AudioPrev, nil
+	}
+	if key == KeyMediaNextTrack {
+		return xf86AudioNext, nil
+	}
+	return 0, errors.New("key not mapped to keysym")
 }

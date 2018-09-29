@@ -36,8 +36,8 @@ import (
 )
 
 const (
-	typingDelay time.Duration = 250 * time.Millisecond
-	scrollDiv   int           = 20
+	keyboardMappingDelay time.Duration = 250 * time.Millisecond
+	scrollDiv            int           = 20
 )
 
 type x11Plugin struct {
@@ -71,13 +71,13 @@ func (p *x11Plugin) Close() error {
 	return nil
 }
 
-func (p *x11Plugin) KeyboardText(text string) error {
+func (p *x11Plugin) keyboardKeys(keys []Keysym) error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	if p.display == nil {
 		return errors.New("X server connection closed")
 	}
-	if text == "" {
+	if len(keys) == 0 {
 		return nil
 	}
 	var minKeycodes, maxKeycodes C.int
@@ -116,23 +116,43 @@ keycodes:
 			(*C.KeySym)(unsafe.Pointer(&keycodeMapping[0])), 1)
 		C.XFlush(p.display)
 	}()
-	for _, runeValue := range text {
-		keysym, err := runeToKeysym(runeValue)
-		if err != nil {
-			return err
-		}
+	for _, keysym := range keys {
 		for i := range keycodeMapping {
 			keycodeMapping[i] = C.KeySym(keysym)
 		}
 		C.XChangeKeyboardMapping(p.display, C.int(emptyKeycode), keysymsPerKeycode,
 			(*C.KeySym)(unsafe.Pointer(&keycodeMapping[0])), 1)
+		// race condition!
+		C.XFlush(p.display)
+		time.Sleep(keyboardMappingDelay)
 		C.XTestFakeKeyEvent(p.display, C.uint(emptyKeycode), C.True, 0)
 		C.XTestFakeKeyEvent(p.display, C.uint(emptyKeycode), C.False, 0)
 		// race condition!
 		C.XFlush(p.display)
-		time.Sleep(typingDelay)
+		time.Sleep(keyboardMappingDelay)
 	}
 	return nil
+}
+
+func (p *x11Plugin) KeyboardText(text string) error {
+	keys := make([]Keysym, 0, len(text))
+	for _, runeValue := range text {
+		keysym, err := RuneToKeysym(runeValue)
+		if err != nil {
+			return err
+		}
+		keys = append(keys, keysym)
+	}
+	return p.keyboardKeys(keys)
+}
+
+func (p *x11Plugin) KeyboardKey(key Key) error {
+	keysym, err := KeyToKeysym(key)
+	if err != nil {
+		return err
+	}
+	keys := [...]Keysym{keysym}
+	return p.keyboardKeys(keys[:])
 }
 
 func (p *x11Plugin) sendButton(button uint, press bool) error {

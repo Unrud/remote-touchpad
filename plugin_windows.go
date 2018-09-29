@@ -34,6 +34,13 @@ const (
 	keyeventfKeyup   uint32 = 0x2
 	keyeventfUnicode uint32 = 0x4
 
+	vkVolumeMute     uint16 = 0xAD
+	vkVolumeDown     uint16 = 0xAE
+	vkVolumeUp       uint16 = 0xAF
+	vkMediaNextTrack uint16 = 0xB0
+	vkMediaPrevTrack uint16 = 0xB1
+	vkMediaPlayPause uint16 = 0xB3
+
 	mouseeventfMove       uint32 = 0x1
 	mouseeventfLeftdown   uint32 = 0x2
 	mouseeventfLeftup     uint32 = 0x4
@@ -84,19 +91,9 @@ func (p *windowsPlugin) Close() error {
 	return nil
 }
 
-func (p *windowsPlugin) KeyboardText(text string) error {
-	runes := []rune(text)
-	if len(runes) == 0 {
+func (p *windowsPlugin) sendInput(inputs []keybdInput) error {
+	if len(inputs) == 0 {
 		return nil
-	}
-	inputs := make([]keybdInput, len(runes)*2)
-	for i := range inputs {
-		inputs[i].typ = inputKeyboard
-		inputs[i].wScan = uint16(runes[i/2])
-		inputs[i].dwFlags = keyeventfUnicode
-		if i%2 == 1 {
-			inputs[i].dwFlags |= keyeventfKeyup
-		}
 	}
 	if r, _, err := sendInputProc.Call(uintptr(len(inputs)),
 		uintptr(unsafe.Pointer(&inputs[0])),
@@ -104,6 +101,42 @@ func (p *windowsPlugin) KeyboardText(text string) error {
 		return err
 	}
 	return nil
+}
+
+func (p *windowsPlugin) KeyboardText(text string) error {
+	inputs := make([]keybdInput, 0, len(text)*2)
+	for _, runeValue := range text {
+		in := keybdInput{typ: inputKeyboard, wScan: uint16(runeValue), dwFlags: keyeventfUnicode}
+		inputs = append(inputs, in)
+		in.dwFlags |= keyeventfKeyup
+		inputs = append(inputs, in)
+	}
+	if len(inputs) == 0 {
+		return nil
+	}
+	return p.sendInput(inputs)
+}
+
+func (p *windowsPlugin) KeyboardKey(key Key) error {
+	input := keybdInput{typ: inputKeyboard}
+	if key == KeyVolumeMute {
+		input.wVk = vkVolumeMute
+	} else if key == KeyVolumeDown {
+		input.wVk = vkVolumeDown
+	} else if key == KeyVolumeUp {
+		input.wVk = vkVolumeUp
+	} else if key == KeyMediaNextTrack {
+		input.wVk = vkMediaNextTrack
+	} else if key == KeyMediaPrevTrack {
+		input.wVk = vkMediaPrevTrack
+	} else if key == KeyMediaPlayPause {
+		input.wVk = vkMediaPlayPause
+	} else {
+		return errors.New("key not mapped to virtual-key code")
+	}
+	inputs := [...]keybdInput{input, input}
+	inputs[1].dwFlags |= keyeventfKeyup
+	return p.sendInput(inputs[:])
 }
 
 func (p *windowsPlugin) PointerButton(button PointerButton, press bool) error {

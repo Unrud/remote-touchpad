@@ -31,6 +31,8 @@ import (
 	"strconv"
 )
 
+type Keysym int32
+
 const (
 	keysymdefHeader  string = "/usr/include/X11/keysymdef.h"
 	output           string = "keysyms.generated.go"
@@ -56,12 +58,12 @@ func main() {
 	}
 	defer f.Close()
 	reader := bufio.NewReader(f)
-	re := regexp.MustCompile("^#define" +
-		"\\s+([A-Za-z0-9_]+)" + // keysymName
-		"\\s+0x([0-9a-fA-F]+)" + // keysym
-		"\\s*(?:/\\*\\s*(?:U\\+([0-9A-Fa-f]+))?.*\\*/)?" + // keysymUnicode (optional)
-		"\\s*$")
-	keysymsMap := make(map[rune]int32)
+	re := regexp.MustCompile("^\\#define " +
+		"(XK_[a-zA-Z_0-9]+)\\s+" + // keysymName
+		"0x([0-9a-f]+)\\s*" + // keysym
+		"(?:/\\*\\s*(?:U\\+([0-9A-F]{4,6}))?.*\\*/\\s*)?" + // keysymUnicode (optional)
+		"$")
+	keysymsMap := make(map[rune]Keysym)
 	for {
 		l, err := reader.ReadString('\n')
 		if err == io.EOF {
@@ -75,7 +77,7 @@ func main() {
 		}
 		keysymName := submatches[1]
 		keysymTemp, err := strconv.ParseInt(submatches[2], 16, 32)
-		keysym := int32(keysymTemp)
+		keysym := Keysym(keysymTemp)
 		if err != nil {
 			panic(err)
 		}
@@ -100,7 +102,7 @@ func main() {
 		keysymsMap[unicode] = keysym
 	}
 	content := "package main\n\n" +
-		"var keysymsMap = map[rune]int32{\n"
+		"var keysymsMap = map[rune]Keysym{\n"
 	keys := make([]rune, 0)
 	for key := range keysymsMap {
 		keys = append(keys, key)
