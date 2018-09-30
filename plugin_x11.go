@@ -36,7 +36,7 @@ import (
 )
 
 const (
-	keyboardMappingDelay time.Duration = 250 * time.Millisecond
+	keyboardMappingDelay time.Duration = 125 * time.Millisecond
 	scrollDiv            int           = 20
 )
 
