@@ -3,6 +3,13 @@
     src: url("icon.woff") format("woff");
 }
 
+* {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 html,
 body,
 body > div {
@@ -38,10 +45,6 @@ p {
     font-size: 2rem;
     color: white;
     word-wrap: break-word;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
 }
 
 #padlabel {
