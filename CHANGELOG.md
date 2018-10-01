@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.10 (2018-10-01)
+
+  * avoid race condition when typing on X11
+
 ## 0.0.9 (2018-09-29)
 
   * add multimedia keys
