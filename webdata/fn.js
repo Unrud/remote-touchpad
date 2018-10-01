@@ -354,9 +354,7 @@ window.addEventListener("load", function() {
     };
 
     ws.onclose = function() {
-        if (fullscreenElement()) {
-            exitFullscreen();
-        }
+        exitFullscreen();
         opening.style.display = "none";
         pad.style.display = "none";
         keys.style.display = "none";
@@ -366,15 +364,14 @@ window.addEventListener("load", function() {
 
     document.getElementById("keysbutton").addEventListener("click",
         function(e) {
+            exitFullscreen();
             pad.style.display = "none";
             keys.style.display = "flex";
             history.pushState("keys", "");
         });
     document.getElementById("keyboardbutton").addEventListener("click",
         function(e) {
-            if (fullscreenElement()) {
-                exitFullscreen();
-            }
+            exitFullscreen();
             pad.style.display = "none";
             keyboard.style.display = "flex";
             text.focus();
