@@ -25,6 +25,7 @@ package main
 // #include <X11/Xlib.h>
 // #include <X11/Intrinsic.h>
 // #include <X11/extensions/XTest.h>
+// #include <X11/XKBlib.h>
 import "C"
 import (
 	"errors"
@@ -39,6 +40,9 @@ const (
 	keyboardMappingDelay time.Duration = 125 * time.Millisecond
 	scrollDiv            int           = 20
 )
+
+var modifierIndices [6]uint = [...]uint{C.ShiftMapIndex, C.Mod1MapIndex,
+	C.Mod2MapIndex, C.Mod3MapIndex, C.Mod4MapIndex, C.Mod5MapIndex}
 
 type x11Plugin struct {
 	display                          *C.Display
@@ -71,25 +75,16 @@ func (p *x11Plugin) Close() error {
 	return nil
 }
 
-func (p *x11Plugin) keyboardKeys(keys []Keysym) error {
-	p.lock.Lock()
-	defer p.lock.Unlock()
-	if p.display == nil {
-		return errors.New("X server connection closed")
-	}
-	if len(keys) == 0 {
-		return nil
-	}
+func (p *x11Plugin) findEmptyKeycodeLocked() (C.KeyCode, C.int, error) {
 	var minKeycodes, maxKeycodes C.int
 	C.XDisplayKeycodes(p.display, &minKeycodes, &maxKeycodes)
 	var keysymsPerKeycode C.int
 	keysyms := C.XGetKeyboardMapping(p.display, C.KeyCode(minKeycodes),
 		maxKeycodes-minKeycodes+1, &keysymsPerKeycode)
 	if keysyms == nil {
-		return errors.New("failed to get keyboard mapping")
+		return 0, 0, errors.New("failed to get keyboard mapping")
 	}
 	defer C.XFree(unsafe.Pointer(keysyms))
-	emptyKeycode := C.KeyCode(0)
 keycodes:
 	for keycode := C.KeyCode(minKeycodes); keycode <= C.KeyCode(maxKeycodes); keycode++ {
 		for i := 0; i < int(keysymsPerKeycode); i++ {
@@ -101,35 +96,142 @@ keycodes:
 				continue keycodes
 			}
 		}
-		emptyKeycode = keycode
-		break
+		return keycode, keysymsPerKeycode, nil
 	}
-	if emptyKeycode == 0 {
-		return errors.New("no empty keycode found")
-	}
+	return 0, 0, errors.New("no empty keycode found")
+}
+
+func (p *x11Plugin) changeKeyMappingLocked(keysymsPerKeycode C.int,
+	keycode C.KeyCode, keysym Keysym) {
 	keycodeMapping := make([]C.KeySym, keysymsPerKeycode)
-	defer func() {
-		for i := range keycodeMapping {
-			keycodeMapping[i] = 0
+	for i := range keycodeMapping {
+		keycodeMapping[i] = C.KeySym(keysym)
+	}
+	C.XChangeKeyboardMapping(p.display, C.int(keycode), keysymsPerKeycode,
+		(*C.KeySym)(unsafe.Pointer(&keycodeMapping[0])), 1)
+	C.XFlush(p.display)
+}
+
+func (p *x11Plugin) getModKeycodesLocked() map[uint]C.KeyCode {
+	modKeymap := C.XGetModifierMapping(p.display)
+	defer C.XFreeModifiermap(modKeymap)
+	modKeycodes := make(map[uint]C.KeyCode)
+	for _, modIndex := range modifierIndices {
+		for i := 0; i < int(modKeymap.max_keypermod); i++ {
+			keycode := *(*C.KeyCode)(unsafe.Pointer(uintptr(unsafe.Pointer(modKeymap.modifiermap)) +
+				uintptr(uint(modIndex)*uint(modKeymap.max_keypermod)+uint(i))))
+			if keycode != 0 {
+				modKeycodes[1<<uint(modIndex)] = keycode
+				break
+			}
 		}
-		C.XChangeKeyboardMapping(p.display, C.int(emptyKeycode), keysymsPerKeycode,
-			(*C.KeySym)(unsafe.Pointer(&keycodeMapping[0])), 1)
-		C.XFlush(p.display)
-	}()
+	}
+	return modKeycodes
+}
+
+func (p *x11Plugin) findKeycodeLocked(keyboard C.XkbDescPtr,
+	modKeycodes map[uint]C.KeyCode, activeMods C.uint,
+	keysym Keysym) (C.KeyCode, C.uint) {
+	keycode := C.XKeysymToKeycode(p.display, C.KeySym(keysym))
+	if keycode == 0 {
+		return 0, 0
+	}
+	var alwaysActiveMods C.uint
+	for modIndex := uint(0); modIndex < 8; modIndex++ {
+		mod := uint(1) << modIndex
+		if _, modAvailable := modKeycodes[mod]; !modAvailable {
+			alwaysActiveMods |= activeMods & C.uint(mod)
+		}
+	}
+	_, shiftModAvailable := modKeycodes[C.ShiftMask]
+	for _, modIndex := range modifierIndices {
+		var mod C.uint
+		if modIndex != C.ShiftMapIndex {
+			mod = 1 << modIndex
+		}
+		for _, shiftMod := range [...]C.uint{0, C.ShiftMask} {
+			if shiftMod != 0 && !shiftModAvailable {
+				continue
+			}
+			mods := alwaysActiveMods | shiftMod | mod
+			var retMods C.uint
+			var retKeysym C.KeySym
+			C.XkbTranslateKeyCode(keyboard, keycode, mods, &retMods, &retKeysym)
+			if retKeysym == C.KeySym(keysym) {
+				return keycode, mods
+			}
+		}
+	}
+	return 0, 0
+}
+
+func (p *x11Plugin) sendModsLocked(modKeycodes map[uint]C.KeyCode, mods C.uint,
+	press bool) {
+	var pressC C.int = C.False
+	if press {
+		pressC = C.True
+	}
+	for mod, keycode := range modKeycodes {
+		if mods&C.uint(mod) != 0 {
+			C.XTestFakeKeyEvent(p.display, C.uint(keycode), pressC, 0)
+		}
+	}
+}
+
+func (p *x11Plugin) keyboardKeys(keys []Keysym) error {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	if p.display == nil {
+		return errors.New("X server connection closed")
+	}
+	if len(keys) == 0 {
+		return nil
+	}
+	rootWindow := C.XDefaultRootWindow(p.display)
+	modKeycodes := p.getModKeycodesLocked()
+	keyboard := C.XkbGetKeyboard(p.display,
+		C.XkbCompatMapMask|C.XkbGeometryMask, C.XkbUseCoreKbd)
+	defer C.XkbFreeKeyboard(keyboard, C.XkbAllComponentsMask, C.True)
+	var emptyKeycode C.KeyCode
+	var keysymsPerKeycode C.int
 	for _, keysym := range keys {
-		for i := range keycodeMapping {
-			keycodeMapping[i] = C.KeySym(keysym)
+		var root, child C.Window
+		var rootX, rootY, x, y C.int
+		var activeMods C.uint
+		C.XSync(p.display, C.False)
+		C.XQueryPointer(p.display, rootWindow, &root, &child, &rootX, &rootY,
+			&x, &y, &activeMods)
+		keycode, mods := p.findKeycodeLocked(keyboard, modKeycodes, activeMods,
+			keysym)
+		var pressMods, releaseMods C.uint
+		if keycode == 0 {
+			if emptyKeycode == 0 {
+				var err error
+				emptyKeycode, keysymsPerKeycode, err = p.findEmptyKeycodeLocked()
+				if err != nil {
+					return err
+				}
+				defer p.changeKeyMappingLocked(keysymsPerKeycode, emptyKeycode, 0)
+			}
+			keycode = emptyKeycode
+			p.changeKeyMappingLocked(keysymsPerKeycode, keycode, keysym)
+			// race condition!
+			time.Sleep(keyboardMappingDelay)
+		} else {
+			pressMods = mods & ^activeMods
+			releaseMods = activeMods & ^mods
 		}
-		C.XChangeKeyboardMapping(p.display, C.int(emptyKeycode), keysymsPerKeycode,
-			(*C.KeySym)(unsafe.Pointer(&keycodeMapping[0])), 1)
-		// race condition!
+		p.sendModsLocked(modKeycodes, releaseMods, false)
+		p.sendModsLocked(modKeycodes, pressMods, true)
+		C.XTestFakeKeyEvent(p.display, C.uint(keycode), C.True, 0)
+		C.XTestFakeKeyEvent(p.display, C.uint(keycode), C.False, 0)
+		p.sendModsLocked(modKeycodes, pressMods, false)
+		p.sendModsLocked(modKeycodes, releaseMods, true)
 		C.XFlush(p.display)
-		time.Sleep(keyboardMappingDelay)
-		C.XTestFakeKeyEvent(p.display, C.uint(emptyKeycode), C.True, 0)
-		C.XTestFakeKeyEvent(p.display, C.uint(emptyKeycode), C.False, 0)
-		// race condition!
-		C.XFlush(p.display)
-		time.Sleep(keyboardMappingDelay)
+		if keycode == emptyKeycode {
+			// race condition!
+			time.Sleep(keyboardMappingDelay)
+		}
 	}
 	return nil
 }
