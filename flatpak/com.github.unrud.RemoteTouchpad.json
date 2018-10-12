@@ -1,7 +1,7 @@
 {
     "app-id" : "com.github.unrud.RemoteTouchpad",
     "runtime" : "org.freedesktop.Platform",
-    "runtime-version" : "1.6",
+    "runtime-version" : "18.08",
     "sdk" : "org.freedesktop.Sdk",
     "command" : "remote-touchpad",
     "rename-appdata-file" : "remote-touchpad.appdata.xml",
@@ -21,7 +21,7 @@
                 {
                     "type" : "git",
                     "url" : "https://github.com/golang/net",
-                    "commit" : "161cd47e91fd58ac17490ef4d742dc98bb4cf60e",
+                    "commit" : "49bb7cea24b1df9410e1712aa6433dae904ff66a",
                     "dest" : "src/golang.org/x/net"
                 },
                 {
