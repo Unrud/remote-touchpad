@@ -39,15 +39,15 @@ const (
 	KeyLimit
 )
 
-type PluginInfo struct {
+type BackendInfo struct {
 	Name string
-	Init func() (Plugin, error)
+	Init func() (Backend, error)
 }
 
-var Plugins []PluginInfo = []PluginInfo{
-	{"X11", InitX11Plugin},
-	{"RemoteDesktop portal", InitPortalPlugin},
-	{"Windows", InitWindowsPlugin},
+var Backends []BackendInfo = []BackendInfo{
+	{"X11", InitX11Backend},
+	{"RemoteDesktop portal", InitPortalBackend},
+	{"Windows", InitWindowsBackend},
 }
 
 type UnsupportedPlatformError struct {
@@ -58,7 +58,7 @@ func (e UnsupportedPlatformError) Error() string {
 	return e.err.Error()
 }
 
-type Plugin interface {
+type Backend interface {
 	Close() error
 	KeyboardText(text string) error
 	KeyboardKey(key Key) error

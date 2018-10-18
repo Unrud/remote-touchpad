@@ -48,12 +48,12 @@ const (
 	version                 string        = "0.0.10"
 )
 
-func processCommand(plugin Plugin, command string) error {
+func processCommand(backend Backend, command string) error {
 	if len(command) == 0 {
 		return errors.New("empty command")
 	}
 	if command == "sf" {
-		return plugin.PointerScrollFinish()
+		return backend.PointerScrollFinish()
 	}
 	if command[0] == 't' {
 		text := command[1:]
@@ -63,7 +63,7 @@ func processCommand(plugin Plugin, command string) error {
 		if !utf8.ValidString(text) {
 			return errors.New("invalid utf-8")
 		}
-		return plugin.KeyboardText(text)
+		return backend.KeyboardText(text)
 	}
 	arguments := strings.Split(command[1:], ";")
 	if command[0] == 'k' && len(arguments) != 1 ||
@@ -78,17 +78,17 @@ func processCommand(plugin Plugin, command string) error {
 		if x < 0 || x >= int64(KeyLimit) {
 			return errors.New("unsupported key")
 		}
-		return plugin.KeyboardKey(Key(x))
+		return backend.KeyboardKey(Key(x))
 	}
 	y, err := strconv.ParseInt(arguments[1], 10, 32)
 	if err != nil {
 		return err
 	}
 	if command[0] == 'm' {
-		return plugin.PointerMove(int(x), int(y))
+		return backend.PointerMove(int(x), int(y))
 	}
 	if command[0] == 's' {
-		return plugin.PointerScroll(int(x), int(y))
+		return backend.PointerScroll(int(x), int(y))
 	}
 	if command[0] == 'b' {
 		if x < 0 || x >= int64(PointerButtonLimit) {
@@ -98,7 +98,7 @@ func processCommand(plugin Plugin, command string) error {
 		if y == 0 {
 			b = false
 		}
-		return plugin.PointerButton(PointerButton(x), b)
+		return backend.PointerButton(PointerButton(x), b)
 	}
 	return errors.New("unsupported command")
 }
@@ -171,25 +171,25 @@ func main() {
 	if secret == "" {
 		secret = secureRandBase64(defaultSecretLength)
 	}
-	var plugin Plugin
-	var pluginName string
+	var backend Backend
+	var backendName string
 	platformErrors := ""
-	for _, pluginInfo := range Plugins {
-		pluginName = pluginInfo.Name
+	for _, backendInfo := range Backends {
+		backendName = backendInfo.Name
 		var err error
-		plugin, err = pluginInfo.Init()
+		backend, err = backendInfo.Init()
 		if err == nil {
 			break
 		} else if _, ok := err.(UnsupportedPlatformError); ok {
-			platformErrors += fmt.Sprintf("%s plugin: %v\n", pluginName, err)
+			platformErrors += fmt.Sprintf("%s backend: %v\n", backendName, err)
 		} else {
-			log.Fatal(fmt.Sprintf("%s plugin: %v", pluginName, err))
+			log.Fatal(fmt.Sprintf("%s backend: %v", backendName, err))
 		}
 	}
-	if plugin == nil {
+	if backend == nil {
 		log.Fatal("unsupported platform:\n" + platformErrors)
 	}
-	defer plugin.Close()
+	defer backend.Close()
 	authenticationChallenges := make(chan challenge, authenticationRateBurst)
 	go authenticationChallengeGenerator(secret, authenticationChallenges)
 	listener, err := net.Listen("tcp", bind)
@@ -228,8 +228,8 @@ func main() {
 			if err := websocket.Message.Receive(ws, &message); err != nil {
 				return
 			}
-			if err := processCommand(plugin, message); err != nil {
-				log.Print(fmt.Sprintf("%s plugin: %v", pluginName, err))
+			if err := processCommand(backend, message); err != nil {
+				log.Print(fmt.Sprintf("%s backend: %v", backendName, err))
 				return
 			}
 		}

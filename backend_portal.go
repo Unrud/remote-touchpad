@@ -40,14 +40,14 @@ const (
 	btnMiddle int32 = 0x112
 )
 
-type portalPlugin struct {
+type portalBackend struct {
 	bus           *dbus.Conn
 	remoteDesktop dbus.BusObject
 	sessionHandle dbus.ObjectPath
 	lock          sync.RWMutex
 }
 
-func InitPortalPlugin() (Plugin, error) {
+func InitPortalBackend() (Backend, error) {
 	bus, err := dbus.SessionBusPrivate()
 	if err != nil {
 		return nil, UnsupportedPlatformError{err}
@@ -139,7 +139,7 @@ func InitPortalPlugin() (Plugin, error) {
 		return nil, errors.New("keyboard or pointer access denied")
 	}
 	cleanupBus = false
-	return &portalPlugin{bus: bus, remoteDesktop: remoteDesktop,
+	return &portalBackend{bus: bus, remoteDesktop: remoteDesktop,
 		sessionHandle: sessionHandle}, nil
 }
 
@@ -171,7 +171,7 @@ func getResponse(bus *dbus.Conn, object dbus.BusObject, method string,
 	}
 }
 
-func (p *portalPlugin) Close() error {
+func (p *portalBackend) Close() error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	if p.bus == nil {
@@ -185,7 +185,7 @@ func (p *portalPlugin) Close() error {
 	return nil
 }
 
-func (p *portalPlugin) keyboardKeys(keys []Keysym) error {
+func (p *portalBackend) keyboardKeys(keys []Keysym) error {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
 	if p.bus == nil {
@@ -204,7 +204,7 @@ func (p *portalPlugin) keyboardKeys(keys []Keysym) error {
 	return nil
 }
 
-func (p *portalPlugin) KeyboardText(text string) error {
+func (p *portalBackend) KeyboardText(text string) error {
 	keys := make([]Keysym, 0, len(text))
 	for _, runeValue := range text {
 		keysym, err := RuneToKeysym(runeValue)
@@ -216,7 +216,7 @@ func (p *portalPlugin) KeyboardText(text string) error {
 	return p.keyboardKeys(keys)
 }
 
-func (p *portalPlugin) KeyboardKey(key Key) error {
+func (p *portalBackend) KeyboardKey(key Key) error {
 	keysym, err := KeyToKeysym(key)
 	if err != nil {
 		return err
@@ -225,7 +225,7 @@ func (p *portalPlugin) KeyboardKey(key Key) error {
 	return p.keyboardKeys(keys[:])
 }
 
-func (p *portalPlugin) PointerButton(button PointerButton, press bool) error {
+func (p *portalBackend) PointerButton(button PointerButton, press bool) error {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
 	if p.bus == nil {
@@ -253,7 +253,7 @@ func (p *portalPlugin) PointerButton(button PointerButton, press bool) error {
 	return nil
 }
 
-func (p *portalPlugin) PointerMove(deltaX, deltaY int) error {
+func (p *portalBackend) PointerMove(deltaX, deltaY int) error {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
 	if p.bus == nil {
@@ -267,7 +267,7 @@ func (p *portalPlugin) PointerMove(deltaX, deltaY int) error {
 	return nil
 }
 
-func (p *portalPlugin) pointerScrollFull(deltaHorizontal, deltaVertical int, finish bool) error {
+func (p *portalBackend) pointerScrollFull(deltaHorizontal, deltaVertical int, finish bool) error {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
 	if p.bus == nil {
@@ -282,10 +282,10 @@ func (p *portalPlugin) pointerScrollFull(deltaHorizontal, deltaVertical int, fin
 	return nil
 }
 
-func (p *portalPlugin) PointerScroll(deltaHorizontal, deltaVertical int) error {
+func (p *portalBackend) PointerScroll(deltaHorizontal, deltaVertical int) error {
 	return p.pointerScrollFull(deltaHorizontal, deltaVertical, false)
 }
 
-func (p *portalPlugin) PointerScrollFinish() error {
+func (p *portalBackend) PointerScrollFinish() error {
 	return p.pointerScrollFull(0, 0, true)
 }

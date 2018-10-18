@@ -1,4 +1,4 @@
-// +build !windows
+// +build !x11
 
 /*
  *    Copyright (c) 2018 Unrud<unrud@outlook.com>
@@ -23,6 +23,6 @@ package main
 
 import "errors"
 
-func InitWindowsPlugin() (Plugin, error) {
+func InitX11Backend() (Backend, error) {
 	return nil, UnsupportedPlatformError{errors.New("disabled")}
 }

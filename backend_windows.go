@@ -77,21 +77,21 @@ type keybdInput struct {
 	padding [8]byte
 }
 
-type windowsPlugin struct{}
+type windowsBackend struct{}
 
-func InitWindowsPlugin() (Plugin, error) {
-	p := &windowsPlugin{}
+func InitWindowsBackend() (Backend, error) {
+	p := &windowsBackend{}
 	if err := sendInputProc.Find(); err != nil {
 		return nil, UnsupportedPlatformError{err}
 	}
 	return p, nil
 }
 
-func (p *windowsPlugin) Close() error {
+func (p *windowsBackend) Close() error {
 	return nil
 }
 
-func (p *windowsPlugin) sendInput(inputs []keybdInput) error {
+func (p *windowsBackend) sendInput(inputs []keybdInput) error {
 	if len(inputs) == 0 {
 		return nil
 	}
@@ -103,7 +103,7 @@ func (p *windowsPlugin) sendInput(inputs []keybdInput) error {
 	return nil
 }
 
-func (p *windowsPlugin) KeyboardText(text string) error {
+func (p *windowsBackend) KeyboardText(text string) error {
 	inputs := make([]keybdInput, 0, len(text)*2)
 	for _, runeValue := range text {
 		in := keybdInput{typ: inputKeyboard, wScan: uint16(runeValue), dwFlags: keyeventfUnicode}
@@ -117,7 +117,7 @@ func (p *windowsPlugin) KeyboardText(text string) error {
 	return p.sendInput(inputs)
 }
 
-func (p *windowsPlugin) KeyboardKey(key Key) error {
+func (p *windowsBackend) KeyboardKey(key Key) error {
 	input := keybdInput{typ: inputKeyboard}
 	if key == KeyVolumeMute {
 		input.wVk = vkVolumeMute
@@ -139,7 +139,7 @@ func (p *windowsPlugin) KeyboardKey(key Key) error {
 	return p.sendInput(inputs[:])
 }
 
-func (p *windowsPlugin) PointerButton(button PointerButton, press bool) error {
+func (p *windowsBackend) PointerButton(button PointerButton, press bool) error {
 	input := mouseInput{typ: inputMouse}
 	if button == PointerButtonLeft && press {
 		input.dwFlags = mouseeventfLeftdown
@@ -163,7 +163,7 @@ func (p *windowsPlugin) PointerButton(button PointerButton, press bool) error {
 	return nil
 }
 
-func (p *windowsPlugin) PointerMove(deltaX, deltaY int) error {
+func (p *windowsBackend) PointerMove(deltaX, deltaY int) error {
 	input := mouseInput{
 		typ:     inputMouse,
 		dx:      int32(deltaX),
@@ -177,7 +177,7 @@ func (p *windowsPlugin) PointerMove(deltaX, deltaY int) error {
 	return nil
 }
 
-func (p *windowsPlugin) PointerScroll(deltaHorizontal, deltaVertical int) error {
+func (p *windowsBackend) PointerScroll(deltaHorizontal, deltaVertical int) error {
 	inputs := make([]mouseInput, 0, 2)
 	if deltaHorizontal != 0 {
 		inputs = append(inputs, mouseInput{
@@ -204,6 +204,6 @@ func (p *windowsPlugin) PointerScroll(deltaHorizontal, deltaVertical int) error 
 	return nil
 }
 
-func (p *windowsPlugin) PointerScrollFinish() error {
+func (p *windowsBackend) PointerScrollFinish() error {
 	return nil
 }

@@ -23,6 +23,6 @@ package main
 
 import "errors"
 
-func InitPortalPlugin() (Plugin, error) {
+func InitPortalBackend() (Backend, error) {
 	return nil, UnsupportedPlatformError{errors.New("disabled")}
 }
