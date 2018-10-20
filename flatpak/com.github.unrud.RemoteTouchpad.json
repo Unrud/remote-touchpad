@@ -4,9 +4,6 @@
     "runtime-version" : "18.08",
     "sdk" : "org.freedesktop.Sdk",
     "command" : "remote-touchpad",
-    "rename-appdata-file" : "remote-touchpad.appdata.xml",
-    "rename-desktop-file" : "remote-touchpad.desktop",
-    "rename-icon" : "remote-touchpad",
     "sdk-extensions" : [
         "org.freedesktop.Sdk.Extension.golang"
     ],
@@ -54,12 +51,12 @@
                 ". /usr/lib/sdk/golang/enable.sh; env GOPATH=\"$(pwd)\" go build -tags 'portal x11' github.com/unrud/remote-touchpad",
                 "install -Dm0755 -t /app/bin remote-touchpad",
                 "install -Dm0755 -t /app/bin src/github.com/unrud/remote-touchpad/desktop/remote-touchpad-wait-on-error",
-                "install -Dm0644 -t /app/share/appdata src/github.com/unrud/remote-touchpad/desktop/remote-touchpad.appdata.xml",
-                "install -Dm0644 -t /app/share/applications src/github.com/unrud/remote-touchpad/desktop/remote-touchpad.desktop",
-                "install -Dm0644 src/github.com/unrud/remote-touchpad/desktop/remote-touchpad_64.png /app/share/icons/hicolor/64x64/apps/remote-touchpad.png",
-                "install -Dm0644 src/github.com/unrud/remote-touchpad/desktop/remote-touchpad_128.png /app/share/icons/hicolor/128x128/apps/remote-touchpad.png",
-                "install -Dm0644 src/github.com/unrud/remote-touchpad/desktop/remote-touchpad_256.png /app/share/icons/hicolor/256x256/apps/remote-touchpad.png",
-                "install -Dm0644 src/github.com/unrud/remote-touchpad/desktop/remote-touchpad_512.png /app/share/icons/hicolor/512x512/apps/remote-touchpad.png"
+                "install -Dm0644 -t /app/share/appdata src/github.com/unrud/remote-touchpad/desktop/com.github.unrud.RemoteTouchpad.appdata.xml",
+                "install -Dm0644 -t /app/share/applications src/github.com/unrud/remote-touchpad/desktop/com.github.unrud.RemoteTouchpad.desktop",
+                "install -Dm0644 src/github.com/unrud/remote-touchpad/desktop/remote-touchpad_64.png /app/share/icons/hicolor/64x64/apps/com.github.unrud.RemoteTouchpad.png",
+                "install -Dm0644 src/github.com/unrud/remote-touchpad/desktop/remote-touchpad_128.png /app/share/icons/hicolor/128x128/apps/com.github.unrud.RemoteTouchpad.png",
+                "install -Dm0644 src/github.com/unrud/remote-touchpad/desktop/remote-touchpad_256.png /app/share/icons/hicolor/256x256/apps/com.github.unrud.RemoteTouchpad.png",
+                "install -Dm0644 src/github.com/unrud/remote-touchpad/desktop/remote-touchpad_512.png /app/share/icons/hicolor/512x512/apps/com.github.unrud.RemoteTouchpad.png"
             ]
         }
     ]

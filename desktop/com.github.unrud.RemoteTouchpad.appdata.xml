@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component type="desktop">
-  <id>remote-touchpad.desktop</id>
+<component type="desktop-application">
+  <id>com.github.unrud.RemoteTouchpad</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
   <name>Remote Touchpad</name>
@@ -14,6 +14,7 @@
       Supports Flatpak&apos;s RemoteDesktop portal (experimental), Windows and X11.
     </p>
   </description>
+  <launchable type="desktop-id">com.github.unrud.RemoteTouchpad.desktop</launchable>
   <url type="bugtracker">https://github.com/Unrud/remote-touchpad/issues</url>
   <url type="homepage">https://github.com/Unrud/remote-touchpad</url>
   <developer_name>Unrud</developer_name>
@@ -43,7 +44,7 @@
         <li>use colors in terminal for QR qode</li>
         <li>remove -invert command line argument</li>
         <li>mitigate race condition when typing text on X11</li>
-        <li>improve KeySyms used for text on X11 and Flatpak's RemoteDesktop portal</li>
+        <li>improve KeySyms used for text on X11 and Flatpak&apos;s RemoteDesktop portal</li>
         <li>normalize line endings</li>
       </ul>
     </release>
@@ -89,5 +90,5 @@
       <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/0.0.10/screenshots/4.png</image>
     </screenshot>
   </screenshots>
-  <content_rating type="oars-1.1" />
+  <content_rating type="oars-1.1"/>
 </component>

@@ -5,5 +5,5 @@ Name=Remote Touchpad
 Comment=Control mouse and keyboard from a smartphone
 Terminal=true
 Exec=remote-touchpad-wait-on-error
-Icon=remote-touchpad
+Icon=com.github.unrud.RemoteTouchpad
 Categories=Network;RemoteAccess;ConsoleOnly;
