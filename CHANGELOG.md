@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.11 (2018-10-20)
+
+  * rename plugin to backend
+  * update flatpak
+
 ## 0.0.10 (2018-10-01)
 
   * avoid race condition when typing on X11
