@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.12 (2018-12-08)
+
+  * fix the browser Forward button
+
 ## 0.0.11 (2018-10-20)
 
   * rename plugin to backend
