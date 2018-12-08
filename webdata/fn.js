@@ -321,11 +321,32 @@ window.addEventListener("load", function() {
     var keyboard = document.getElementById("keyboard");
     var fullscreenbutton = document.getElementById("fullscreenbutton");
     var text = document.getElementById("text");
-    closed.style.display = "none";
-    pad.style.display = "none";
-    keys.style.display = "none";
-    keyboard.style.display = "none";
+
+    function showScene(scene) {
+        [opening, closed, pad, keys, keyboard].forEach(function (e) {
+            e.style.display = e == scene ? "flex" : "none";
+        });
+    }
+
+    function showKeys() {
+        exitFullscreen();
+        showScene(keys);
+        if (history.state != "keys") {
+            history.pushState("keys", "");
+        }
+    }
+
+    function showKeyboard() {
+        exitFullscreen();
+        showScene(keyboard);
+        text.focus();
+        if (history.state != "keyboard") {
+            history.pushState("keyboard", "");
+        }
+    }
+
     text.value = "";
+    showScene(opening);
 
     var wsProtocol = "wss:";
     if (location.protocol == "http:") {
@@ -342,45 +363,26 @@ window.addEventListener("load", function() {
         }
         authenticated = true;
         ws.send(challengeResponse(event.data));
-        opening.style.display = "none";
         if (history.state == "keyboard") {
-            keyboard.style.display = "flex";
-            text.focus();
+            showKeyboard();
         } else if (history.state == "keys") {
-            keys.style.display = "flex";
+            showKeys()
         } else {
-            pad.style.display = "flex";
+            showScene(pad);
         }
     };
 
     ws.onclose = function() {
         exitFullscreen();
-        opening.style.display = "none";
-        pad.style.display = "none";
-        keys.style.display = "none";
-        keyboard.style.display = "none";
-        closed.style.display = "flex";
+        showScene(closed);
     };
 
-    document.getElementById("keysbutton").addEventListener("click",
-        function(e) {
-            exitFullscreen();
-            pad.style.display = "none";
-            keys.style.display = "flex";
-            history.pushState("keys", "");
-        });
-    document.getElementById("keyboardbutton").addEventListener("click",
-        function(e) {
-            exitFullscreen();
-            pad.style.display = "none";
-            keyboard.style.display = "flex";
-            text.focus();
-            history.pushState("keyboard", "");
-        });
+    document.getElementById("keysbutton").addEventListener("click", showKeys);
+    document.getElementById("keyboardbutton").addEventListener("click", showKeyboard);
     if (!fullscreenEnabled()) {
         fullscreenbutton.style.display = "none";
     }
-    fullscreenbutton.addEventListener("click", function(e) {
+    fullscreenbutton.addEventListener("click", function() {
         if (fullscreenElement()) {
             exitFullscreen();
         } else {
@@ -394,30 +396,33 @@ window.addEventListener("load", function() {
      {id: "volumemutebutton", key: KEY_VOLUME_MUTE},
      {id: "volumeupbutton", key: KEY_VOLUME_UP}].forEach(function(o) {
         document.getElementById(o.id).addEventListener("click",
-            function(e) {
+            function() {
                 ws.send("k" + o.key);
             });
      });
     document.getElementById("sendbutton").addEventListener("click",
-        function(e) {
+        function() {
             if (text.value != "") {
                 ws.send("t" + text.value);
                 text.value = "";
             }
             window.history.back();
         });
-    window.onpopstate = function(event) {
-        if (keyboard.style.display == "flex" ||
-                keys.style.display == "flex") {
-            pad.style.display = "flex";
-            keys.style.display = "none";
-            keyboard.style.display = "none";
-        } else {
-            window.history.back();
+    window.onpopstate = function() {
+        if (pad.style.display != "none" ||
+                keyboard.style.display != "none" ||
+                keys.style.display != "none") {
+            if (history.state == "keys") {
+                showKeys();
+            } else if (history.state == "keyboard") {
+                showKeyboard();
+            } else {
+                showScene(pad);
+            }
         }
     };
     document.getElementById("reloadbutton").addEventListener("click",
-        function(e) {
+        function() {
             location.reload();
         });
     pad.addEventListener("touchstart", handleStart, false);
