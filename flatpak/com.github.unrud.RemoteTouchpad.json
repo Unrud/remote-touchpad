@@ -18,7 +18,7 @@
                 {
                     "type" : "git",
                     "url" : "https://github.com/golang/net",
-                    "commit" : "04a2e542c03f1d053ab3e4d6e5abcd4b66e2be8e",
+                    "commit" : "610586996380ceef02dd726cc09df7e00a3f8e56",
                     "dest" : "src/golang.org/x/net"
                 },
                 {
