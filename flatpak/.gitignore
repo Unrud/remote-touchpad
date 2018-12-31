@@ -1,4 +1,5 @@
-/RemoteTouchpad
-/repo
-/.flatpak-builder
-/RemoteTouchpad-*.flatpak
+Makefile
+.flatpak-builder
+repo
+build
+*.flatpak
