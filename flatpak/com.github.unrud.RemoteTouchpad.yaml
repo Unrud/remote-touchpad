@@ -7,17 +7,18 @@ sdk-extensions:
 - org.freedesktop.Sdk.Extension.golang
 finish-args:
 - --socket=x11
+- --socket=fallback-x11
 - --share=network
 modules:
 - name: remote-touchpad
   sources:
   - type: git
     url: https://github.com/golang/net
-    commit: 610586996380ceef02dd726cc09df7e00a3f8e56
+    commit: 915654e7eabcea33ae277abbecf52f0d8b7a9fdc
     dest: src/golang.org/x/net
   - type: git
     url: https://github.com/skip2/go-qrcode
-    commit: cf5f9fa2f0d847edb8e038db7ed975e239095e1a
+    commit: dc11ecdae0a9889dc81a343585516404e8dc6ead
     dest: src/github.com/skip2/go-qrcode
   - type: git
     url: https://github.com/elazarl/go-bindata-assetfs
