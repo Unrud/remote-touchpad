@@ -1,0 +1,57 @@
+name: remote-touchpad
+adopt-info: remote-touchpad
+title: Remote Touchpad
+# WORKAROUND: Snapcraft doesn't normalize whitespaces in description from AppStream
+description: |
+  Control mouse and keyboard from the webbrowser of a smartphone (or any other device with a touchscreen).
+  To take control open the displayed URL or scan the QR code.
+  
+  Supports Flatpak's RemoteDesktop portal (experimental), Windows and X11.
+license: GPL-3.0
+version: unset
+version-script: remote-touchpad --version
+icon: desktop/remote-touchpad_128.png
+confinement: strict
+grade: stable
+base: core18
+
+parts:
+  remote-touchpad:
+    plugin: go
+    go-importpath: github.com/Unrud/remote-touchpad
+    go-buildtags: [portal x11]
+    source: .
+    source-type: git
+    build-packages:
+    - libxt-dev
+    - libxtst-dev
+    stage-packages:
+    - libxt6
+    - libxtst6
+    parse-info: [desktop/com.github.unrud.RemoteTouchpad.appdata.xml]
+    override-pull: |
+      snapcraftctl pull
+      # WORKAROUND: Snapcraft Go Plugin doesn't set buildtags for go-get
+      GOPATH="$(realpath "${SNAPCRAFT_PART_SRC}/../go")"
+      env --chdir="$GOPATH/src" GOPATH="$GOPATH" go get -t -d -tags 'portal x11' ./github.com/Unrud/remote-touchpad/...
+    override-build: |
+      # WORKAROUND: Snap doesn't export icons
+      sed -i 's,^\(Icon=\).*,\1${SNAP}/meta/gui/icon.png,' desktop/com.github.unrud.RemoteTouchpad.desktop
+      snapcraftctl build
+      install -Dm0755 -t "${SNAPCRAFT_PART_INSTALL}/bin" desktop/remote-touchpad-wait-on-error
+      install -Dm0644 -t "${SNAPCRAFT_PART_INSTALL}/share/applications" desktop/com.github.unrud.RemoteTouchpad.desktop
+
+apps:
+  remote-touchpad:
+    command: bin/remote-touchpad
+    plugs:
+    - network-bind
+    - desktop
+    - x11
+  remote-touchpad-wait-on-error:
+    command: bin/remote-touchpad-wait-on-error
+    desktop: share/applications/com.github.unrud.RemoteTouchpad.desktop
+    plugs:
+    - network-bind
+    - desktop
+    - x11
