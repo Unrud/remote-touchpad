@@ -8,6 +8,7 @@ Supports Flatpak's RemoteDesktop portal (experimental), Windows and X11.
 ## Installation
 
   * [Flatpak](https://flathub.org/apps/details/com.github.unrud.RemoteTouchpad)
+  * [Snap](https://snapcraft.io/remote-touchpad)
   * [Windows](https://github.com/Unrud/remote-touchpad/releases/latest)
 
 ## Screenshots

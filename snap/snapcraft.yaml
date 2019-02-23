@@ -7,6 +7,7 @@ description: |
   To take control open the displayed URL or scan the QR code.
   
   Supports Flatpak's RemoteDesktop portal (experimental), Windows and X11.
+# WORKAROUND: Snapcraft doesn't accept GPL-3.0-or-later
 license: GPL-3.0
 version: unset
 version-script: remote-touchpad --version
