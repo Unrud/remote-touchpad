@@ -14,7 +14,7 @@ modules:
   sources:
   - type: git
     url: https://github.com/golang/net
-    commit: 915654e7eabcea33ae277abbecf52f0d8b7a9fdc
+    commit: 3a22650c66bd7f4fb6d1e8072ffd7b75c8a27898
     dest: src/golang.org/x/net
   - type: git
     url: https://github.com/skip2/go-qrcode
@@ -48,4 +48,3 @@ modules:
     /app/share/icons/hicolor/256x256/apps/com.github.unrud.RemoteTouchpad.png
   - install -Dm0644 src/github.com/unrud/remote-touchpad/desktop/remote-touchpad_512.png
     /app/share/icons/hicolor/512x512/apps/com.github.unrud.RemoteTouchpad.png
-
