@@ -20,71 +20,95 @@
   <developer_name>Unrud</developer_name>
   <releases>
     <release version="0.0.12" date="2018-12-08">
-      <ul>
-        <li>fix the browser Forward button</li>
-      </ul>
+      <description>
+        <ul>
+          <li>fix the browser Forward button</li>
+        </ul>
+      </description>
     </release>
     <release version="0.0.11" date="2018-10-20">
-      <ul>
-        <li>rename plugin to backend</li>
-        <li>update flatpak</li>
-      </ul>
+      <description>
+        <ul>
+          <li>rename plugin to backend</li>
+          <li>update flatpak</li>
+        </ul>
+      </description>
     </release>
     <release version="0.0.10" date="2018-10-01">
-      <ul>
-        <li>avoid race condition when typing on X11</li>
-      </ul>
+      <description>
+        <ul>
+          <li>avoid race condition when typing on X11</li>
+        </ul>
+      </description>
     </release>
     <release version="0.0.9" date="2018-09-29">
-      <ul>
-        <li>add multimedia keys</li>
-      </ul>
+      <description>
+        <ul>
+          <li>add multimedia keys</li>
+        </ul>
+      </description>
     </release>
     <release version="0.0.8" date="2018-09-07">
-      <ul>
-        <li>enable pointer movement after timeout</li>
-      </ul>
+      <description>
+        <ul>
+          <li>enable pointer movement after timeout</li>
+        </ul>
+      </description>
     </release>
     <release version="0.0.7" date="2018-09-04">
-      <ul>
-        <li>use custom font for icons</li>
-      </ul>
+      <description>
+        <ul>
+          <li>use custom font for icons</li>
+        </ul>
+      </description>
     </release>
     <release version="0.0.6" date="2018-08-23">
-      <ul>
-        <li>use colors in terminal for QR qode</li>
-        <li>remove -invert command line argument</li>
-        <li>mitigate race condition when typing text on X11</li>
-        <li>improve KeySyms used for text on X11 and Flatpak&apos;s RemoteDesktop portal</li>
-        <li>normalize line endings</li>
-      </ul>
+      <description>
+        <ul>
+          <li>use colors in terminal for QR qode</li>
+          <li>remove -invert command line argument</li>
+          <li>mitigate race condition when typing text on X11</li>
+          <li>improve KeySyms used for text on X11 and Flatpak&apos;s RemoteDesktop portal</li>
+          <li>normalize line endings</li>
+        </ul>
+      </description>
     </release>
     <release version="0.0.5" date="2018-07-31">
-      <ul>
-        <li>remove mouse polling interval</li>
-        <li>add support for &quot;pixel-perfect&quot; scrolling</li>
-        <li>add experimental support for Flatpak&apos;s RemoteDesktop portal</li>
-        <li>X11 plugin: check session type</li>
-        <li>improve error logging</li>
-      </ul>
+      <description>
+        <ul>
+          <li>remove mouse polling interval</li>
+          <li>add support for &quot;pixel-perfect&quot; scrolling</li>
+          <li>add experimental support for Flatpak&apos;s RemoteDesktop portal</li>
+          <li>X11 plugin: check session type</li>
+          <li>improve error logging</li>
+        </ul>
+      </description>
     </release>
     <release version="0.0.4" date="2018-07-22">
-      <ul>
-        <li>add setting for mouse polling interval</li>
-      </ul>
+      <description>
+        <ul>
+          <li>add setting for mouse polling interval</li>
+        </ul>
+      </description>
     </release>
     <release version="0.0.3" date="2018-06-26">
-      <ul>
-        <li>fix websocket with https</li>
-      </ul>
+      <description>
+        <ul>
+          <li>fix websocket with https</li>
+        </ul>
+      </description>
     </release>
     <release version="0.0.2" date="2018-06-25">
-      <ul>
-        <li>add reload button to disconnected-page</li>
-      </ul>
+      <description>
+        <ul>
+          <li>add reload button to disconnected-page</li>
+        </ul>
+      </description>
     </release>
     <release version="0.0.1" date="2018-06-23">
-      <p>initial release</p>
+      <description>
+        <p>initial release</p>
+      </description>
     </release>
   </releases>
   <screenshots>
