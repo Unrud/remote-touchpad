@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.13 (2019-05-04)
+
+  * Flatpak: Update dependencies
+  * AppStream: Fix release descriptions
+
 ## 0.0.12 (2018-12-08)
 
   * fix the browser Forward button
