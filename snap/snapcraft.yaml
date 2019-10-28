@@ -24,6 +24,7 @@ parts:
     source: .
     source-type: git
     build-packages:
+    - gcc
     - libxt-dev
     - libxtst-dev
     stage-packages:
