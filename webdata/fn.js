@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2018 Unrud <unrud@outlook.com>
+ *    Copyright (c) 2018-2019 Unrud <unrud@outlook.com>
  *
  *    This file is part of Remote-Touchpad.
  *
@@ -39,22 +39,22 @@ const KEY_MEDIA_PLAY_PAUSE = 3;
 const KEY_MEDIA_PREV_TRACK = 4;
 const KEY_MEDIA_NEXT_TRACK = 5;
 
-var ws;
-var pad;
-var padlabel;
+let ws;
+let pad;
+let padlabel;
 
-var touchMoved = false;
-var touchStart = 0;
-var touchLastEnd = 0;
-var touchReleasedCount = 0;
-var ongoingTouches = [];
-var moveXSum = 0;
-var moveYSum = 0;
-var scrollXSum = 0;
-var scrollYSum = 0;
-var dragging = false;
-var draggingTimeout = null;
-var scrolling = false;
+let touchMoved = false;
+let touchStart = 0;
+let touchLastEnd = 0;
+let touchReleasedCount = 0;
+let ongoingTouches = [];
+let moveXSum = 0;
+let moveYSum = 0;
+let scrollXSum = 0;
+let scrollYSum = 0;
+let dragging = false;
+let draggingTimeout = null;
+let scrolling = false;
 
 function fullscreenEnabled() {
     return (document.fullscreenEnabled ||
@@ -120,10 +120,8 @@ function copyTouch(touch, timeStamp) {
 }
 
 function ongoingTouchIndexById(idToFind) {
-    for (var i = 0; i < ongoingTouches.length; i++) {
-        var id = ongoingTouches[i].identifier;
-
-        if (id == idToFind) {
+    for (let i = 0; i < ongoingTouches.length; i++) {
+        if (ongoingTouches[i].identifier == idToFind) {
             return i;
         }
     }
@@ -131,17 +129,17 @@ function ongoingTouchIndexById(idToFind) {
 }
 
 function calculatePointerAccelerationMult(speed) {
-    for (var i = 0; i < POINTER_ACCELERATION.length; i++) {
-        s2 = POINTER_ACCELERATION[i][0];
-        a2 = POINTER_ACCELERATION[i][1];
+    for (let i = 0; i < POINTER_ACCELERATION.length; i++) {
+        let s2 = POINTER_ACCELERATION[i][0];
+        let a2 = POINTER_ACCELERATION[i][1];
         if (s2 <= speed) {
             continue;
         }
         if (i == 0) {
             return a2;
         }
-        s1 = POINTER_ACCELERATION[i - 1][0];
-        a1 = POINTER_ACCELERATION[i - 1][1];
+        let s1 = POINTER_ACCELERATION[i - 1][0];
+        let a1 = POINTER_ACCELERATION[i - 1][1];
         return ((speed - s1) / (s2 - s1)) * (a2 - a1) + a1;
     }
     if (POINTER_ACCELERATION.length > 0) {
@@ -156,15 +154,15 @@ function onDraggingTimeout() {
 }
 
 function updateMoveAndScroll() {
-    var moveX = Math.trunc(moveXSum);
-    var moveY = Math.trunc(moveYSum);
+    let moveX = Math.trunc(moveXSum);
+    let moveY = Math.trunc(moveYSum);
     if (Math.abs(moveX) >= 1 || Math.abs(moveY) >= 1) {
         moveXSum -= moveX;
         moveYSum -= moveY;
         ws.send("m" + moveX + ";" + moveY);
     }
-    var scrollX = Math.trunc(scrollXSum);
-    var scrollY = Math.trunc(scrollYSum);
+    let scrollX = Math.trunc(scrollXSum);
+    let scrollY = Math.trunc(scrollYSum);
     if (Math.abs(scrollX) >= 1 || Math.abs(scrollY) >= 1) {
         scrollXSum -= scrollX;
         scrollYSum -= scrollY;
@@ -180,8 +178,8 @@ function handleStart(evt) {
         touchReleasedCount = 0;
         dragging = false;
     }
-    var touches = evt.changedTouches;
-    for (var i = 0; i < touches.length; i++) {
+    let touches = evt.changedTouches;
+    for (let i = 0; i < touches.length; i++) {
         if (touches[i].target !== pad && touches[i].target !== padlabel) {
             continue;
         }
@@ -207,9 +205,9 @@ function handleStart(evt) {
 }
 
 function handleEnd(evt) {
-    var touches = evt.changedTouches;
-    for (var i = 0; i < touches.length; i++) {
-        var idx = ongoingTouchIndexById(touches[i].identifier);
+    let touches = evt.changedTouches;
+    for (let i = 0; i < touches.length; i++) {
+        let idx = ongoingTouchIndexById(touches[i].identifier);
         if (idx < 0) {
             continue;
         }
@@ -230,7 +228,7 @@ function handleEnd(evt) {
     }
     if (ongoingTouches.length == 0 && touchReleasedCount >= 1 &&
         !touchMoved && evt.timeStamp - touchStart < TOUCH_TIMEOUT) {
-        var button = 0;
+        let button = 0;
         if (touchReleasedCount == 1) {
             button = POINTER_BUTTON_LEFT;
         } else if (touchReleasedCount == 2) {
@@ -248,9 +246,9 @@ function handleEnd(evt) {
 }
 
 function handleCancel(evt) {
-    var touches = evt.changedTouches;
-    for (var i = 0; i < touches.length; i++) {
-        var idx = ongoingTouchIndexById(touches[i].identifier);
+    let touches = evt.changedTouches;
+    for (let i = 0; i < touches.length; i++) {
+        let idx = ongoingTouchIndexById(touches[i].identifier);
         if (idx < 0) {
             continue;
         }
@@ -266,16 +264,16 @@ function handleCancel(evt) {
 }
 
 function handleMove(evt) {
-    var sumX = 0;
-    var sumY = 0;
-    var touches = evt.changedTouches;
-    for (var i = 0; i < touches.length; i++) {
-        var idx = ongoingTouchIndexById(touches[i].identifier);
+    let sumX = 0;
+    let sumY = 0;
+    let touches = evt.changedTouches;
+    for (let i = 0; i < touches.length; i++) {
+        let idx = ongoingTouchIndexById(touches[i].identifier);
         if (idx < 0) {
             continue;
         }
         if (!touchMoved) {
-            var dist = Math.sqrt(Math.pow(touches[i].pageX - ongoingTouches[idx].pageXStart, 2) +
+            let dist = Math.sqrt(Math.pow(touches[i].pageX - ongoingTouches[idx].pageXStart, 2) +
                 Math.pow(touches[i].pageY - ongoingTouches[idx].pageYStart, 2));
             if (ongoingTouches.length > TOUCH_MOVE_THRESHOLD.length ||
                 dist > TOUCH_MOVE_THRESHOLD[ongoingTouches.length - 1] ||
@@ -283,9 +281,9 @@ function handleMove(evt) {
                 touchMoved = true;
             }
         }
-        var dx = touches[i].pageX - ongoingTouches[idx].pageX;
-        var dy = touches[i].pageY - ongoingTouches[idx].pageY;
-        var timeDelta = evt.timeStamp - ongoingTouches[idx].timeStamp;
+        let dx = touches[i].pageX - ongoingTouches[idx].pageX;
+        let dy = touches[i].pageY - ongoingTouches[idx].pageY;
+        let timeDelta = evt.timeStamp - ongoingTouches[idx].timeStamp;
         sumX += dx * calculatePointerAccelerationMult(Math.abs(dx) / timeDelta * 1000);
         sumY += dy * calculatePointerAccelerationMult(Math.abs(dy) / timeDelta * 1000);
         ongoingTouches[idx].pageX = touches[i].pageX;
@@ -305,22 +303,22 @@ function handleMove(evt) {
 }
 
 function challengeResponse(message) {
-    var shaObj = new jsSHA("SHA-256", "TEXT");
+    let shaObj = new jsSHA("SHA-256", "TEXT");
     shaObj.setHMACKey(message, "TEXT");
     shaObj.update(window.location.hash.substr(1));
     return btoa(shaObj.getHMAC("BYTES"));
 }
 
 window.addEventListener("load", function() {
-    var authenticated = false;
-    var opening = document.getElementById("opening");
-    var closed = document.getElementById("closed");
+    let authenticated = false;
+    let opening = document.getElementById("opening");
+    let closed = document.getElementById("closed");
     pad = document.getElementById("pad");
     padlabel = document.getElementById("padlabel");
-    var keys = document.getElementById("keys");
-    var keyboard = document.getElementById("keyboard");
-    var fullscreenbutton = document.getElementById("fullscreenbutton");
-    var text = document.getElementById("text");
+    let keys = document.getElementById("keys");
+    let keyboard = document.getElementById("keyboard");
+    let fullscreenbutton = document.getElementById("fullscreenbutton");
+    let text = document.getElementById("text");
 
     function showScene(scene) {
         [opening, closed, pad, keys, keyboard].forEach(function (e) {
@@ -348,7 +346,7 @@ window.addEventListener("load", function() {
     text.value = "";
     showScene(opening);
 
-    var wsProtocol = "wss:";
+    let wsProtocol = "wss:";
     if (location.protocol == "http:") {
         wsProtocol = "ws:";
     }
@@ -356,13 +354,13 @@ window.addEventListener("load", function() {
         (location.port ? ":" + location.port : "") +
         "/ws");
 
-    ws.onmessage = function(event) {
+    ws.onmessage = function(evt) {
         if (authenticated) {
             ws.close();
             return;
         }
         authenticated = true;
-        ws.send(challengeResponse(event.data));
+        ws.send(challengeResponse(evt.data));
         if (history.state == "keyboard") {
             showKeyboard();
         } else if (history.state == "keys") {
@@ -425,8 +423,8 @@ window.addEventListener("load", function() {
         function() {
             location.reload();
         });
-    pad.addEventListener("touchstart", handleStart, false);
-    pad.addEventListener("touchend", handleEnd, false);
-    pad.addEventListener("touchcancel", handleCancel, false);
-    pad.addEventListener("touchmove", handleMove, false);
-}, false);
+    pad.addEventListener("touchstart", handleStart);
+    pad.addEventListener("touchend", handleEnd);
+    pad.addEventListener("touchcancel", handleCancel);
+    pad.addEventListener("touchmove", handleMove);
+});
