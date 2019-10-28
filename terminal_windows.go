@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2018 Unrud <unrud@outlook.com>
+ *    Copyright (c) 2018-2019 Unrud <unrud@outlook.com>
  *
  *    This file is part of Remote-Touchpad.
  *
@@ -19,7 +19,10 @@
 
 package main
 
-import "syscall"
+import (
+	"syscall"
+	"unsafe"
+)
 
 const (
 	enableProcessedOuput            uint32 = 0x1
@@ -28,12 +31,19 @@ const (
 )
 
 var (
-	kernel32DLL        = syscall.NewLazyDLL("kernel32.dll")
-	setConsoleModeProc = kernel32DLL.NewProc("SetConsoleMode")
+	kernel32DLL         = syscall.NewLazyDLL("kernel32.dll")
+	setConsoleModeProc  = kernel32DLL.NewProc("SetConsoleMode")
+	setConsoleTitleProc = kernel32DLL.NewProc("SetConsoleTitleW")
 )
 
 func TerminalSupportsColor(fd uintptr) bool {
 	r, _, _ := setConsoleModeProc.Call(fd, uintptr(enableProcessedOuput|
 		enableWrapAtEolOutput|enableVirtualTerminalProcessing))
+	return r != 0
+}
+
+func TerminalSetTitle(title string) bool {
+	r, _, _ := setConsoleTitleProc.Call(
+		uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(title))))
 	return r != 0
 }

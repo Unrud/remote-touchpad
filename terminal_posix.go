@@ -1,7 +1,7 @@
 // +build !windows
 
 /*
- *    Copyright (c) 2018 Unrud <unrud@outlook.com>
+ *    Copyright (c) 2018-2019 Unrud <unrud@outlook.com>
  *
  *    This file is part of Remote-Touchpad.
  *
@@ -23,7 +23,17 @@ package main
 
 // #include <unistd.h>
 import "C"
+import "os"
 
 func TerminalSupportsColor(fd uintptr) bool {
 	return C.isatty(C.int(fd)) != 0
+}
+
+func TerminalSetTitle(title string) bool {
+	if C.isatty(C.int(os.Stdout.Fd())) != 0 {
+		os.Stdout.Write([]byte("\x1b]2;" + title + "\x07"))
+		os.Stdout.Sync()
+		return true
+	}
+	return false
 }

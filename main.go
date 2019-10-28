@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2018 Unrud <unrud@outlook.com>
+ *    Copyright (c) 2018-2019 Unrud <unrud@outlook.com>
  *
  *    This file is part of Remote-Touchpad.
  *
@@ -46,6 +46,7 @@ const (
 	challengeLength         int           = 8
 	defaultBind             string        = ":0"
 	version                 string        = "0.0.13"
+	pretty_app_name         string        = "Remote Touchpad"
 )
 
 func processCommand(backend Backend, command string) error {
@@ -139,6 +140,7 @@ func secureRandBase64(length int) string {
 }
 
 func main() {
+	TerminalSetTitle(pretty_app_name)
 	var bind, certFile, keyFile, secret string
 	var showVersion bool
 	parseFlags := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
