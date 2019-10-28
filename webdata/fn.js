@@ -172,19 +172,25 @@ function updateMoveAndScroll() {
 }
 
 function handleStart(evt) {
+    // Might get called multiple times for the same touches
     if (ongoingTouches.length == 0) {
         touchStart = evt.timeStamp;
         touchMoved = false;
-        touchReleasedCount = 0;
-        dragging = false;
     }
     let touches = evt.changedTouches;
     for (let i = 0; i < touches.length; i++) {
-        if (touches[i].target !== pad && touches[i].target !== padlabel) {
+        if (touches[i].target !== pad && touches[i].target !== padlabel &&
+            ongoingTouches.length == 0) {
             continue;
         }
         evt.preventDefault();
-        ongoingTouches.push(copyTouch(touches[i], evt.timeStamp));
+        let touch = copyTouch(touches[i], evt.timeStamp);
+        let idx = ongoingTouchIndexById(touch.identifier);
+        if (idx < 0) {
+            ongoingTouches.push(touch);
+        } else {
+            ongoingTouches[idx] = touch;
+        }
         touchLastEnd = 0;
         if (!dragging) {
             moveXSum = Math.trunc(moveXSum);
@@ -222,44 +228,28 @@ function handleEnd(evt) {
     if (touchReleasedCount > TOUCH_MOVE_THRESHOLD.length) {
         touchMoved = true;
     }
-    if (ongoingTouches.length == 0 && touchReleasedCount >= 1 &&
-        dragging) {
-        ws.send("b" + POINTER_BUTTON_LEFT + ";0");
-    }
-    if (ongoingTouches.length == 0 && touchReleasedCount >= 1 &&
-        !touchMoved && evt.timeStamp - touchStart < TOUCH_TIMEOUT) {
-        let button = 0;
-        if (touchReleasedCount == 1) {
-            button = POINTER_BUTTON_LEFT;
-        } else if (touchReleasedCount == 2) {
-            button = POINTER_BUTTON_RIGHT;
-        } else if (touchReleasedCount == 3) {
-            button = POINTER_BUTTON_MIDDLE;
+    if (ongoingTouches.length == 0 && touchReleasedCount >= 1) {
+        if (dragging) {
+            dragging = false;
+            ws.send("b" + POINTER_BUTTON_LEFT + ";0");
         }
-        ws.send("b" + button + ";1");
-        if (button == POINTER_BUTTON_LEFT) {
-            draggingTimeout = setTimeout(onDraggingTimeout, TOUCH_TIMEOUT);
-        } else {
-            ws.send("b" + button + ";0");
+        if (!touchMoved && evt.timeStamp - touchStart < TOUCH_TIMEOUT) {
+            let button = 0;
+            if (touchReleasedCount == 1) {
+                button = POINTER_BUTTON_LEFT;
+            } else if (touchReleasedCount == 2) {
+                button = POINTER_BUTTON_RIGHT;
+            } else if (touchReleasedCount == 3) {
+                button = POINTER_BUTTON_MIDDLE;
+            }
+            ws.send("b" + button + ";1");
+            if (button == POINTER_BUTTON_LEFT) {
+                draggingTimeout = setTimeout(onDraggingTimeout, TOUCH_TIMEOUT);
+            } else {
+                ws.send("b" + button + ";0");
+            }
         }
-    }
-}
-
-function handleCancel(evt) {
-    let touches = evt.changedTouches;
-    for (let i = 0; i < touches.length; i++) {
-        let idx = ongoingTouchIndexById(touches[i].identifier);
-        if (idx < 0) {
-            continue;
-        }
-        ongoingTouches.splice(idx, 1);
-        touchReleasedCount++;
-        touchLastEnd = evt.timeStamp;
-        touchMoved = true;
-        if (scrolling) {
-            ws.send("sf");
-            scrolling = false;
-        }
+        touchReleasedCount = 0;
     }
 }
 
@@ -425,6 +415,6 @@ window.addEventListener("load", function() {
         });
     pad.addEventListener("touchstart", handleStart);
     pad.addEventListener("touchend", handleEnd);
-    pad.addEventListener("touchcancel", handleCancel);
+    pad.addEventListener("touchcancel", handleEnd);
     pad.addEventListener("touchmove", handleMove);
 });
