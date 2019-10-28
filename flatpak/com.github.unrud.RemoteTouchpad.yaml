@@ -1,6 +1,6 @@
 app-id: com.github.unrud.RemoteTouchpad
 runtime: org.freedesktop.Platform
-runtime-version: '18.08'
+runtime-version: '19.08'
 sdk: org.freedesktop.Sdk
 command: remote-touchpad
 sdk-extensions:
@@ -14,7 +14,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/golang/net
-        commit: ca1201d0de80cfde86cb01aea620983605dfe99b
+        commit: ec77196f6094c3492a8b61f2c11cf937f78992ae
         dest: src/golang.org/x/net
       - type: git
         url: https://github.com/skip2/go-qrcode
@@ -26,7 +26,7 @@ modules:
         dest: src/github.com/elazarl/go-bindata-assetfs
       - type: git
         url: https://salsa.debian.org/go-team/packages/golang-dbus.git
-        commit: 79d96b151df08809558c825f8a75188826e8e228
+        commit: 815bb726c30e24947e1778b93fbb01c27f5d62db
         dest: src/salsa.debian.org/go-team/packages/golang-dbus.git
       - type: git
         path: ..
