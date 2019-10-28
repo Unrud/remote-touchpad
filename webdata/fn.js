@@ -64,15 +64,15 @@ function fullscreenEnabled() {
         false);
 }
 
-function requestFullscreen(e) {
+function requestFullscreen(e, options) {
     if (e.requestFullscreen) {
-        e.requestFullscreen();
+        e.requestFullscreen(options);
     } else if (e.webkitRequestFullscreen) {
-        e.webkitRequestFullscreen();
+        e.webkitRequestFullscreen(options);
     } else if (e.mozRequestFullScreen) {
-        e.mozRequestFullScreen();
+        e.mozRequestFullScreen(options);
     } else if (e.msRequestFullscreen) {
-        e.msRequestFullscreen();
+        e.msRequestFullscreen(options);
     }
 }
 
@@ -384,7 +384,7 @@ window.addEventListener("load", function() {
         if (fullscreenElement()) {
             exitFullscreen();
         } else {
-            requestFullscreen(pad);
+            requestFullscreen(pad, {navigationUI: "hide"});
         }
     });
     [{id: "prevtrackbutton", key: KEY_MEDIA_PREV_TRACK},
