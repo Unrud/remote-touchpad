@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2018 Unrud<unrud@outlook.com>
+ *    Copyright (c) 2018 Unrud <unrud@outlook.com>
  *
  *    This file is part of Remote-Touchpad.
  *
