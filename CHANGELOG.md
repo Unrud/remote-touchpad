@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.14 (2019-10-28)
+
+  * Handle quirks of browser touch events
+  * Hide navigation bar in fullscreen mode
+  * Set terminal title
+  * Flatpak: Update dependencies
+
 ## 0.0.13 (2019-05-04)
 
   * Flatpak: Update dependencies

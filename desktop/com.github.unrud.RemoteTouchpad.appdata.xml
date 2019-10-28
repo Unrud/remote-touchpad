@@ -19,6 +19,16 @@
   <url type="homepage">https://github.com/Unrud/remote-touchpad</url>
   <developer_name>Unrud</developer_name>
   <releases>
+    <release version="0.0.14" date="2019-10-28">
+      <description>
+        <ul>
+          <li>Handle quirks of browser touch events</li>
+          <li>Hide navigation bar in fullscreen mode</li>
+          <li>Set terminal title</li>
+          <li>Flatpak: Update dependencies</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.0.13" date="2019-05-04">
       <description>
         <ul>
@@ -121,16 +131,16 @@
   </releases>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/0.0.13/screenshots/1.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/0.0.14/screenshots/1.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/0.0.13/screenshots/2.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/0.0.14/screenshots/2.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/0.0.13/screenshots/3.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/0.0.14/screenshots/3.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/0.0.13/screenshots/4.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/0.0.14/screenshots/4.png</image>
     </screenshot>
   </screenshots>
   <content_rating type="oars-1.1"/>
