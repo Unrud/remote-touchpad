@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.15 (2019-11-03)
+
+  * Prefer IPv4 addresses
+
 ## 0.0.14 (2019-10-28)
 
   * Handle quirks of browser touch events
