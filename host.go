@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2018 Unrud <unrud@outlook.com>
+ *    Copyright (c) 2018-2019 Unrud <unrud@outlook.com>
  *
  *    This file is part of Remote-Touchpad.
  *
@@ -22,11 +22,25 @@ package main
 import (
 	"fmt"
 	"net"
+	"sort"
 	"strings"
 )
 
-func FindDefaultHost() (host string) {
-	host = "localhost"
+const ipv4Rating int = +1
+
+func FindDefaultHost() string {
+	type hostsValue struct {
+		prio int
+		host string
+	}
+	hosts := make([]hostsValue, 0)
+	hosts = append(hosts, hostsValue{0, "localhost"})
+	addIP := func(prio int, ip net.IP) {
+		if ip.To4() != nil {
+			prio += ipv4Rating
+		}
+		hosts = append(hosts, hostsValue{prio, ip.String()})
+	}
 	for _, publicIP := range []string{"2001:4860:4860::8888", "8.8.8.8"} {
 		addr := fmt.Sprintf("[%s]:80", publicIP)
 		conn, err := net.Dial("udp", addr)
@@ -34,42 +48,42 @@ func FindDefaultHost() (host string) {
 			continue
 		}
 		conn.Close()
-		host, _, err = net.SplitHostPort(conn.LocalAddr().String())
+		host, _, err := net.SplitHostPort(conn.LocalAddr().String())
 		if err != nil {
 			panic(err)
 		}
-		return
+		ip := net.ParseIP(host)
+		if ip == nil {
+			panic("Invalid IP address: " + host)
+		}
+		addIP(100, ip)
 	}
-	interfaces, err := net.Interfaces()
-	if err != nil {
-		return
-	}
+	interfaces, _ := net.Interfaces()
 	for _, inter := range interfaces {
-		if inter.Flags&net.FlagUp == 0 || inter.Flags&net.FlagLoopback != 0 {
+		if inter.Flags&net.FlagUp == 0 {
 			continue
 		}
-		addrs, err := inter.Addrs()
-		if err != nil {
-			continue
-		}
+		addrs, _ := inter.Addrs()
 	addrs:
 		for _, addr := range addrs {
 			ip, _, err := net.ParseCIDR(addr.String())
 			if err != nil {
-				continue
+				panic(err)
 			}
-			if host == "localhost" {
-				host = ip.String()
+			if inter.Flags&net.FlagLoopback != 0 {
+				addIP(10, ip)
+				continue
 			}
 			for _, linkLocalPrefix := range []string{
 				"169.254.", "fe8", "fe9", "fea", "feb"} {
 				if strings.HasPrefix(ip.String(), linkLocalPrefix) {
+					addIP(20, ip)
 					continue addrs
 				}
 			}
-			return ip.String()
+			addIP(30, ip)
 		}
-
 	}
-	return
+	sort.Slice(hosts, func(i, j int) bool { return hosts[i].prio > hosts[j].prio })
+	return hosts[0].host
 }
