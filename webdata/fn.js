@@ -312,7 +312,7 @@ window.addEventListener("load", function() {
 
     function showScene(scene) {
         [opening, closed, pad, keys, keyboard].forEach(function (e) {
-            e.style.display = e == scene ? "flex" : "none";
+            e.classList.toggle("hidden", e != scene);
         });
     }
 
@@ -368,7 +368,7 @@ window.addEventListener("load", function() {
     document.getElementById("keysbutton").addEventListener("click", showKeys);
     document.getElementById("keyboardbutton").addEventListener("click", showKeyboard);
     if (!fullscreenEnabled()) {
-        fullscreenbutton.style.display = "none";
+        fullscreenbutton.classList.add("hidden");
     }
     fullscreenbutton.addEventListener("click", function() {
         if (fullscreenElement()) {
@@ -397,9 +397,9 @@ window.addEventListener("load", function() {
             window.history.back();
         });
     window.onpopstate = function() {
-        if (pad.style.display != "none" ||
-                keyboard.style.display != "none" ||
-                keys.style.display != "none") {
+        if (!pad.classList.contains("hidden") ||
+                !keyboard.classList.contains("hidden") ||
+                !keys.classList.contains("hidden")) {
             if (history.state == "keys") {
                 showKeys();
             } else if (history.state == "keyboard") {
