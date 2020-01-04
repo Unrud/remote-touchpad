@@ -1,20 +1,27 @@
 name: remote-touchpad
-adopt-info: remote-touchpad
-title: Remote Touchpad
-# WORKAROUND: Snapcraft doesn't normalize whitespaces in description from AppStream
-description: |
-  Control mouse and keyboard from the webbrowser of a smartphone (or any other device with a touchscreen).
-  To take control open the displayed URL or scan the QR code.
-  
-  Supports Flatpak's RemoteDesktop portal (experimental), Windows and X11.
 # WORKAROUND: Snapcraft doesn't accept GPL-3.0-or-later
 license: GPL-3.0
-version: unset
-version-script: remote-touchpad --version
-icon: desktop/remote-touchpad_128.png
-confinement: strict
 grade: stable
+adopt-info: remote-touchpad
+
 base: core18
+confinement: strict
+
+apps:
+  remote-touchpad:
+    command: bin/remote-touchpad
+    plugs:
+      - network-bind
+      - desktop
+      - x11
+  remote-touchpad-wait-on-error:
+    command: usr/bin/remote-touchpad-wait-on-error
+    plugs:
+      - network-bind
+      - desktop
+      - x11
+    common-id: com.github.unrud.RemoteTouchpad
+    desktop: share/applications/com.github.unrud.RemoteTouchpad.desktop
 
 parts:
   remote-touchpad:
@@ -24,36 +31,27 @@ parts:
     source: .
     source-type: git
     build-packages:
-    - gcc
-    - libxt-dev
-    - libxtst-dev
+     - gcc
+     - libxt-dev
+     - libxtst-dev
     stage-packages:
-    - libxt6
-    - libxtst6
-    parse-info: [desktop/com.github.unrud.RemoteTouchpad.appdata.xml]
+     - libxt6
+     - libxtst6
     override-pull: |
       snapcraftctl pull
       # WORKAROUND: Snapcraft Go Plugin doesn't set buildtags for go-get
       GOPATH="$(realpath "${SNAPCRAFT_PART_SRC}/../go")"
       env --chdir="$GOPATH/src" GOPATH="$GOPATH" go get -t -d -tags 'portal x11' ./github.com/Unrud/remote-touchpad/...
+      # WORKAROUND: Point icon to the correct location
+      sed -e 's|Icon=com.github.unrud.RemoteTouchpad|Icon=/usr/share/icons/hicolor/512x512/apps/com.github.unrud.RemoteTouchpad.png|' -i desktop/com.github.unrud.RemoteTouchpad.desktop
     override-build: |
-      # WORKAROUND: Snap doesn't export icons
-      sed -i 's,^\(Icon=\).*,\1${SNAP}/meta/gui/icon.png,' desktop/com.github.unrud.RemoteTouchpad.desktop
       snapcraftctl build
-      install -Dm0755 -t "${SNAPCRAFT_PART_INSTALL}/bin" desktop/remote-touchpad-wait-on-error
-      install -Dm0644 -t "${SNAPCRAFT_PART_INSTALL}/share/applications" desktop/com.github.unrud.RemoteTouchpad.desktop
-
-apps:
-  remote-touchpad:
-    command: bin/remote-touchpad
-    plugs:
-    - network-bind
-    - desktop
-    - x11
-  remote-touchpad-wait-on-error:
-    command: bin/remote-touchpad-wait-on-error
-    desktop: share/applications/com.github.unrud.RemoteTouchpad.desktop
-    plugs:
-    - network-bind
-    - desktop
-    - x11
+      install -Dm0755 -t "${SNAPCRAFT_PART_INSTALL}/usr/bin" desktop/remote-touchpad-wait-on-error
+      install -Dm0644 -t "${SNAPCRAFT_PART_INSTALL}/usr/share/metainfo" desktop/com.github.unrud.RemoteTouchpad.appdata.xml
+      install -Dm0644 -t "${SNAPCRAFT_PART_INSTALL}/usr/share/applications" desktop/com.github.unrud.RemoteTouchpad.desktop
+      for s in 64 128 256 512; do
+        install -Dm0644 desktop/remote-touchpad_${s}.png "${SNAPCRAFT_PART_INSTALL}/usr/share/icons/hicolor/${s}x${s}/apps/com.github.unrud.RemoteTouchpad.png"
+      done
+      # WORKAROUND: Version is not extracted from AppStream
+      snapcraftctl set-version "$(${SNAPCRAFT_PART_INSTALL}/bin/remote-touchpad --version)"
+    parse-info: [usr/share/metainfo/com.github.unrud.RemoteTouchpad.appdata.xml]

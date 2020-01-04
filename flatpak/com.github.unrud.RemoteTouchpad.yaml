@@ -40,11 +40,8 @@ modules:
       - install -Dm0755 -t /app/bin src/github.com/unrud/remote-touchpad/desktop/remote-touchpad-wait-on-error
       - install -Dm0644 -t /app/share/metainfo src/github.com/unrud/remote-touchpad/desktop/com.github.unrud.RemoteTouchpad.appdata.xml
       - install -Dm0644 -t /app/share/applications src/github.com/unrud/remote-touchpad/desktop/com.github.unrud.RemoteTouchpad.desktop
-      - install -Dm0644 src/github.com/unrud/remote-touchpad/desktop/remote-touchpad_64.png
-        /app/share/icons/hicolor/64x64/apps/com.github.unrud.RemoteTouchpad.png
-      - install -Dm0644 src/github.com/unrud/remote-touchpad/desktop/remote-touchpad_128.png
-        /app/share/icons/hicolor/128x128/apps/com.github.unrud.RemoteTouchpad.png
-      - install -Dm0644 src/github.com/unrud/remote-touchpad/desktop/remote-touchpad_256.png
-        /app/share/icons/hicolor/256x256/apps/com.github.unrud.RemoteTouchpad.png
-      - install -Dm0644 src/github.com/unrud/remote-touchpad/desktop/remote-touchpad_512.png
-        /app/share/icons/hicolor/512x512/apps/com.github.unrud.RemoteTouchpad.png
+      - |
+        for s in 64 128 256 512; do
+          install -Dm0644 src/github.com/unrud/remote-touchpad/desktop/remote-touchpad_${s}.png \
+            /app/share/icons/hicolor/${s}x${s}/apps/com.github.unrud.RemoteTouchpad.png
+        done
