@@ -14,19 +14,19 @@ modules:
     sources:
       - type: git
         url: https://github.com/golang/net
-        commit: ec77196f6094c3492a8b61f2c11cf937f78992ae
+        commit: c0dbc17a35534bf2e581d7a942408dc936316da4
         dest: src/golang.org/x/net
       - type: git
         url: https://github.com/skip2/go-qrcode
-        commit: dc11ecdae0a9889dc81a343585516404e8dc6ead
+        commit: 9434209cb0863a5f3c316b49a8abb7f7dc80610a
         dest: src/github.com/skip2/go-qrcode
       - type: git
         url: https://github.com/elazarl/go-bindata-assetfs
-        commit: 38087fe4dafb822e541b3f7955075cc1c30bd294
+        commit: d0111fe6fb11d467f8aa090457c2edaa4a2d7bab
         dest: src/github.com/elazarl/go-bindata-assetfs
       - type: git
         url: https://salsa.debian.org/go-team/packages/golang-dbus.git
-        commit: 815bb726c30e24947e1778b93fbb01c27f5d62db
+        commit: 23d235ce6d5fee2616e6c9325987ef9cdf14ef23
         dest: src/salsa.debian.org/go-team/packages/golang-dbus.git
       - type: git
         path: ..
