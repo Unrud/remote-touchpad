@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.16 (2020-02-17)
+
+  * Fix textarea on WebKit
+
 ## 0.0.15 (2019-11-03)
 
   * Prefer IPv4 addresses
