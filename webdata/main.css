@@ -3,13 +3,6 @@
     src: url("icon.woff") format("woff");
 }
 
-* {
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
 .hidden {
     display: none;
 }
@@ -21,6 +14,10 @@ body > div {
     height: 100%;
     margin: 0;
     font-family: sans-serif;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 body > div {
