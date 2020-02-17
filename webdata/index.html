@@ -1,51 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width initial-scale=1, maximum-scale=1, user-scalable=0" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <script src="fn.js"></script>
-    <script src="sha256.js"></script>
-    <title>Remote Touchpad</title>
-    <link href="main.css" media="screen" rel="stylesheet" />
-    <link href="icon.png" type="image/png" rel="shortcut icon" />
-</head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width initial-scale=1, maximum-scale=1, user-scalable=0" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<script src="fn.js"></script>
+<script src="sha256.js"></script>
+<title>Remote Touchpad</title>
+<link href="main.css" media="screen" rel="stylesheet" />
+<link href="icon.png" type="image/png" rel="shortcut icon" />
 
-<body>
-    <div id="opening">
-        <p>Connecting...</p>
+<div id="opening">
+    <p>Connecting...</p>
+    <noscript><p>JavaScript is required!</p></noscript>
+</div>
+<div id="closed" class="hidden">
+    <p>Disconnected</p>
+    <button id="reloadbutton">↻</button>
+</div>
+<div id="pad" class="hidden">
+    <div class="buttons">
+        <button id="keysbutton">☰</button>
     </div>
-    <div id="closed">
-        <p>Disconnected</p>
-        <button id="reloadbutton">↻</button>
+    <p id="padlabel">Touchpad</p>
+    <div class="buttons">
+        <button id="fullscreenbutton">⤢</button>
+        <button id="keyboardbutton">⌨</button>
     </div>
-    <div id="pad">
-        <div class="buttons">
-            <button id="keysbutton">☰</button>
-        </div>
-        <p id="padlabel">Touchpad</p>
-        <div class="buttons">
-            <button id="fullscreenbutton">⤢</button>
-            <button id="keyboardbutton">⌨</button>
-        </div>
+</div>
+<div id="keyboard" class="hidden">
+    <textarea id="text"></textarea>
+    <button id="sendbutton">➣</button>
+</div>
+<div id="keys" class="hidden">
+    <div class="buttons">
+        <button id="prevtrackbutton">⏮</button>
+        <button id="playpausebutton">⏯</button>
+        <button id="nexttrackbutton">⏭</button>
     </div>
-    <div id="keyboard">
-        <textarea id="text"></textarea>
-        <button id="sendbutton">➣</button>
+    <div class="buttons">
+        <button id="volumedownbutton">🔉</button>
+        <button id="volumemutebutton">🔇</button>
+        <button id="volumeupbutton">🔊</button>
     </div>
-    <div id="keys">
-        <div class="buttons">
-            <button id="prevtrackbutton">⏮</button>
-            <button id="playpausebutton">⏯</button>
-            <button id="nexttrackbutton">⏭</button>
-        </div>
-        <div class="buttons">
-            <button id="volumedownbutton">🔉</button>
-            <button id="volumemutebutton">🔇</button>
-            <button id="volumeupbutton">🔊</button>
-        </div>
-    </div>
-</body>
-
-</html>
+</div>
