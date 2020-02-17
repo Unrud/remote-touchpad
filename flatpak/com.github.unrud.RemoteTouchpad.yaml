@@ -14,7 +14,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/golang/net
-        commit: c0dbc17a35534bf2e581d7a942408dc936316da4
+        commit: 16171245cfb220d5317888b716d69c1fb4e7992b
         dest: src/golang.org/x/net
       - type: git
         url: https://github.com/skip2/go-qrcode
