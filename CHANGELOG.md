@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.17 (2020-02-20)
+
+  * Minor HTML improvements
+
 ## 0.0.16 (2020-02-17)
 
   * Fix textarea on WebKit
