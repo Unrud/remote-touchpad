@@ -14,7 +14,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/golang/net
-        commit: 16171245cfb220d5317888b716d69c1fb4e7992b
+        commit: ff2c4b7c35a07b0c1e90ce72aa7bfe41bb66a3cb
         dest: src/golang.org/x/net
       - type: git
         url: https://github.com/skip2/go-qrcode
@@ -26,7 +26,7 @@ modules:
         dest: src/github.com/elazarl/go-bindata-assetfs
       - type: git
         url: https://salsa.debian.org/go-team/packages/golang-dbus.git
-        commit: 23d235ce6d5fee2616e6c9325987ef9cdf14ef23
+        commit: ed647c482535c2296517ff0c45d8bdcb5efce458
         dest: src/salsa.debian.org/go-team/packages/golang-dbus.git
       - type: git
         path: ..
