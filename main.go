@@ -164,10 +164,10 @@ func main() {
 		return
 	}
 	if certFile != "" && keyFile == "" {
-		log.Fatal("TLS certificate missing")
+		log.Fatal("TLS private key file missing")
 	}
 	if certFile == "" && keyFile != "" {
-		log.Fatal("TLS private key missing")
+		log.Fatal("TLS certificate file missing")
 	}
 	tls := certFile != "" && keyFile != ""
 	if secret == "" {
