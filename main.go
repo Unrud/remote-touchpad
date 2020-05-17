@@ -45,7 +45,7 @@ const (
 	authenticationRateBurst int           = 10
 	challengeLength         int           = 8
 	defaultBind             string        = ":0"
-	version                 string        = "0.0.17"
+	version                 string        = "0.0.18"
 	pretty_app_name         string        = "Remote Touchpad"
 )
 

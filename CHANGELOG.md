@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.18 (2020-05-16)
+
+  * Fix error messages for TLS certificate and private key files
+
 ## 0.0.17 (2020-02-20)
 
   * Minor HTML improvements
