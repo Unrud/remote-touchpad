@@ -10,6 +10,7 @@ Supports Flatpak's RemoteDesktop portal (experimental), Windows and X11.
   * [Flatpak](https://flathub.org/apps/details/com.github.unrud.RemoteTouchpad)
   * [Snap](https://snapcraft.io/remote-touchpad)
   * [Windows](https://github.com/Unrud/remote-touchpad/releases/latest)
+  - golang(this will install bleeding edge): `go get github.com/Unrud/remote-touchpad && go install -tags {windows|x11} github.com/Unrud/remote-touchpad`
 
 ## Screenshots
 
