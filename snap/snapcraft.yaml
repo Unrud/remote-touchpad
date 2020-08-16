@@ -1,3 +1,9 @@
+# Build by running "snapcraft".
+
+# WARNING:
+# Snapcraft uses caching for already build steps but it's buggy and can cause strange problems.
+# Clean the cache by running "snapcraft clean".
+
 name: remote-touchpad
 license: GPL-3.0+
 grade: stable
@@ -31,6 +37,7 @@ parts:
     source-type: git
     build-packages:
      - gcc
+     - libc6-dev
      - libxt-dev
      - libxtst-dev
     stage-packages:
@@ -41,7 +48,7 @@ parts:
       # WORKAROUND: Snapcraft Go Plugin doesn't set buildtags for go-get
       GOPATH="$(realpath "${SNAPCRAFT_PART_SRC}/../go")"
       env --chdir="$GOPATH/src" GOPATH="$GOPATH" go get -t -d -tags 'portal x11' ./github.com/Unrud/remote-touchpad/...
-      # WORKAROUND: Point icon to the correct location
+      # WORKAROUND: Point icon directly to high resolution version otherwise snapcraft automatically chooses lowest resolution
       sed -e 's|Icon=com.github.unrud.RemoteTouchpad|Icon=/usr/share/icons/hicolor/512x512/apps/com.github.unrud.RemoteTouchpad.png|' -i desktop/com.github.unrud.RemoteTouchpad.desktop
     override-build: |
       snapcraftctl build
@@ -51,6 +58,4 @@ parts:
       for s in 64 128 256 512; do
         install -Dm0644 desktop/remote-touchpad_${s}.png "${SNAPCRAFT_PART_INSTALL}/usr/share/icons/hicolor/${s}x${s}/apps/com.github.unrud.RemoteTouchpad.png"
       done
-      # WORKAROUND: Version is not extracted from AppStream
-      snapcraftctl set-version "$(${SNAPCRAFT_PART_INSTALL}/bin/remote-touchpad --version)"
     parse-info: [usr/share/metainfo/com.github.unrud.RemoteTouchpad.appdata.xml]
