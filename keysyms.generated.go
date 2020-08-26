@@ -1,3 +1,5 @@
+// +build portal x11
+
 package main
 
 var keysymsMap = map[rune]Keysym{

@@ -101,7 +101,8 @@ func main() {
 		}
 		keysymsMap[unicode] = keysym
 	}
-	content := "package main\n\n" +
+	content := "// +build portal x11\n\n" +
+		"package main\n\n" +
 		"var keysymsMap = map[rune]Keysym{\n"
 	keys := make([]rune, 0)
 	for key := range keysymsMap {
