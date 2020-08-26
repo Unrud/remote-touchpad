@@ -39,6 +39,9 @@ const KEY_VOLUME_UP = 2;
 const KEY_MEDIA_PLAY_PAUSE = 3;
 const KEY_MEDIA_PREV_TRACK = 4;
 const KEY_MEDIA_NEXT_TRACK = 5;
+const KEY_BROWSER_BACK = 6;
+const KEY_BROWSER_FORWARD = 7;
+const KEY_SUPER = 8;
 
 let ws;
 let pad;
@@ -381,7 +384,10 @@ window.addEventListener("load", function() {
             requestFullscreen(document.documentElement, {navigationUI: "hide"});
         }
     });
-    [{id: "prevtrackbutton", key: KEY_MEDIA_PREV_TRACK},
+    [{id: "browserbackbutton", key: KEY_BROWSER_BACK},
+     {id: "superbutton", key: KEY_SUPER},
+     {id: "browserforwardbutton", key: KEY_BROWSER_FORWARD},
+     {id: "prevtrackbutton", key: KEY_MEDIA_PREV_TRACK},
      {id: "playpausebutton", key: KEY_MEDIA_PLAY_PAUSE},
      {id: "nexttrackbutton", key: KEY_MEDIA_NEXT_TRACK},
      {id: "volumedownbutton", key: KEY_VOLUME_DOWN},

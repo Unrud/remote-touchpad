@@ -34,6 +34,9 @@ const (
 	keyeventfKeyup   uint32 = 0x2
 	keyeventfUnicode uint32 = 0x4
 
+	vkLwin           uint16 = 0x5B
+	vkBrowserBack    uint16 = 0xA6
+	vkBrowserForward uint16 = 0xA7
 	vkVolumeMute     uint16 = 0xAD
 	vkVolumeDown     uint16 = 0xAE
 	vkVolumeUp       uint16 = 0xAF
@@ -119,7 +122,13 @@ func (p *windowsBackend) KeyboardText(text string) error {
 
 func (p *windowsBackend) KeyboardKey(key Key) error {
 	input := keybdInput{typ: inputKeyboard}
-	if key == KeyVolumeMute {
+	if key == KeySuper {
+		input.wVk = vkLwin
+	} else if key == KeyBrowserBack {
+		input.wVk = vkBrowserBack
+	} else if key == KeyBrowserForward {
+		input.wVk = vkBrowserForward
+	} else if key == KeyVolumeMute {
 		input.wVk = vkVolumeMute
 	} else if key == KeyVolumeDown {
 		input.wVk = vkVolumeDown

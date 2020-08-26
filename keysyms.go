@@ -26,6 +26,8 @@ import "errors"
 type Keysym int32
 
 const (
+	// X11/keysymdef.h
+	xkSuperL Keysym = 0xffeb
 	// X11/XF86keysym.h
 	xf86xkAudioLowerVolume Keysym = 0x1008ff11
 	xf86xkAudioMute        Keysym = 0x1008ff12
@@ -33,6 +35,8 @@ const (
 	xf86xkAudioPlay        Keysym = 0x1008ff14
 	xf86xkAudioPrev        Keysym = 0x1008ff16
 	xf86xkAudioNext        Keysym = 0x1008ff17
+	xf86xkBack             Keysym = 0x1008ff26
+	xf86xkForward          Keysym = 0x1008ff27
 )
 
 func RuneToKeysym(runeValue rune) (Keysym, error) {
@@ -51,6 +55,9 @@ func RuneToKeysym(runeValue rune) (Keysym, error) {
 }
 
 func KeyToKeysym(key Key) (Keysym, error) {
+	if key == KeySuper {
+		return xkSuperL, nil
+	}
 	if key == KeyVolumeMute {
 		return xf86xkAudioMute, nil
 	}
@@ -68,6 +75,12 @@ func KeyToKeysym(key Key) (Keysym, error) {
 	}
 	if key == KeyMediaNextTrack {
 		return xf86xkAudioNext, nil
+	}
+	if key == KeyBrowserBack {
+		return xf86xkBack, nil
+	}
+	if key == KeyBrowserForward {
+		return xf86xkForward, nil
 	}
 	return 0, errors.New("key not mapped to keysym")
 }

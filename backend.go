@@ -36,6 +36,9 @@ const (
 	KeyMediaPlayPause
 	KeyMediaPrevTrack
 	KeyMediaNextTrack
+	KeyBrowserBack
+	KeyBrowserForward
+	KeySuper
 	KeyLimit
 )
 
