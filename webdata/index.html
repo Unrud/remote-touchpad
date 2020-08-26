@@ -11,28 +11,29 @@
 <link href="icon.png" type="image/png" rel="shortcut icon">
 
 <div id="opening">
-    <p>Connecting...</p>
     <noscript><p>JavaScript is required!</p></noscript>
+    <p>Connecting…</p>
 </div>
 <div id="closed" class="hidden">
     <p>Disconnected</p>
     <button id="reloadbutton">↻</button>
 </div>
 <div id="pad" class="hidden">
-    <div class="buttons">
-        <button id="keysbutton">☰</button>
-    </div>
     <p id="padlabel">Touchpad</p>
-    <div class="buttons">
-        <button id="fullscreenbutton">⤢</button>
-        <button id="keyboardbutton">⌨</button>
-    </div>
+    <button id="keysbutton">☰</button>
+    <button id="fullscreenbutton">⤢</button>
+    <button id="keyboardbutton">⌨</button>
 </div>
 <div id="keyboard" class="hidden">
     <textarea id="text" cols=1 rows=1></textarea>
     <button id="sendbutton">➣</button>
 </div>
 <div id="keys" class="hidden">
+    <div class="buttons">
+        <button id="browserbackbutton">⭠</button>
+        <button id="superbutton">🪟</button>
+        <button id="browserforwardbutton">⭢</button>
+    </div>
     <div class="buttons">
         <button id="prevtrackbutton">⏮</button>
         <button id="playpausebutton">⏯</button>

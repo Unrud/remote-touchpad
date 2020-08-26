@@ -7,45 +7,71 @@
     display: none;
 }
 
+html {
+    font-family: sans-serif;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-color: #404040;
+    color: white;
+    background-image: url(tex.png);
+}
+
 html,
 body,
 body > div {
     width: 100%;
     height: 100%;
     margin: 0;
-    font-family: sans-serif;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
 }
 
 body > div {
-    background-color: #404040 !important;
-    background-image: url(tex.png);
+    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: center;
-}
-
-#opening,
-#closed,
-#keys {
-    align-items: center;
-}
-
-#keys {
-    justify-content: flex-end;
-}
-
-#keyboard {
-    flex-direction: row;
+    box-sizing: border-box;
 }
 
 p {
+    margin: 0;
+    font-size: 2rem;
+    word-wrap: break-word;
+    text-align: center;
+}
+
+button {
+    padding: 0;
+    background-color: transparent;
+    border: 1px solid black;
+    height: 1.5em;
+    width: 2em;
+    border-radius: 2px;
     font-size: 2rem;
     color: white;
-    word-wrap: break-word;
+    font-family: "icon";
+    overflow: hidden;
+}
+
+button:focus {
+    outline: none;
+}
+
+#opening,
+#closed {
+    padding: 0 0.5rem;
+}
+
+#opening noscript p,
+#closed p {
+    margin-bottom: 1em;
+}
+
+#reloadbutton {
+    font-size: 4rem;
+    margin: 0 auto;
+    max-width: 100%;
 }
 
 #padlabel {
@@ -57,11 +83,7 @@ p {
         1px 1px 0 black;
     opacity: 0.08;
     font-weight: bold;
-    margin-top: auto;
-    margin-bottom: auto;
-    text-align: center;
     font-size: 4rem;
-    word-wrap: break-word;
 }
 
 @media (max-width: 32rem) {
@@ -70,101 +92,87 @@ p {
     }
 }
 
-.buttons {
-    display: flex;
+#pad > button {
+    position: absolute;
+    max-width: 50%;
+    max-height: 50%;
 }
 
-button {
-    background-color: transparent;
-    border: 1px solid black;
-    height: 1.5em;
-    width: 2em;
-    font-size: 2rem;
-    color: white;
-    font-family: "icon";
-}
-
-button:focus {
-    outline: none;
-}
-
-#fullscreenbutton,
-#keyboardbutton,
-#sendbutton {
+#fullscreenbutton {
+    left: 0;
+    bottom: 0;
     border-bottom: none;
-}
-
-#keysbutton,
-#fullscreenbutton,
-#playpausebutton,
-#volumemutebutton {
     border-left: none;
 }
 
-#keysbutton {
-    border-top: none;
-}
-
-#playpausebutton,
-#volumemutebutton,
 #keyboardbutton {
+    right: 0;
+    bottom: 0;
     border-right: none;
+    border-bottom: none;
 }
 
-#keyboardbutton {
-    margin-left: auto;
-}
-
-#reloadbutton {
-    font-size: 4rem;
+#keysbutton {
+    left: 0;
+    top: 0;
+    border-top: none;
+    border-left: none;
 }
 
 textarea {
-    flex: 2;
+    flex-grow: 1;
     border: none;
     resize: none;
     font-size: 2rem;
     background-color: white;
     color: black;
     margin: 0;
+    padding: 0 0.5rem;
 }
 
 #sendbutton {
+    border-bottom: none;
     border-right: none;
-    border-top: none;
-    height: 100%;
+    border-left: none;
+    width: auto;
+    height: 1.5em;
 }
 
-#keys > .buttons {
-    margin-bottom: 0.5rem;
-}
-
-#keys > .buttons > button {
-    height: 6rem;
-    width: 8rem;
-}
-
-@media (max-width: 25rem) {
-    #keys > .buttons > button {
-        width: calc(0.33 * (100vw - 1rem));
-    }
-}
-
-@media (max-height: 13.5rem) {
-    #keys > .buttons > button {
-        height: calc(0.5 * (100vh - 1.5rem));
-    }
-}
-
-@media (max-aspect-ratio: 4/3) {
+@media (min-aspect-ratio: 4/3) {
     #keyboard {
-        flex-direction: column;
+        flex-direction: row;
     }
 
     #sendbutton {
-        border-left: none;
-        border-top: 1px solid black;
-        height: 1.5em;
-        width: 100%;
+        border-top: none;
+        border-left: 1px solid black;
+        width: 2em;
+        height: auto;
     }
+}
+
+#keys {
+    padding: 0.5rem;
+    padding-bottom: 0;
+    justify-content: flex-end;
+}
+
+#keys .buttons {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    flex-shrink: 1;
+    height: 6rem;
+    min-height: 0;
+}
+
+#keys .buttons > button:not(:last-of-type) {
+    border-right: none;
+}
+
+#keys .buttons > button {
+    flex-shrink: 1;
+    height: 100%;
+    width: 8rem;
+    min-width: 0;
 }

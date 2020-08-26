@@ -378,7 +378,7 @@ window.addEventListener("load", function() {
         if (fullscreenElement()) {
             exitFullscreen();
         } else {
-            requestFullscreen(pad, {navigationUI: "hide"});
+            requestFullscreen(document.documentElement, {navigationUI: "hide"});
         }
     });
     [{id: "prevtrackbutton", key: KEY_MEDIA_PREV_TRACK},
