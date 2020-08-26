@@ -1,3 +1,4 @@
+"use strict";
 /*
  *    Copyright (c) 2018-2019 Unrud <unrud@outlook.com>
  *
@@ -101,13 +102,13 @@ function fullscreenElement() {
 }
 
 function addFullscreenchangeEventListener(listener) {
-    if (document.fullscreenElement !== undefined) {
+    if (document.fullscreenElement != undefined) {
         document.addEventListener("fullscreenchange", listener);
-    } else if (document.webkitFullscreenElement !== undefined) {
+    } else if (document.webkitFullscreenElement != undefined) {
         document.addEventListener("webkitfullscreenchange", listener);
-    } else if (document.mozFullScreenElement !== undefined) {
+    } else if (document.mozFullScreenElement != undefined) {
         document.addEventListener("mozfullscreenchange", listener);
-    } else if (document.msFullscreenElement !== undefined) {
+    } else if (document.msFullscreenElement != undefined) {
         document.addEventListener("MSFullscreenChange", listener);
     }
 }
@@ -183,7 +184,7 @@ function handleStart(evt) {
     }
     let touches = evt.changedTouches;
     for (let i = 0; i < touches.length; i++) {
-        if (touches[i].target !== pad && touches[i].target !== padlabel &&
+        if (touches[i].target != pad && touches[i].target != padlabel &&
             ongoingTouches.length == 0) {
             continue;
         }
@@ -202,7 +203,7 @@ function handleStart(evt) {
         }
         scrollXSum = Math.trunc(scrollXSum);
         scrollYSum = Math.trunc(scrollYSum);
-        if (draggingTimeout !== null) {
+        if (draggingTimeout != null) {
             clearTimeout(draggingTimeout);
             draggingTimeout = null;
             dragging = true;
