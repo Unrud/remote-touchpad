@@ -10,6 +10,9 @@ Supports Flatpak's RemoteDesktop portal (for Wayland), Windows and X11.
   * [Flatpak](https://flathub.org/apps/details/com.github.unrud.RemoteTouchpad)
   * [Snap](https://snapcraft.io/remote-touchpad)
   * [Windows](https://github.com/Unrud/remote-touchpad/releases/latest)
+  * Golang:
+      * Portal & X11: `go get -u -tags 'portal x11' github.com/Unrud/remote-touchpad`
+      * Windows: `get get -u github.com/Unrud/remote-touchpad`
 
 ## Screenshots
 
