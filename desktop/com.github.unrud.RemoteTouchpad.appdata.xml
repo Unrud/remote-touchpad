@@ -11,7 +11,7 @@
       To take control open the displayed URL or scan the QR code.
     </p>
     <p>
-      Supports Flatpak&apos;s RemoteDesktop portal (experimental), Windows and X11.
+      Supports Flatpak&apos;s RemoteDesktop portal (for Wayland), Windows and X11.
     </p>
   </description>
   <launchable type="desktop-id">com.github.unrud.RemoteTouchpad.desktop</launchable>
