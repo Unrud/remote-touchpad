@@ -143,22 +143,12 @@ func main() {
 	TerminalSetTitle(pretty_app_name)
 	var bind, certFile, keyFile, secret string
 	var showVersion bool
-	parseFlags := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
-	for _, fs := range [](*flag.FlagSet){parseFlags, flag.CommandLine} {
-		fs.BoolVar(&showVersion, "version", false, "show program's version number and exit")
-		fs.StringVar(&bind, "bind", defaultBind, "bind server to [HOSTNAME]:PORT")
-		fs.StringVar(&secret, "secret", "", "shared secret for client authentication")
-		fs.StringVar(&certFile, "cert", "", "file containing TLS certificate")
-		fs.StringVar(&keyFile, "key", "", "file containing TLS private key")
-	}
-	// ignore obsolete flags for backward compatibility, but don't show them in usage message
-	parseFlags.Usage = func() {}
-	parseFlags.Bool("invert", false, "")
-	parseFlags.Int("interval", 0, "")
-	if err := parseFlags.Parse(os.Args[1:]); err != nil {
-		flag.Usage()
-		os.Exit(2)
-	}
+	flag.BoolVar(&showVersion, "version", false, "show program's version number and exit")
+	flag.StringVar(&bind, "bind", defaultBind, "bind server to [HOSTNAME]:PORT")
+	flag.StringVar(&secret, "secret", "", "shared secret for client authentication")
+	flag.StringVar(&certFile, "cert", "", "file containing TLS certificate")
+	flag.StringVar(&keyFile, "key", "", "file containing TLS private key")
+	flag.Parse()
 	if showVersion {
 		fmt.Println(version)
 		return
