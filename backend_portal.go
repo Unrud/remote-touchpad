@@ -15,8 +15,8 @@
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with Remote-Touchpad.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with Remote-Touchpad.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package main
@@ -35,6 +35,7 @@ const (
 	btnReleased uint32 = 0
 	btnPressed  uint32 = 1
 
+	// linux/input-event-codes.h
 	btnLeft   int32 = 0x110
 	btnRight  int32 = 0x111
 	btnMiddle int32 = 0x112

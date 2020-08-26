@@ -13,14 +13,15 @@
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with Remote-Touchpad.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with Remote-Touchpad.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// [1 Touch, 2 Touches, 3 Touches]
+// [1 Touch, 2 Touches, 3 Touches] (as pixel)
 const TOUCH_MOVE_THRESHOLD = [10, 15, 15];
+// Max time between consecutive touches for clicking or dragging (as milliseconds)
 const TOUCH_TIMEOUT = 250;
-// [[px/s, mult], ...]
+// [[pixel/second, multiplicator], ...]
 const POINTER_ACCELERATION = [
     [0, 0],
     [87, 1],
@@ -311,7 +312,7 @@ window.addEventListener("load", function() {
     let text = document.getElementById("text");
 
     function showScene(scene) {
-        [opening, closed, pad, keys, keyboard].forEach(function (e) {
+        [opening, closed, pad, keys, keyboard].forEach(function(e) {
             e.classList.toggle("hidden", e != scene);
         });
     }
@@ -336,13 +337,10 @@ window.addEventListener("load", function() {
     text.value = "";
     showScene(opening);
 
-    let wsProtocol = "wss:";
-    if (location.protocol == "http:") {
-        wsProtocol = "ws:";
-    }
-    ws = new WebSocket(wsProtocol + "//" + location.hostname +
-        (location.port ? ":" + location.port : "") +
-        "/ws");
+    ws = new WebSocket(
+        (location.protocol == "http:" ? "ws:" : "wss:") + "//" + location.hostname +
+        (location.port ? ":" + location.port : "") + "/ws"
+    );
 
     ws.onmessage = function(evt) {
         if (authenticated) {
@@ -383,23 +381,21 @@ window.addEventListener("load", function() {
      {id: "volumedownbutton", key: KEY_VOLUME_DOWN},
      {id: "volumemutebutton", key: KEY_VOLUME_MUTE},
      {id: "volumeupbutton", key: KEY_VOLUME_UP}].forEach(function(o) {
-        document.getElementById(o.id).addEventListener("click",
-            function() {
-                ws.send("k" + o.key);
-            });
-     });
-    document.getElementById("sendbutton").addEventListener("click",
-        function() {
-            if (text.value != "") {
-                ws.send("t" + text.value);
-                text.value = "";
-            }
-            window.history.back();
+        document.getElementById(o.id).addEventListener("click", function() {
+            ws.send("k" + o.key);
         });
+    });
+    document.getElementById("sendbutton").addEventListener("click", function() {
+        if (text.value != "") {
+            ws.send("t" + text.value);
+            text.value = "";
+        }
+        window.history.back();
+    });
     window.onpopstate = function() {
         if (!pad.classList.contains("hidden") ||
-                !keyboard.classList.contains("hidden") ||
-                !keys.classList.contains("hidden")) {
+            !keyboard.classList.contains("hidden") ||
+            !keys.classList.contains("hidden")) {
             if (history.state == "keys") {
                 showKeys();
             } else if (history.state == "keyboard") {
@@ -409,10 +405,9 @@ window.addEventListener("load", function() {
             }
         }
     };
-    document.getElementById("reloadbutton").addEventListener("click",
-        function() {
-            location.reload();
-        });
+    document.getElementById("reloadbutton").addEventListener("click", function() {
+        location.reload();
+    });
     pad.addEventListener("touchstart", handleStart);
     pad.addEventListener("touchend", handleEnd);
     pad.addEventListener("touchcancel", handleEnd);

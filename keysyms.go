@@ -13,8 +13,8 @@
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with Remote-Touchpad.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with Remote-Touchpad.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package main
@@ -26,12 +26,13 @@ import "errors"
 type Keysym int32
 
 const (
-	xf86AudioLowerVolume Keysym = 0x1008ff11
-	xf86AudioMute        Keysym = 0x1008ff12
-	xf86AudioRaiseVolume Keysym = 0x1008ff13
-	xf86AudioPlay        Keysym = 0x1008ff14
-	xf86AudioPrev        Keysym = 0x1008ff16
-	xf86AudioNext        Keysym = 0x1008ff17
+	// X11/XF86keysym.h
+	xf86xkAudioLowerVolume Keysym = 0x1008ff11
+	xf86xkAudioMute        Keysym = 0x1008ff12
+	xf86xkAudioRaiseVolume Keysym = 0x1008ff13
+	xf86xkAudioPlay        Keysym = 0x1008ff14
+	xf86xkAudioPrev        Keysym = 0x1008ff16
+	xf86xkAudioNext        Keysym = 0x1008ff17
 )
 
 func RuneToKeysym(runeValue rune) (Keysym, error) {
@@ -51,22 +52,22 @@ func RuneToKeysym(runeValue rune) (Keysym, error) {
 
 func KeyToKeysym(key Key) (Keysym, error) {
 	if key == KeyVolumeMute {
-		return xf86AudioMute, nil
+		return xf86xkAudioMute, nil
 	}
 	if key == KeyVolumeDown {
-		return xf86AudioLowerVolume, nil
+		return xf86xkAudioLowerVolume, nil
 	}
 	if key == KeyVolumeUp {
-		return xf86AudioRaiseVolume, nil
+		return xf86xkAudioRaiseVolume, nil
 	}
 	if key == KeyMediaPlayPause {
-		return xf86AudioPlay, nil
+		return xf86xkAudioPlay, nil
 	}
 	if key == KeyMediaPrevTrack {
-		return xf86AudioPrev, nil
+		return xf86xkAudioPrev, nil
 	}
 	if key == KeyMediaNextTrack {
-		return xf86AudioNext, nil
+		return xf86xkAudioNext, nil
 	}
 	return 0, errors.New("key not mapped to keysym")
 }
