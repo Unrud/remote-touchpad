@@ -318,7 +318,9 @@ window.addEventListener("load", function() {
     }
 
     function showKeys() {
-        exitFullscreen();
+        if (fullscreenElement()) {
+            exitFullscreen();
+        }
         showScene(keys);
         if (history.state != "keys") {
             history.pushState("keys", "");
@@ -326,7 +328,9 @@ window.addEventListener("load", function() {
     }
 
     function showKeyboard() {
-        exitFullscreen();
+        if (fullscreenElement()) {
+            exitFullscreen();
+        }
         showScene(keyboard);
         text.focus();
         if (history.state != "keyboard") {
@@ -359,7 +363,9 @@ window.addEventListener("load", function() {
     };
 
     ws.onclose = function() {
-        exitFullscreen();
+        if (fullscreenElement()) {
+            exitFullscreen();
+        }
         showScene(closed);
     };
 
