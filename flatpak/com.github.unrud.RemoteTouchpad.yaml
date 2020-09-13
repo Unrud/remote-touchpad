@@ -1,6 +1,6 @@
 app-id: com.github.unrud.RemoteTouchpad
 runtime: org.freedesktop.Platform
-runtime-version: '19.08'
+runtime-version: '20.08'
 sdk: org.freedesktop.Sdk
 command: remote-touchpad
 sdk-extensions:
@@ -12,22 +12,38 @@ finish-args:
 modules:
   - name: remote-touchpad
     sources:
+      # List dependencies: go mod download -json | jq -r '.Path+" "+.Version'
       - type: git
-        url: https://github.com/golang/net
-        commit: 3edf25e44fccea9e11b919341e952fca722ef460
-        dest: src/golang.org/x/net
+        url: https://github.com/elazarl/go-bindata-assetfs
+        tag: v1.0.1
+        commit: 234c15e7648ff35458026de92b34c637bae5e6f7
+        dest: src/github.com/elazarl/go-bindata-assetfs
+      - type: git
+        url: https://github.com/godbus/dbus
+        tag: v5.0.3
+        commit: 37bf87eef99d69c4f1d3528bd66e3a87dc201472
+        dest: src/github.com/godbus/dbus/v5
       - type: git
         url: https://github.com/skip2/go-qrcode
         commit: da1b6568686e89143e94f980a98bc2dbd5537f13
         dest: src/github.com/skip2/go-qrcode
       - type: git
-        url: https://github.com/elazarl/go-bindata-assetfs
-        commit: 234c15e7648ff35458026de92b34c637bae5e6f7
-        dest: src/github.com/elazarl/go-bindata-assetfs
+        url: https://github.com/golang/crypto
+        commit: 75b288015ac94e66e3d6715fb68a9b41bf046ec2
+        dest: src/golang.org/x/crypto
       - type: git
-        url: https://salsa.debian.org/go-team/packages/golang-dbus.git
-        commit: ed647c482535c2296517ff0c45d8bdcb5efce458
-        dest: src/salsa.debian.org/go-team/packages/golang-dbus.git
+        url: https://github.com/golang/net
+        commit: ab34263943818b32f575efc978a3d24e80b04bd7
+        dest: src/golang.org/x/net
+      - type: git
+        url: https://github.com/golang/sys
+        commit: 85ca7c5b95cdf1e557abb38a283d1e61a5959c31
+        dest: src/golang.org/x/sys
+      - type: git
+        url: https://github.com/golang/text
+        tag: v0.3.0
+        commit: f21a4dfb5e38f5895301dc265a8def02365cc3d0
+        dest: src/golang.org/x/text
       - type: git
         path: ..
         branch: master
