@@ -32,7 +32,9 @@ parts:
   remote-touchpad:
     plugin: go
     go-importpath: github.com/Unrud/remote-touchpad
-    go-buildtags: [portal x11]
+    go-buildtags:
+      - portal
+      - x11
     source: .
     source-type: git
     build-packages:
@@ -47,7 +49,7 @@ parts:
       snapcraftctl pull
       # WORKAROUND: Snapcraft Go Plugin doesn't set buildtags for go-get
       GOPATH="$(realpath "${SNAPCRAFT_PART_SRC}/../go")"
-      env --chdir="$GOPATH/src" GOPATH="$GOPATH" go get -t -d -tags 'portal x11' ./github.com/Unrud/remote-touchpad/...
+      env --chdir="$GOPATH/src" GOPATH="$GOPATH" go get -t -d -tags portal,x11 ./github.com/Unrud/remote-touchpad/...
       # WORKAROUND: Point icon directly to high resolution version otherwise snapcraft automatically chooses lowest resolution
       sed -e 's|Icon=com.github.unrud.RemoteTouchpad|Icon=/usr/share/icons/hicolor/512x512/apps/com.github.unrud.RemoteTouchpad.png|' -i desktop/com.github.unrud.RemoteTouchpad.desktop
     override-build: |
