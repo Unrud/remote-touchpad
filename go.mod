@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/elazarl/go-bindata-assetfs v1.0.1
+	github.com/godbus/dbus/v5 v5.0.3
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
-	golang.org/x/net v0.0.0-20200822124328-c89045814202
-	salsa.debian.org/go-team/packages/golang-dbus.git v4.1.0+incompatible
+	golang.org/x/net v0.0.0-20200707034311-ab3426394381
 )

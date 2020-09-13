@@ -24,7 +24,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	dbus "salsa.debian.org/go-team/packages/golang-dbus.git"
+	"github.com/godbus/dbus/v5"
 	"sync"
 )
 
