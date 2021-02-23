@@ -103,6 +103,7 @@ button:focus {
     bottom: 0;
     border-bottom: none;
     border-left: none;
+    position: absolute;
 }
 
 #keyboardbutton {
@@ -110,6 +111,7 @@ button:focus {
     bottom: 0;
     border-right: none;
     border-bottom: none;
+    position: absolute;
 }
 
 #keysbutton {
@@ -117,6 +119,7 @@ button:focus {
     top: 0;
     border-top: none;
     border-left: none;
+    position: absolute;
 }
 
 textarea {

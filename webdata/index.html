@@ -1,47 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<script src="fn.js"></script>
-<script src="sha256.js"></script>
-<title>Remote Touchpad</title>
-<link href="main.css" media="screen" rel="stylesheet">
-<link href="icon.png" type="image/png" rel="shortcut icon">
-
-<div id="opening">
-    <noscript><p>JavaScript is required!</p></noscript>
-    <p>Connecting…</p>
-</div>
-<div id="closed" class="hidden">
-    <p>Disconnected</p>
-    <button id="reloadbutton">↻</button>
-</div>
-<div id="pad" class="hidden">
-    <p id="padlabel">Touchpad</p>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <script src="fn.js"></script>
+    <script src="sha256.js"></script>
+    <title>Remote Touchpad</title>
+    <link href="main.css" media="screen" rel="stylesheet">
+    <link href="icon.png" type="image/png" rel="shortcut icon">
+</head>
+<body>
     <button id="keysbutton">☰</button>
     <button id="fullscreenbutton">⤢</button>
     <button id="keyboardbutton">⌨</button>
-</div>
-<div id="keyboard" class="hidden">
-    <textarea id="text" cols=1 rows=1></textarea>
-    <button id="sendbutton">➣</button>
-</div>
-<div id="keys" class="hidden">
-    <div class="buttons">
-        <button id="browserbackbutton">⭠</button>
-        <button id="superbutton">🪟</button>
-        <button id="browserforwardbutton">⭢</button>
+    <div id="opening">
+        <noscript><p>JavaScript is required!</p></noscript>
+        <p>Connecting…</p>
     </div>
-    <div class="buttons">
-        <button id="prevtrackbutton">⏮</button>
-        <button id="playpausebutton">⏯</button>
-        <button id="nexttrackbutton">⏭</button>
+    <div id="closed" class="hidden">
+        <p>Disconnected</p>
+        <button id="reloadbutton">↻</button>
     </div>
-    <div class="buttons">
-        <button id="volumedownbutton">🔉</button>
-        <button id="volumemutebutton">🔇</button>
-        <button id="volumeupbutton">🔊</button>
+    <div id="pad" class="hidden">
+        <p id="padlabel">Touchpad</p>
     </div>
-</div>
+    <div id="keyboard" class="hidden">
+        <textarea id="text" cols=1 rows=1></textarea>
+        <button id="sendbutton">➣</button>
+    </div>
+    <div id="keys" class="hidden">
+        <div class="buttons">
+            <button id="browserbackbutton">⭠</button>
+            <button id="superbutton">🪟</button>
+            <button id="browserforwardbutton">⭢</button>
+        </div>
+        <div class="buttons">
+            <button id="prevtrackbutton">⏮</button>
+            <button id="playpausebutton">⏯</button>
+            <button id="nexttrackbutton">⏭</button>
+        </div>
+        <div class="buttons">
+            <button id="volumedownbutton">🔉</button>
+            <button id="volumemutebutton">🔇</button>
+            <button id="volumeupbutton">🔊</button>
+        </div>
+    </div>
+</body>
