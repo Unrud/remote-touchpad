@@ -1,0 +1,14 @@
+# github.com/elazarl/go-bindata-assetfs v1.0.1
+## explicit
+github.com/elazarl/go-bindata-assetfs
+# github.com/godbus/dbus/v5 v5.0.4
+## explicit
+github.com/godbus/dbus/v5
+# github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
+## explicit
+github.com/skip2/go-qrcode
+github.com/skip2/go-qrcode/bitset
+github.com/skip2/go-qrcode/reedsolomon
+# golang.org/x/net v0.0.0-20210525063256-abc453219eb5
+## explicit
+golang.org/x/net/websocket
