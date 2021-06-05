@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.0.2 (2021-06-05)
+
+* New logo
+* Update dependencies
+
+## 1.0.1 (2020-09-13)
+
+* Update dependencies
+
+## 1.0.0 (2020-08-26)
+
+* Add super and browser back and forward keys
+* Reduce minimum size of textarea
+* Small UI improvements
+* Remove obsolete command line arguments
+
 ## 0.0.18 (2020-05-16)
 
 * Fix error messages for TLS certificate and private key files
