@@ -44,16 +44,10 @@ parts:
     stage-packages:
       - libxt6
       - libxtst6
-    override-pull: |
-      snapcraftctl pull
-      # WORKAROUND: Point icon directly to high resolution version otherwise snapcraft automatically chooses lowest resolution
-      sed -e 's|Icon=com.github.unrud.RemoteTouchpad|Icon=/usr/share/icons/hicolor/512x512/apps/com.github.unrud.RemoteTouchpad.png|' -i desktop/com.github.unrud.RemoteTouchpad.desktop
     override-build: |
       snapcraftctl build
       install -Dm0755 -t "${SNAPCRAFT_PART_INSTALL}/usr/bin" desktop/remote-touchpad-wait-on-error
       install -Dm0644 -t "${SNAPCRAFT_PART_INSTALL}/usr/share/metainfo" desktop/com.github.unrud.RemoteTouchpad.appdata.xml
       install -Dm0644 -t "${SNAPCRAFT_PART_INSTALL}/usr/share/applications" desktop/com.github.unrud.RemoteTouchpad.desktop
-      for s in 64 128 256 512; do
-        install -Dm0644 desktop/remote-touchpad_${s}.png "${SNAPCRAFT_PART_INSTALL}/usr/share/icons/hicolor/${s}x${s}/apps/com.github.unrud.RemoteTouchpad.png"
-      done
+      install -Dm0644 -t "${SNAPCRAFT_PART_INSTALL}/usr/share/icons/hicolor/scalable/apps" desktop/com.github.unrud.RemoteTouchpad.svg
     parse-info: [usr/share/metainfo/com.github.unrud.RemoteTouchpad.appdata.xml]

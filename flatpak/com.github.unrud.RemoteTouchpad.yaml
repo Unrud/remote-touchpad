@@ -44,8 +44,9 @@ modules:
       - install -Dm0755 -t /app/bin desktop/remote-touchpad-wait-on-error
       - install -Dm0644 -t /app/share/metainfo desktop/com.github.unrud.RemoteTouchpad.appdata.xml
       - install -Dm0644 -t /app/share/applications desktop/com.github.unrud.RemoteTouchpad.desktop
+      - install -Dm0644 -t /app/share/icons/hicolor/scalable/apps desktop/com.github.unrud.RemoteTouchpad.svg
       - |
-        for s in 64 128 256 512; do
-          install -Dm0644 desktop/remote-touchpad_${s}.png \
-            /app/share/icons/hicolor/${s}x${s}/apps/com.github.unrud.RemoteTouchpad.png || exit 1
+        for res in 16 32 48 64 128 256 512; do
+          rsvg-convert --height "${res}" --keep-aspect-ratio --format png --output com.github.unrud.RemoteTouchpad.png desktop/com.github.unrud.RemoteTouchpad.svg || exit 1
+          install -Dm0644 -t "/app/share/icons/hicolor/${res}x${res}/apps" com.github.unrud.RemoteTouchpad.png || exit 1
         done
