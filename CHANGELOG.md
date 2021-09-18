@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.3 (2021-09-18)
+
+* Update dependencies
+
 ## 1.0.2 (2021-06-05)
 
 * New logo
