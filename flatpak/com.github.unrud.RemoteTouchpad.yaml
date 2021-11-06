@@ -20,8 +20,8 @@ modules:
         dest: vendor/github.com/elazarl/go-bindata-assetfs
       - type: git
         url: https://github.com/godbus/dbus
-        tag: v5.0.5
-        commit: 84a2dfb382a81e88c000206b8fcba8d98f00ad1e
+        tag: v5.0.6
+        commit: daa017464e266380cdeb4e6f9613eba9182b59a3
         dest: vendor/github.com/godbus/dbus/v5
       - type: git
         url: https://github.com/skip2/go-qrcode
@@ -29,7 +29,7 @@ modules:
         dest: vendor/github.com/skip2/go-qrcode
       - type: git
         url: https://github.com/golang/net
-        commit: 978cfadd31cf6299758dbb5165d451ce91989f1a
+        commit: b53810dc28af183c5c4adfbb6b6d982379845b06
         dest: vendor/golang.org/x/net
       - type: file
         path: modules.txt
