@@ -16,6 +16,7 @@ html {
     background-color: #404040;
     color: white;
     background-image: url(tex.png);
+    touch-action: none;
 }
 
 html,
