@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.4 (2021-11-06)
+
+* Disable browser touch gestures
+* Update dependencies
+
 ## 1.0.3 (2021-09-18)
 
 * Update dependencies
