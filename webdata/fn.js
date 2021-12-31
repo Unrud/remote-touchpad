@@ -346,8 +346,7 @@ window.addEventListener("load", function() {
     showScene(opening);
 
     ws = new WebSocket(
-        (location.protocol == "http:" ? "ws:" : "wss:") + "//" + location.hostname +
-        (location.port ? ":" + location.port : "") + "/ws"
+        String(new URL("ws", location.href)).replace(/^http/, "ws")
     );
 
     ws.onmessage = function(evt) {
