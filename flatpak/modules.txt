@@ -9,6 +9,6 @@ github.com/godbus/dbus/v5
 github.com/skip2/go-qrcode
 github.com/skip2/go-qrcode/bitset
 github.com/skip2/go-qrcode/reedsolomon
-# golang.org/x/net v0.0.0-20211105192438-b53810dc28af
+# golang.org/x/net v0.0.0-20220107192237-5cfca573fb4d
 ## explicit
 golang.org/x/net/websocket

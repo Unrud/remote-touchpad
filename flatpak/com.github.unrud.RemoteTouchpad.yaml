@@ -29,7 +29,7 @@ modules:
         dest: vendor/github.com/skip2/go-qrcode
       - type: git
         url: https://github.com/golang/net
-        commit: b53810dc28af183c5c4adfbb6b6d982379845b06
+        commit: 5cfca573fb4de1b4540d42c216f39c8d1cbbb494
         dest: vendor/golang.org/x/net
       - type: file
         path: modules.txt
