@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.5 (2022-01-07)
+
+* Use relative URL for websocket
+* Update dependencies
+
 ## 1.0.4 (2021-11-06)
 
 * Disable browser touch gestures
