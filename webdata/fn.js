@@ -345,10 +345,9 @@ window.addEventListener("load", function() {
     text.value = "";
     showScene(opening);
 
-    ws = new WebSocket(
-        (location.protocol == "http:" ? "ws:" : "wss:") + "//" + location.hostname +
-        (location.port ? ":" + location.port : "") + "/ws"
-    );
+    let wsURL = new URL("ws", location.href);
+    wsURL.protocol = wsURL.protocol == "http:" ? "ws:" : "wss:";
+    ws = new WebSocket(wsURL);
 
     ws.onmessage = function(evt) {
         if (authenticated) {
