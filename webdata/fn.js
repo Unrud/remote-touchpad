@@ -19,47 +19,47 @@
  */
 
 // [1 Touch, 2 Touches, 3 Touches] (as pixel)
-const TOUCH_MOVE_THRESHOLD = [10, 15, 15];
+var TOUCH_MOVE_THRESHOLD = [10, 15, 15];
 // Max time between consecutive touches for clicking or dragging (as milliseconds)
-const TOUCH_TIMEOUT = 250;
+var TOUCH_TIMEOUT = 250;
 // [[pixel/second, multiplicator], ...]
-const POINTER_ACCELERATION = [
+var POINTER_ACCELERATION = [
     [0, 0],
     [87, 1],
     [173, 1],
     [553, 2]
 ];
 
-const POINTER_BUTTON_LEFT = 0;
-const POINTER_BUTTON_RIGHT = 1;
-const POINTER_BUTTON_MIDDLE = 2;
+var POINTER_BUTTON_LEFT = 0;
+var POINTER_BUTTON_RIGHT = 1;
+var POINTER_BUTTON_MIDDLE = 2;
 
-const KEY_VOLUME_MUTE = 0;
-const KEY_VOLUME_DOWN = 1;
-const KEY_VOLUME_UP = 2;
-const KEY_MEDIA_PLAY_PAUSE = 3;
-const KEY_MEDIA_PREV_TRACK = 4;
-const KEY_MEDIA_NEXT_TRACK = 5;
-const KEY_BROWSER_BACK = 6;
-const KEY_BROWSER_FORWARD = 7;
-const KEY_SUPER = 8;
+var KEY_VOLUME_MUTE = 0;
+var KEY_VOLUME_DOWN = 1;
+var KEY_VOLUME_UP = 2;
+var KEY_MEDIA_PLAY_PAUSE = 3;
+var KEY_MEDIA_PREV_TRACK = 4;
+var KEY_MEDIA_NEXT_TRACK = 5;
+var KEY_BROWSER_BACK = 6;
+var KEY_BROWSER_FORWARD = 7;
+var KEY_SUPER = 8;
 
-let ws;
-let pad;
-let padlabel;
+var ws;
+var pad;
+var padlabel;
 
-let touchMoved = false;
-let touchStart = 0;
-let touchLastEnd = 0;
-let touchReleasedCount = 0;
-let ongoingTouches = [];
-let moveXSum = 0;
-let moveYSum = 0;
-let scrollXSum = 0;
-let scrollYSum = 0;
-let dragging = false;
-let draggingTimeout = null;
-let scrolling = false;
+var touchMoved = false;
+var touchStart = 0;
+var touchLastEnd = 0;
+var touchReleasedCount = 0;
+var ongoingTouches = [];
+var moveXSum = 0;
+var moveYSum = 0;
+var scrollXSum = 0;
+var scrollYSum = 0;
+var dragging = false;
+var draggingTimeout = null;
+var scrolling = false;
 
 function fullscreenEnabled() {
     return (document.fullscreenEnabled ||
@@ -125,7 +125,7 @@ function copyTouch(touch, timeStamp) {
 }
 
 function ongoingTouchIndexById(idToFind) {
-    for (let i = 0; i < ongoingTouches.length; i++) {
+    for (var i = 0; i < ongoingTouches.length; i++) {
         if (ongoingTouches[i].identifier == idToFind) {
             return i;
         }
@@ -134,17 +134,17 @@ function ongoingTouchIndexById(idToFind) {
 }
 
 function calculatePointerAccelerationMult(speed) {
-    for (let i = 0; i < POINTER_ACCELERATION.length; i++) {
-        let s2 = POINTER_ACCELERATION[i][0];
-        let a2 = POINTER_ACCELERATION[i][1];
+    for (var i = 0; i < POINTER_ACCELERATION.length; i++) {
+        var s2 = POINTER_ACCELERATION[i][0];
+        var a2 = POINTER_ACCELERATION[i][1];
         if (s2 <= speed) {
             continue;
         }
         if (i == 0) {
             return a2;
         }
-        let s1 = POINTER_ACCELERATION[i - 1][0];
-        let a1 = POINTER_ACCELERATION[i - 1][1];
+        var s1 = POINTER_ACCELERATION[i - 1][0];
+        var a1 = POINTER_ACCELERATION[i - 1][1];
         return ((speed - s1) / (s2 - s1)) * (a2 - a1) + a1;
     }
     if (POINTER_ACCELERATION.length > 0) {
@@ -159,15 +159,15 @@ function onDraggingTimeout() {
 }
 
 function updateMoveAndScroll() {
-    let moveX = Math.trunc(moveXSum);
-    let moveY = Math.trunc(moveYSum);
+    var moveX = Math.trunc(moveXSum);
+    var moveY = Math.trunc(moveYSum);
     if (Math.abs(moveX) >= 1 || Math.abs(moveY) >= 1) {
         moveXSum -= moveX;
         moveYSum -= moveY;
         ws.send("m" + moveX + ";" + moveY);
     }
-    let scrollX = Math.trunc(scrollXSum);
-    let scrollY = Math.trunc(scrollYSum);
+    var scrollX = Math.trunc(scrollXSum);
+    var scrollY = Math.trunc(scrollYSum);
     if (Math.abs(scrollX) >= 1 || Math.abs(scrollY) >= 1) {
         scrollXSum -= scrollX;
         scrollYSum -= scrollY;
@@ -182,15 +182,15 @@ function handleStart(evt) {
         touchStart = evt.timeStamp;
         touchMoved = false;
     }
-    let touches = evt.changedTouches;
-    for (let i = 0; i < touches.length; i++) {
+    var touches = evt.changedTouches;
+    for (var i = 0; i < touches.length; i++) {
         if (touches[i].target != pad && touches[i].target != padlabel &&
             ongoingTouches.length == 0) {
             continue;
         }
         evt.preventDefault();
-        let touch = copyTouch(touches[i], evt.timeStamp);
-        let idx = ongoingTouchIndexById(touch.identifier);
+        var touch = copyTouch(touches[i], evt.timeStamp);
+        var idx = ongoingTouchIndexById(touch.identifier);
         if (idx < 0) {
             ongoingTouches.push(touch);
         } else {
@@ -216,9 +216,9 @@ function handleStart(evt) {
 }
 
 function handleEnd(evt) {
-    let touches = evt.changedTouches;
-    for (let i = 0; i < touches.length; i++) {
-        let idx = ongoingTouchIndexById(touches[i].identifier);
+    var touches = evt.changedTouches;
+    for (var i = 0; i < touches.length; i++) {
+        var idx = ongoingTouchIndexById(touches[i].identifier);
         if (idx < 0) {
             continue;
         }
@@ -239,7 +239,7 @@ function handleEnd(evt) {
             ws.send("b" + POINTER_BUTTON_LEFT + ";0");
         }
         if (!touchMoved && evt.timeStamp - touchStart < TOUCH_TIMEOUT) {
-            let button = 0;
+            var button = 0;
             if (touchReleasedCount == 1) {
                 button = POINTER_BUTTON_LEFT;
             } else if (touchReleasedCount == 2) {
@@ -259,16 +259,16 @@ function handleEnd(evt) {
 }
 
 function handleMove(evt) {
-    let sumX = 0;
-    let sumY = 0;
-    let touches = evt.changedTouches;
-    for (let i = 0; i < touches.length; i++) {
-        let idx = ongoingTouchIndexById(touches[i].identifier);
+    var sumX = 0;
+    var sumY = 0;
+    var touches = evt.changedTouches;
+    for (var i = 0; i < touches.length; i++) {
+        var idx = ongoingTouchIndexById(touches[i].identifier);
         if (idx < 0) {
             continue;
         }
         if (!touchMoved) {
-            let dist = Math.sqrt(Math.pow(touches[i].pageX - ongoingTouches[idx].pageXStart, 2) +
+            var dist = Math.sqrt(Math.pow(touches[i].pageX - ongoingTouches[idx].pageXStart, 2) +
                 Math.pow(touches[i].pageY - ongoingTouches[idx].pageYStart, 2));
             if (ongoingTouches.length > TOUCH_MOVE_THRESHOLD.length ||
                 dist > TOUCH_MOVE_THRESHOLD[ongoingTouches.length - 1] ||
@@ -276,9 +276,9 @@ function handleMove(evt) {
                 touchMoved = true;
             }
         }
-        let dx = touches[i].pageX - ongoingTouches[idx].pageX;
-        let dy = touches[i].pageY - ongoingTouches[idx].pageY;
-        let timeDelta = evt.timeStamp - ongoingTouches[idx].timeStamp;
+        var dx = touches[i].pageX - ongoingTouches[idx].pageX;
+        var dy = touches[i].pageY - ongoingTouches[idx].pageY;
+        var timeDelta = evt.timeStamp - ongoingTouches[idx].timeStamp;
         sumX += dx * calculatePointerAccelerationMult(Math.abs(dx) / timeDelta * 1000);
         sumY += dy * calculatePointerAccelerationMult(Math.abs(dy) / timeDelta * 1000);
         ongoingTouches[idx].pageX = touches[i].pageX;
@@ -298,22 +298,22 @@ function handleMove(evt) {
 }
 
 function challengeResponse(message) {
-    let shaObj = new jsSHA("SHA-256", "TEXT");
+    var shaObj = new jsSHA("SHA-256", "TEXT");
     shaObj.setHMACKey(message, "TEXT");
     shaObj.update(window.location.hash.substr(1));
     return btoa(shaObj.getHMAC("BYTES"));
 }
 
 window.addEventListener("load", function() {
-    let authenticated = false;
-    let opening = document.getElementById("opening");
-    let closed = document.getElementById("closed");
+    var authenticated = false;
+    var opening = document.getElementById("opening");
+    var closed = document.getElementById("closed");
     pad = document.getElementById("pad");
     padlabel = document.getElementById("padlabel");
-    let keys = document.getElementById("keys");
-    let keyboard = document.getElementById("keyboard");
-    let fullscreenbutton = document.getElementById("fullscreenbutton");
-    let text = document.getElementById("text");
+    var keys = document.getElementById("keys");
+    var keyboard = document.getElementById("keyboard");
+    var fullscreenbutton = document.getElementById("fullscreenbutton");
+    var text = document.getElementById("text");
 
     function showScene(scene) {
         [opening, closed, pad, keys, keyboard].forEach(function(e) {
@@ -345,7 +345,7 @@ window.addEventListener("load", function() {
     text.value = "";
     showScene(opening);
 
-    let wsURL = new URL("ws", location.href);
+    var wsURL = new URL("ws", location.href);
     wsURL.protocol = wsURL.protocol == "http:" ? "ws:" : "wss:";
     ws = new WebSocket(wsURL);
 
