@@ -234,8 +234,8 @@ func main() {
 	if tls {
 		scheme = "https"
 	}
-	url := fmt.Sprintf("%s://%s/#%s\n", scheme, domain, secret)
-	readyMsg := "ready: " + url
+	url := fmt.Sprintf("%s://%s/#%s", scheme, domain, secret)
+	readyMsg := "ready: " + url + "\n"
 	qrCode, _ := GenerateQRCode(url, TerminalSupportsColor(os.Stderr.Fd()))
 	readyMsg += qrCode
 	if !tls {
