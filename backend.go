@@ -39,6 +39,14 @@ const (
 	KeyBrowserBack
 	KeyBrowserForward
 	KeySuper
+	KeyLeft
+	KeyRight
+	KeyUp
+	KeyDown
+	KeyHome
+	KeyEnd
+	KeyBackSpace
+	KeyDelete
 	KeyLimit
 )
 

@@ -94,7 +94,7 @@ button:focus {
     }
 }
 
-#pad > button {
+#pad > button, #keys > button {
     position: absolute;
     max-width: 50%;
     max-height: 50%;
@@ -132,12 +132,19 @@ textarea {
     padding: 0 0.5rem;
 }
 
-#sendbutton {
+#keyboard .buttons {
+    display: flex;
+    flex-direction: row;
+}
+
+#keyboard .buttons > button {
     border-bottom: none;
-    border-right: none;
     border-left: none;
-    width: auto;
-    height: 1.5em;
+}
+
+#keyboard .buttons > button:last-of-type {
+    flex-grow: 1;
+    border-right: none;
 }
 
 @media (min-aspect-ratio: 4/3) {
@@ -145,11 +152,18 @@ textarea {
         flex-direction: row;
     }
 
-    #sendbutton {
+    #keyboard .buttons {
+        flex-direction: column;
+    }
+
+    #keyboard .buttons > button {
         border-top: none;
+        border-right: none;
         border-left: 1px solid black;
-        width: 2em;
-        height: auto;
+    }
+
+    #keyboard .buttons > button:last-of-type {
+        border-top: 1px solid black;
     }
 }
 
@@ -157,6 +171,13 @@ textarea {
     padding: 0.5rem;
     padding-bottom: 0;
     justify-content: flex-end;
+}
+
+#switchbutton {
+    right: 0;
+    top: 0;
+    border-top: none;
+    border-right: none;
 }
 
 #keys .buttons {
@@ -177,4 +198,9 @@ textarea {
     height: 100%;
     width: 8rem;
     min-width: 0;
+}
+
+#keys .buttons > button:disabled {
+    border-top: none;
+    border-bottom: none;
 }

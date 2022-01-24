@@ -29,7 +29,15 @@ type Keysym int32
 
 const (
 	// X11/keysymdef.h
-	xkSuperL Keysym = 0xffeb
+	xkBackSpace Keysym = 0xff08
+	xkDelete    Keysym = 0xffff
+	xkHome      Keysym = 0xff50
+	xkLeft      Keysym = 0xff51
+	xkUp        Keysym = 0xff52
+	xkRight     Keysym = 0xff53
+	xkDown      Keysym = 0xff54
+	xkEnd       Keysym = 0xff57
+	xkSuperL    Keysym = 0xffeb
 	// X11/XF86keysym.h
 	xf86xkAudioLowerVolume Keysym = 0x1008ff11
 	xf86xkAudioMute        Keysym = 0x1008ff12
@@ -57,6 +65,30 @@ func RuneToKeysym(runeValue rune) (Keysym, error) {
 }
 
 func KeyToKeysym(key Key) (Keysym, error) {
+	if key == KeyBackSpace {
+		return xkBackSpace, nil
+	}
+	if key == KeyDelete {
+		return xkDelete, nil
+	}
+	if key == KeyHome {
+		return xkHome, nil
+	}
+	if key == KeyLeft {
+		return xkLeft, nil
+	}
+	if key == KeyUp {
+		return xkUp, nil
+	}
+	if key == KeyRight {
+		return xkRight, nil
+	}
+	if key == KeyDown {
+		return xkDown, nil
+	}
+	if key == KeyEnd {
+		return xkEnd, nil
+	}
 	if key == KeySuper {
 		return xkSuperL, nil
 	}

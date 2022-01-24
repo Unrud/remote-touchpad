@@ -34,6 +34,14 @@ const (
 	keyeventfKeyup   uint32 = 0x2
 	keyeventfUnicode uint32 = 0x4
 
+	vkBack           uint16 = 0x8
+	vkEnd            uint16 = 0x23
+	vkHome           uint16 = 0x24
+	vkLeft           uint16 = 0x25
+	vkUp             uint16 = 0x26
+	vkRight          uint16 = 0x27
+	vkDown           uint16 = 0x28
+	vkDelete         uint16 = 0x2E
 	vkLwin           uint16 = 0x5B
 	vkBrowserBack    uint16 = 0xA6
 	vkBrowserForward uint16 = 0xA7
@@ -122,7 +130,23 @@ func (p *windowsBackend) KeyboardText(text string) error {
 
 func (p *windowsBackend) KeyboardKey(key Key) error {
 	input := keybdInput{typ: inputKeyboard}
-	if key == KeySuper {
+	if key == KeyBackSpace {
+		input.wVk = vkBack
+	} else if key == KeyEnd {
+		input.wVk = vkEnd
+	} else if key == KeyHome {
+		input.wVk = vkHome
+	} else if key == KeyLeft {
+		input.wVk = vkLeft
+	} else if key == KeyUp {
+		input.wVk = vkUp
+	} else if key == KeyRight {
+		input.wVk = vkRight
+	} else if key == KeyDown {
+		input.wVk = vkDown
+	} else if key == KeyDelete {
+		input.wVk = vkDelete
+	} else if key == KeySuper {
 		input.wVk = vkLwin
 	} else if key == KeyBrowserBack {
 		input.wVk = vkBrowserBack

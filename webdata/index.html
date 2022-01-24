@@ -25,22 +25,45 @@
 </div>
 <div id="keyboard" class="hidden">
     <textarea id="text" cols=1 rows=1></textarea>
-    <button id="sendbutton">➣</button>
+    <div class="buttons">
+        <button id="textkeysbutton">≡</button>
+        <button id="sendbutton">➣</button>
+    </div>
 </div>
 <div id="keys" class="hidden">
-    <div class="buttons">
-        <button id="browserbackbutton">⭠</button>
-        <button id="superbutton">🪟</button>
-        <button id="browserforwardbutton">⭢</button>
+    <div class="page hidden">
+        <div class="buttons">
+            <button id="browserbackbutton">⭠</button>
+            <button id="superbutton">🪟</button>
+            <button id="browserforwardbutton">⭢</button>
+        </div>
+        <div class="buttons">
+            <button id="prevtrackbutton">⏮</button>
+            <button id="playpausebutton">⏯</button>
+            <button id="nexttrackbutton">⏭</button>
+        </div>
+        <div class="buttons">
+            <button id="volumedownbutton">🔉</button>
+            <button id="volumemutebutton">🔇</button>
+            <button id="volumeupbutton">🔊</button>
+        </div>
     </div>
-    <div class="buttons">
-        <button id="prevtrackbutton">⏮</button>
-        <button id="playpausebutton">⏯</button>
-        <button id="nexttrackbutton">⏭</button>
+    <div class="page hidden">
+        <div class="buttons">
+            <button id="backspacebutton">⌫</button>
+            <button disabled></button>
+            <button id="deletebutton">⌦</button>
+        </div>
+        <div class="buttons">
+            <button id="homebutton">⭰</button>
+            <button id="upbutton">↑</button>
+            <button id="endbutton">⭲</button>
+        </div>
+        <div class="buttons">
+            <button id="leftbutton">←</button>
+            <button id="downbutton">↓</button>
+            <button id="rightbutton">→</button>
+        </div>
     </div>
-    <div class="buttons">
-        <button id="volumedownbutton">🔉</button>
-        <button id="volumemutebutton">🔇</button>
-        <button id="volumeupbutton">🔊</button>
-    </div>
+    <button id="switchbutton">⮂</button>
 </div>

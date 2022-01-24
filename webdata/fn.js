@@ -43,6 +43,14 @@ var KEY_MEDIA_NEXT_TRACK = 5;
 var KEY_BROWSER_BACK = 6;
 var KEY_BROWSER_FORWARD = 7;
 var KEY_SUPER = 8;
+var KEY_LEFT = 9;
+var KEY_RIGHT = 10;
+var KEY_UP = 11;
+var KEY_DOWN = 12;
+var KEY_HOME = 13;
+var KEY_END = 14;
+var KEY_BACK_SPACE = 15;
+var KEY_DELETE = 16;
 
 var ws;
 var pad;
@@ -301,6 +309,7 @@ window.addEventListener("load", function() {
     pad = document.getElementById("pad");
     padlabel = document.getElementById("padlabel");
     var keys = document.getElementById("keys");
+    var keys_pages = keys.querySelectorAll(".page");
     var keyboard = document.getElementById("keyboard");
     var fullscreenbutton = document.getElementById("fullscreenbutton");
     var text = document.getElementById("text");
@@ -311,11 +320,19 @@ window.addEventListener("load", function() {
         });
     }
 
-    function showKeys() {
+    function showKeys(page_index) {
+        if (page_index < 0 || keys_pages.length <= page_index) {
+            page_index = 0;
+        }
         exitFullscreen();
         showScene(keys);
-        if (history.state != "keys") {
-            history.pushState("keys", "");
+        for (var i = 0; i < keys_pages.length; i += 1) {
+            keys_pages[i].classList.toggle("hidden", i != page_index);
+        }
+        if ((history.state || "").split(":")[0] == "keys") {
+            history.replaceState("keys:" + page_index, "");
+        } else {
+            history.pushState("keys:" + page_index, "");
         }
     }
 
@@ -352,7 +369,7 @@ window.addEventListener("load", function() {
     };
 
     document.getElementById("keysbutton").addEventListener("click", function() {
-        showKeys();
+        showKeys(0);
     });
     document.getElementById("keyboardbutton").addEventListener("click", function() {
         showKeyboard();
@@ -367,6 +384,15 @@ window.addEventListener("load", function() {
             requestFullscreen(document.documentElement, {navigationUI: "hide"});
         }
     });
+    document.getElementById("switchbutton").addEventListener("click", function() {
+        var page_index = 0;
+        for (var i = 0; i < keys_pages.length; i += 1) {
+            if (!keys_pages[i].classList.contains("hidden")) {
+                page_index = i;
+            }
+        }
+        showKeys(page_index + 1);
+    });
     [{id: "browserbackbutton", key: KEY_BROWSER_BACK},
      {id: "superbutton", key: KEY_SUPER},
      {id: "browserforwardbutton", key: KEY_BROWSER_FORWARD},
@@ -375,10 +401,21 @@ window.addEventListener("load", function() {
      {id: "nexttrackbutton", key: KEY_MEDIA_NEXT_TRACK},
      {id: "volumedownbutton", key: KEY_VOLUME_DOWN},
      {id: "volumemutebutton", key: KEY_VOLUME_MUTE},
-     {id: "volumeupbutton", key: KEY_VOLUME_UP}].forEach(function(o) {
+     {id: "volumeupbutton", key: KEY_VOLUME_UP},
+     {id: "backspacebutton", key: KEY_BACK_SPACE},
+     {id: "deletebutton", key: KEY_DELETE},
+     {id: "homebutton", key: KEY_HOME},
+     {id: "endbutton", key: KEY_END},
+     {id: "leftbutton", key: KEY_LEFT},
+     {id: "rightbutton", key: KEY_RIGHT},
+     {id: "upbutton", key: KEY_UP},
+     {id: "downbutton", key: KEY_DOWN}].forEach(function(o) {
         document.getElementById(o.id).addEventListener("click", function() {
             ws.send("k" + o.key);
         });
+    });
+    document.getElementById("textkeysbutton").addEventListener("click", function() {
+        showKeys(1);
     });
     document.getElementById("sendbutton").addEventListener("click", function() {
         if (text.value != "") {
@@ -389,8 +426,8 @@ window.addEventListener("load", function() {
     });
     window.onpopstate = function() {
         if (authenticated) {
-            if (history.state == "keys") {
-                showKeys();
+            if ((history.state || "").split(":")[0] == "keys") {
+                showKeys(parseInt(history.state.split(":")[1]) || 0);
             } else if (history.state == "keyboard") {
                 showKeyboard();
             } else {
