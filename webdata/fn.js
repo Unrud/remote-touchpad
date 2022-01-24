@@ -82,14 +82,16 @@ function requestFullscreen(e, options) {
 }
 
 function exitFullscreen() {
-    if (document.exitFullscreen) {
-        document.exitFullscreen();
-    } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-    } else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-    } else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
+    if (fullscreenElement()) {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
     }
 }
 
@@ -125,7 +127,7 @@ function copyTouch(touch, timeStamp) {
 }
 
 function ongoingTouchIndexById(idToFind) {
-    for (var i = 0; i < ongoingTouches.length; i++) {
+    for (var i = 0; i < ongoingTouches.length; i += 1) {
         if (ongoingTouches[i].identifier == idToFind) {
             return i;
         }
@@ -134,7 +136,7 @@ function ongoingTouchIndexById(idToFind) {
 }
 
 function calculatePointerAccelerationMult(speed) {
-    for (var i = 0; i < POINTER_ACCELERATION.length; i++) {
+    for (var i = 0; i < POINTER_ACCELERATION.length; i += 1) {
         var s2 = POINTER_ACCELERATION[i][0];
         var a2 = POINTER_ACCELERATION[i][1];
         if (s2 <= speed) {
@@ -183,7 +185,7 @@ function handleStart(evt) {
         touchMoved = false;
     }
     var touches = evt.changedTouches;
-    for (var i = 0; i < touches.length; i++) {
+    for (var i = 0; i < touches.length; i += 1) {
         if (touches[i].target != pad && touches[i].target != padlabel &&
             ongoingTouches.length == 0) {
             continue;
@@ -217,13 +219,13 @@ function handleStart(evt) {
 
 function handleEnd(evt) {
     var touches = evt.changedTouches;
-    for (var i = 0; i < touches.length; i++) {
+    for (var i = 0; i < touches.length; i += 1) {
         var idx = ongoingTouchIndexById(touches[i].identifier);
         if (idx < 0) {
             continue;
         }
         ongoingTouches.splice(idx, 1);
-        touchReleasedCount++;
+        touchReleasedCount += 1;
         touchLastEnd = evt.timeStamp;
         if (scrolling) {
             ws.send("sf");
@@ -262,7 +264,7 @@ function handleMove(evt) {
     var sumX = 0;
     var sumY = 0;
     var touches = evt.changedTouches;
-    for (var i = 0; i < touches.length; i++) {
+    for (var i = 0; i < touches.length; i += 1) {
         var idx = ongoingTouchIndexById(touches[i].identifier);
         if (idx < 0) {
             continue;
@@ -322,9 +324,7 @@ window.addEventListener("load", function() {
     }
 
     function showKeys() {
-        if (fullscreenElement()) {
-            exitFullscreen();
-        }
+        exitFullscreen();
         showScene(keys);
         if (history.state != "keys") {
             history.pushState("keys", "");
@@ -332,9 +332,7 @@ window.addEventListener("load", function() {
     }
 
     function showKeyboard() {
-        if (fullscreenElement()) {
-            exitFullscreen();
-        }
+        exitFullscreen();
         showScene(keyboard);
         text.focus();
         if (history.state != "keyboard") {
@@ -356,24 +354,21 @@ window.addEventListener("load", function() {
         }
         authenticated = true;
         ws.send(challengeResponse(evt.data));
-        if (history.state == "keyboard") {
-            showKeyboard();
-        } else if (history.state == "keys") {
-            showKeys()
-        } else {
-            showScene(pad);
-        }
+        window.onpopstate();
     };
 
     ws.onclose = function() {
-        if (fullscreenElement()) {
-            exitFullscreen();
-        }
+        authenticated = false;
+        exitFullscreen();
         showScene(closed);
     };
 
-    document.getElementById("keysbutton").addEventListener("click", showKeys);
-    document.getElementById("keyboardbutton").addEventListener("click", showKeyboard);
+    document.getElementById("keysbutton").addEventListener("click", function() {
+        showKeys();
+    });
+    document.getElementById("keyboardbutton").addEventListener("click", function() {
+        showKeyboard();
+    });
     if (!fullscreenEnabled()) {
         fullscreenbutton.classList.add("hidden");
     }
@@ -405,9 +400,7 @@ window.addEventListener("load", function() {
         window.history.back();
     });
     window.onpopstate = function() {
-        if (!pad.classList.contains("hidden") ||
-            !keyboard.classList.contains("hidden") ||
-            !keys.classList.contains("hidden")) {
+        if (authenticated) {
             if (history.state == "keys") {
                 showKeys();
             } else if (history.state == "keyboard") {
