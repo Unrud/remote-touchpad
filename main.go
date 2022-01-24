@@ -235,15 +235,16 @@ func main() {
 		scheme = "https"
 	}
 	url := fmt.Sprintf("%s://%s/#%s", scheme, domain, secret)
-	readyMsg := "ready: " + url + "\n"
-	qrCode, _ := GenerateQRCode(url, TerminalSupportsColor(os.Stderr.Fd()))
-	readyMsg += qrCode
-	if !tls {
-		readyMsg += ("" +
-			"▌   WARNING: TLS is not enabled    ▐\n" +
-			"▌Don't use in an untrusted network!▐\n")
+	fmt.Println(url)
+	if qrCode, err := GenerateQRCode(url, TerminalSupportsColor(os.Stdout.Fd())); err == nil {
+		fmt.Print(qrCode)
+	} else {
+		log.Printf("QR code error: %v", err)
 	}
-	log.Print(readyMsg)
+	if !tls {
+		fmt.Println("▌   WARNING: TLS is not enabled    ▐")
+		fmt.Println("▌Don't use in an untrusted network!▐")
+	}
 	if tls {
 		err = http.ServeTLS(listener, mux, certFile, keyFile)
 	} else {
