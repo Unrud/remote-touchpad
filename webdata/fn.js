@@ -103,18 +103,6 @@ function fullscreenElement() {
         null);
 }
 
-function addFullscreenchangeEventListener(listener) {
-    if (document.fullscreenElement != undefined) {
-        document.addEventListener("fullscreenchange", listener);
-    } else if (document.webkitFullscreenElement != undefined) {
-        document.addEventListener("webkitfullscreenchange", listener);
-    } else if (document.mozFullScreenElement != undefined) {
-        document.addEventListener("mozfullscreenchange", listener);
-    } else if (document.msFullscreenElement != undefined) {
-        document.addEventListener("MSFullscreenChange", listener);
-    }
-}
-
 function copyTouch(touch, timeStamp) {
     return {
         identifier: touch.identifier,
