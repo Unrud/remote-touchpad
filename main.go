@@ -175,7 +175,7 @@ func main() {
 		} else if _, ok := err.(UnsupportedPlatformError); ok {
 			platformErrors += fmt.Sprintf("%s backend: %v\n", backendName, err)
 		} else {
-			log.Fatal(fmt.Sprintf("%s backend: %v", backendName, err))
+			log.Fatalf("%s backend: %v", backendName, err)
 		}
 	}
 	if backend == nil {
@@ -221,7 +221,7 @@ func main() {
 				return
 			}
 			if err := processCommand(backend, message); err != nil {
-				log.Print(fmt.Sprintf("%s backend: %v", backendName, err))
+				log.Printf("%s backend: %v", backendName, err)
 				return
 			}
 		}
