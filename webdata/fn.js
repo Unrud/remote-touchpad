@@ -488,6 +488,11 @@ window.addEventListener("load", function() {
     document.getElementById("reloadbutton").addEventListener("click", function() {
         location.reload();
     });
+    document.querySelectorAll(".backbutton").forEach(function(button) {
+        button.addEventListener("click", function() {
+            history.back();
+        });
+    });
     document.addEventListener("touchstart", handleStart);
     document.addEventListener("touchend", handleEnd);
     document.addEventListener("touchcancel", handleEnd);

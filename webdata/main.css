@@ -180,6 +180,13 @@ textarea {
     border-right: none;
 }
 
+#keys .backbutton {
+    left: 0;
+    top: 0;
+    border-top: none;
+    border-left: none;
+}
+
 #keys .buttons {
     display: flex;
     justify-content: center;
