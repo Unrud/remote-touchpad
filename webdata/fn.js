@@ -344,6 +344,7 @@ window.addEventListener("load", function() {
     var keyboardtext = document.getElementById("keyboardtext");
 
     function showScene(scene) {
+        keyboardtext.value = "";
         [opening, closed, pad, keys, keyboard].forEach(function(element) {
             element.classList.toggle("hidden", element != scene);
         });
@@ -368,13 +369,17 @@ window.addEventListener("load", function() {
     function showKeyboard() {
         exitFullscreen();
         showScene(keyboard);
+        keyboardtext.value = sessionStorage.getItem("keyboard") || "";
         keyboardtext.focus();
         if (history.state != "keyboard") {
             history.pushState("keyboard", "");
         }
     }
 
-    keyboardtext.value = "";
+    keyboardtext.oninput = function() {
+        sessionStorage.setItem("keyboard", keyboardtext.value);
+    };
+
     showScene(opening);
 
     var wsURL = new URL("ws", location.href);
@@ -453,6 +458,7 @@ window.addEventListener("load", function() {
         if (keyboardtext.value) {
             ws.send("t" + keyboardtext.value);
             keyboardtext.value = "";
+            keyboardtext.oninput();
         }
         window.history.back();
     });
