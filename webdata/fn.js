@@ -292,6 +292,9 @@ function handleMove(evt) {
 }
 
 function handleKeydown(evt) {
+    if (evt.ctrlKey || evt.altKey || evt.isComposing) {
+        return;
+    }
     var key = {
         "OS": KEY_SUPER,
         "Super": KEY_SUPER,
@@ -310,7 +313,7 @@ function handleKeydown(evt) {
         "Down": KEY_DOWN,
         "ArrowDown": KEY_DOWN
     }[evt.key];
-    if (key != undefined) {
+    if (key != undefined && !evt.shiftKey) {
         evt.preventDefault();
         ws.send("k" + key);
     } else if (evt.key.length == 1) {
