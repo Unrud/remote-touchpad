@@ -54,8 +54,6 @@ var KEY_DELETE = 16;
 var KEY_RETURN = 17;
 
 var ws;
-var pad;
-var padlabel;
 
 var touchMoved = false;
 var touchStart = 0;
@@ -91,16 +89,14 @@ function requestFullscreen(element, options) {
 }
 
 function exitFullscreen() {
-    if (fullscreenElement()) {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-            document.mozCancelFullScreen();
-        } else if (document.msExitFullscreen) {
-            document.msExitFullscreen();
-        }
+    if (document.exitFullscreen) {
+        document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+    } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
     }
 }
 
@@ -183,8 +179,7 @@ function handleStart(evt) {
     }
     var touches = evt.changedTouches;
     for (var i = 0; i < touches.length; i += 1) {
-        if (touches[i].target != pad && touches[i].target != padlabel &&
-            ongoingTouches.length == 0) {
+        if (ongoingTouches.length == 0 && !touches[i].target.classList.contains("touchpad")) {
             continue;
         }
         evt.preventDefault();
@@ -335,15 +330,19 @@ window.addEventListener("load", function() {
     var authenticated = false;
     var opening = document.getElementById("opening");
     var closed = document.getElementById("closed");
-    pad = document.getElementById("pad");
-    padlabel = document.getElementById("padlabel");
+    var pad = document.getElementById("pad");
     var keys = document.getElementById("keys");
     var keysPages = keys.querySelectorAll(".page");
     var keyboard = document.getElementById("keyboard");
     var fullscreenbutton = document.getElementById("fullscreenbutton");
     var keyboardtext = document.getElementById("keyboardtext");
+    var activeScene;
 
     function showScene(scene) {
+        activeScene = scene;
+        if (fullscreenElement() && !scene.classList.contains("fullscreen")) {
+            exitFullscreen();
+        }
         keyboardtext.value = "";
         [opening, closed, pad, keys, keyboard].forEach(function(element) {
             element.classList.toggle("hidden", element != scene);
@@ -354,7 +353,6 @@ window.addEventListener("load", function() {
         if (!Number.isInteger(pageIndex) || pageIndex < 0 || keysPages.length <= pageIndex) {
             pageIndex = 0;
         }
-        exitFullscreen();
         showScene(keys);
         for (var i = 0; i < keysPages.length; i += 1) {
             keysPages[i].classList.toggle("hidden", i != pageIndex);
@@ -367,7 +365,6 @@ window.addEventListener("load", function() {
     }
 
     function showKeyboard() {
-        exitFullscreen();
         showScene(keyboard);
         keyboardtext.value = sessionStorage.getItem("keyboard") || "";
         keyboardtext.focus();
@@ -398,7 +395,6 @@ window.addEventListener("load", function() {
 
     ws.onclose = function() {
         authenticated = false;
-        exitFullscreen();
         showScene(closed);
     };
 
@@ -476,12 +472,12 @@ window.addEventListener("load", function() {
     document.getElementById("reloadbutton").addEventListener("click", function() {
         location.reload();
     });
-    pad.addEventListener("touchstart", handleStart);
-    pad.addEventListener("touchend", handleEnd);
-    pad.addEventListener("touchcancel", handleEnd);
-    pad.addEventListener("touchmove", handleMove);
+    document.addEventListener("touchstart", handleStart);
+    document.addEventListener("touchend", handleEnd);
+    document.addEventListener("touchcancel", handleEnd);
+    document.addEventListener("touchmove", handleMove);
     window.addEventListener("keydown", function(evt) {
-        if (!pad.classList.contains("hidden")) {
+        if (activeScene && activeScene.classList.contains("key")) {
             handleKeydown(evt);
         }
     });
