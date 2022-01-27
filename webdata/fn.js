@@ -313,7 +313,7 @@ function handleKeydown(evt) {
         "Up": KEY_UP,
         "ArrowUp": KEY_UP,
         "Down": KEY_DOWN,
-        "ArrowDown": KEY_DOWN,
+        "ArrowDown": KEY_DOWN
     }[evt.key];
     if (key != undefined) {
         evt.preventDefault();
@@ -338,10 +338,10 @@ window.addEventListener("load", function() {
     pad = document.getElementById("pad");
     padlabel = document.getElementById("padlabel");
     var keys = document.getElementById("keys");
-    var keys_pages = keys.querySelectorAll(".page");
+    var keysPages = keys.querySelectorAll(".page");
     var keyboard = document.getElementById("keyboard");
     var fullscreenbutton = document.getElementById("fullscreenbutton");
-    var text = document.getElementById("text");
+    var keyboardtext = document.getElementById("keyboardtext");
 
     function showScene(scene) {
         [opening, closed, pad, keys, keyboard].forEach(function(element) {
@@ -349,32 +349,32 @@ window.addEventListener("load", function() {
         });
     }
 
-    function showKeys(page_index) {
-        if (page_index < 0 || keys_pages.length <= page_index) {
-            page_index = 0;
+    function showKeys(pageIndex) {
+        if (!Number.isInteger(pageIndex) || pageIndex < 0 || keysPages.length <= pageIndex) {
+            pageIndex = 0;
         }
         exitFullscreen();
         showScene(keys);
-        for (var i = 0; i < keys_pages.length; i += 1) {
-            keys_pages[i].classList.toggle("hidden", i != page_index);
+        for (var i = 0; i < keysPages.length; i += 1) {
+            keysPages[i].classList.toggle("hidden", i != pageIndex);
         }
         if ((history.state || "").split(":")[0] == "keys") {
-            history.replaceState("keys:" + page_index, "");
+            history.replaceState("keys:" + pageIndex, "");
         } else {
-            history.pushState("keys:" + page_index, "");
+            history.pushState("keys:" + pageIndex, "");
         }
     }
 
     function showKeyboard() {
         exitFullscreen();
         showScene(keyboard);
-        text.focus();
+        keyboardtext.focus();
         if (history.state != "keyboard") {
             history.pushState("keyboard", "");
         }
     }
 
-    text.value = "";
+    keyboardtext.value = "";
     showScene(opening);
 
     var wsURL = new URL("ws", location.href);
@@ -414,13 +414,13 @@ window.addEventListener("load", function() {
         }
     });
     document.getElementById("switchbutton").addEventListener("click", function() {
-        var page_index = 0;
-        for (var i = 0; i < keys_pages.length; i += 1) {
-            if (!keys_pages[i].classList.contains("hidden")) {
-                page_index = i;
+        var pageIndex = 0;
+        for (var i = 0; i < keysPages.length; i += 1) {
+            if (!keysPages[i].classList.contains("hidden")) {
+                pageIndex = i;
             }
         }
-        showKeys(page_index + 1);
+        showKeys(pageIndex + 1);
     });
     [
         {id: "browserbackbutton", key: KEY_BROWSER_BACK},
@@ -440,19 +440,19 @@ window.addEventListener("load", function() {
         {id: "leftbutton", key: KEY_LEFT},
         {id: "rightbutton", key: KEY_RIGHT},
         {id: "upbutton", key: KEY_UP},
-        {id: "downbutton", key: KEY_DOWN},
+        {id: "downbutton", key: KEY_DOWN}
     ].forEach(function(o) {
         document.getElementById(o.id).addEventListener("click", function() {
             ws.send("k" + o.key);
         });
     });
-    document.getElementById("textkeysbutton").addEventListener("click", function() {
+    document.getElementById("keyboardkeysbutton").addEventListener("click", function() {
         showKeys(1);
     });
     document.getElementById("sendbutton").addEventListener("click", function() {
-        if (text.value != "") {
-            ws.send("t" + text.value);
-            text.value = "";
+        if (keyboardtext.value) {
+            ws.send("t" + keyboardtext.value);
+            keyboardtext.value = "";
         }
         window.history.back();
     });
