@@ -78,15 +78,15 @@ function fullscreenEnabled() {
         false);
 }
 
-function requestFullscreen(e, options) {
-    if (e.requestFullscreen) {
-        e.requestFullscreen(options);
-    } else if (e.webkitRequestFullscreen) {
-        e.webkitRequestFullscreen(options);
-    } else if (e.mozRequestFullScreen) {
-        e.mozRequestFullScreen(options);
-    } else if (e.msRequestFullscreen) {
-        e.msRequestFullscreen(options);
+function requestFullscreen(element, options) {
+    if (element.requestFullscreen) {
+        element.requestFullscreen(options);
+    } else if (element.webkitRequestFullscreen) {
+        element.webkitRequestFullscreen(options);
+    } else if (element.mozRequestFullScreen) {
+        element.mozRequestFullScreen(options);
+    } else if (element.msRequestFullscreen) {
+        element.msRequestFullscreen(options);
     }
 }
 
@@ -316,8 +316,8 @@ window.addEventListener("load", function() {
     var text = document.getElementById("text");
 
     function showScene(scene) {
-        [opening, closed, pad, keys, keyboard].forEach(function(e) {
-            e.classList.toggle("hidden", e != scene);
+        [opening, closed, pad, keys, keyboard].forEach(function(element) {
+            element.classList.toggle("hidden", element != scene);
         });
     }
 
@@ -358,8 +358,8 @@ window.addEventListener("load", function() {
             ws.close();
             return;
         }
-        authenticated = true;
         ws.send(challengeResponse(evt.data));
+        authenticated = true;
         window.onpopstate();
     };
 
@@ -394,24 +394,26 @@ window.addEventListener("load", function() {
         }
         showKeys(page_index + 1);
     });
-    [{id: "browserbackbutton", key: KEY_BROWSER_BACK},
-     {id: "superbutton", key: KEY_SUPER},
-     {id: "browserforwardbutton", key: KEY_BROWSER_FORWARD},
-     {id: "prevtrackbutton", key: KEY_MEDIA_PREV_TRACK},
-     {id: "playpausebutton", key: KEY_MEDIA_PLAY_PAUSE},
-     {id: "nexttrackbutton", key: KEY_MEDIA_NEXT_TRACK},
-     {id: "volumedownbutton", key: KEY_VOLUME_DOWN},
-     {id: "volumemutebutton", key: KEY_VOLUME_MUTE},
-     {id: "volumeupbutton", key: KEY_VOLUME_UP},
-     {id: "backspacebutton", key: KEY_BACK_SPACE},
-     {id: "returnbutton", key: KEY_RETURN},
-     {id: "deletebutton", key: KEY_DELETE},
-     {id: "homebutton", key: KEY_HOME},
-     {id: "endbutton", key: KEY_END},
-     {id: "leftbutton", key: KEY_LEFT},
-     {id: "rightbutton", key: KEY_RIGHT},
-     {id: "upbutton", key: KEY_UP},
-     {id: "downbutton", key: KEY_DOWN}].forEach(function(o) {
+    [
+        {id: "browserbackbutton", key: KEY_BROWSER_BACK},
+        {id: "superbutton", key: KEY_SUPER},
+        {id: "browserforwardbutton", key: KEY_BROWSER_FORWARD},
+        {id: "prevtrackbutton", key: KEY_MEDIA_PREV_TRACK},
+        {id: "playpausebutton", key: KEY_MEDIA_PLAY_PAUSE},
+        {id: "nexttrackbutton", key: KEY_MEDIA_NEXT_TRACK},
+        {id: "volumedownbutton", key: KEY_VOLUME_DOWN},
+        {id: "volumemutebutton", key: KEY_VOLUME_MUTE},
+        {id: "volumeupbutton", key: KEY_VOLUME_UP},
+        {id: "backspacebutton", key: KEY_BACK_SPACE},
+        {id: "returnbutton", key: KEY_RETURN},
+        {id: "deletebutton", key: KEY_DELETE},
+        {id: "homebutton", key: KEY_HOME},
+        {id: "endbutton", key: KEY_END},
+        {id: "leftbutton", key: KEY_LEFT},
+        {id: "rightbutton", key: KEY_RIGHT},
+        {id: "upbutton", key: KEY_UP},
+        {id: "downbutton", key: KEY_DOWN},
+    ].forEach(function(o) {
         document.getElementById(o.id).addEventListener("click", function() {
             ws.send("k" + o.key);
         });
