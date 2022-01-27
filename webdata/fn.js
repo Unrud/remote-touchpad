@@ -296,6 +296,34 @@ function handleMove(evt) {
     }
 }
 
+function handleKeydown(evt) {
+    var key = {
+        "OS": KEY_SUPER,
+        "Super": KEY_SUPER,
+        "Meta": KEY_SUPER,
+        "Backspace": KEY_BACK_SPACE,
+        "Enter": KEY_RETURN,
+        "Delete": KEY_DELETE,
+        "Home": KEY_HOME,
+        "End": KEY_END,
+        "Left": KEY_LEFT,
+        "ArrowLeft": KEY_LEFT,
+        "Right": KEY_RIGHT,
+        "ArrowRight": KEY_RIGHT,
+        "Up": KEY_UP,
+        "ArrowUp": KEY_UP,
+        "Down": KEY_DOWN,
+        "ArrowDown": KEY_DOWN,
+    }[evt.key];
+    if (key != undefined) {
+        evt.preventDefault();
+        ws.send("k" + key);
+    } else if (evt.key.length == 1) {
+        evt.preventDefault();
+        ws.send("t" + evt.key);
+    }
+}
+
 function challengeResponse(message) {
     var shaObj = new jsSHA("SHA-256", "TEXT");
     shaObj.setHMACKey(message, "TEXT");
@@ -446,4 +474,9 @@ window.addEventListener("load", function() {
     pad.addEventListener("touchend", handleEnd);
     pad.addEventListener("touchcancel", handleEnd);
     pad.addEventListener("touchmove", handleMove);
+    window.addEventListener("keydown", function(evt) {
+        if (!pad.classList.contains("hidden")) {
+            handleKeydown(evt);
+        }
+    });
 });
