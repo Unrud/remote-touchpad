@@ -30,6 +30,7 @@ type Keysym int32
 const (
 	// X11/keysymdef.h
 	xkBackSpace Keysym = 0xff08
+	xkReturn    Keysym = 0xff0D
 	xkDelete    Keysym = 0xffff
 	xkHome      Keysym = 0xff50
 	xkLeft      Keysym = 0xff51
@@ -67,6 +68,9 @@ func RuneToKeysym(runeValue rune) (Keysym, error) {
 func KeyToKeysym(key Key) (Keysym, error) {
 	if key == KeyBackSpace {
 		return xkBackSpace, nil
+	}
+	if key == KeyReturn {
+		return xkReturn, nil
 	}
 	if key == KeyDelete {
 		return xkDelete, nil

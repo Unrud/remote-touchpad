@@ -35,6 +35,7 @@ const (
 	keyeventfUnicode uint32 = 0x4
 
 	vkBack           uint16 = 0x8
+	vkReturn         uint16 = 0xD
 	vkEnd            uint16 = 0x23
 	vkHome           uint16 = 0x24
 	vkLeft           uint16 = 0x25
@@ -132,6 +133,8 @@ func (p *windowsBackend) KeyboardKey(key Key) error {
 	input := keybdInput{typ: inputKeyboard}
 	if key == KeyBackSpace {
 		input.wVk = vkBack
+	} else if key == KeyReturn {
+		input.wVk = vkReturn
 	} else if key == KeyEnd {
 		input.wVk = vkEnd
 	} else if key == KeyHome {

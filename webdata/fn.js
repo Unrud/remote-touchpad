@@ -51,6 +51,7 @@ var KEY_HOME = 13;
 var KEY_END = 14;
 var KEY_BACK_SPACE = 15;
 var KEY_DELETE = 16;
+var KEY_RETURN = 17;
 
 var ws;
 var pad;
@@ -403,6 +404,7 @@ window.addEventListener("load", function() {
      {id: "volumemutebutton", key: KEY_VOLUME_MUTE},
      {id: "volumeupbutton", key: KEY_VOLUME_UP},
      {id: "backspacebutton", key: KEY_BACK_SPACE},
+     {id: "returnbutton", key: KEY_RETURN},
      {id: "deletebutton", key: KEY_DELETE},
      {id: "homebutton", key: KEY_HOME},
      {id: "endbutton", key: KEY_END},

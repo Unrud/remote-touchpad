@@ -47,6 +47,7 @@ const (
 	KeyEnd
 	KeyBackSpace
 	KeyDelete
+	KeyReturn
 	KeyLimit
 )
 

@@ -199,8 +199,3 @@ textarea {
     width: 8rem;
     min-width: 0;
 }
-
-#keys .buttons > button:disabled {
-    border-top: none;
-    border-bottom: none;
-}
