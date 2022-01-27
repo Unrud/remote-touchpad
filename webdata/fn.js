@@ -472,7 +472,7 @@ window.addEventListener("load", function() {
             keyboardtext.value = "";
             keyboardtext.oninput();
         }
-        window.history.back();
+        history.back();
     });
     window.onpopstate = function() {
         if (authenticated) {
