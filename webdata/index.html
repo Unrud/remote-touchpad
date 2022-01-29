@@ -9,29 +9,29 @@
 <link href="main.css" media="screen" rel="stylesheet">
 <link href="icon.png" type="image/png" rel="icon">
 
-<div id="opening">
+<div id="opening" class="scene">
     <noscript><p>JavaScript is required!</p></noscript>
     <p>Connecting…</p>
 </div>
-<div id="closed" class="hidden">
+<div id="closed" class="scene hidden">
     <p>Disconnected</p>
     <button id="reloadbutton">↻</button>
 </div>
-<div id="pad" class="touchpad key fullscreen hidden">
+<div id="pad" class="scene touchpad key fullscreen hidden">
     <p id="padlabel" class="touchpad">Touchpad</p>
     <button id="keysbutton">≡</button>
     <button id="fullscreenbutton">⤢</button>
     <button id="keyboardbutton">⌨</button>
 </div>
-<div id="keyboard" class="hidden">
+<div id="keyboard" class="scene hidden">
     <textarea id="keyboardtext" cols=1 rows=1></textarea>
     <div class="buttons">
         <button id="keyboardkeysbutton">≡</button>
         <button id="sendbutton">➣</button>
     </div>
 </div>
-<div id="keys" class="touchpad key fullscreen hidden">
-    <div class="page">
+<div id="keys" class="scene touchpad key fullscreen hidden">
+    <div class="scene touchpad">
         <div class="buttons">
             <button id="browserbackbutton">⭠</button>
             <button id="superbutton">🪟</button>
@@ -48,7 +48,7 @@
             <button id="volumeupbutton">🔊</button>
         </div>
     </div>
-    <div class="page">
+    <div class="scene touchpad">
         <div class="buttons">
             <button id="backspacebutton">⌫</button>
             <button id="returnbutton">⮠</button>

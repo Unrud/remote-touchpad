@@ -330,16 +330,17 @@ function challengeResponse(message) {
 }
 
 window.addEventListener("load", function() {
-    var DEFAULT_KEYS_PAGE = {
+    var DEFAULT_KEYS_SCENE = {
         "": 0,
         "keyboard": 1
     };
     var authenticated = false;
+    var scenes = document.querySelectorAll("body > .scene");
     var opening = document.getElementById("opening");
     var closed = document.getElementById("closed");
     var pad = document.getElementById("pad");
     var keys = document.getElementById("keys");
-    var keysPages = keys.querySelectorAll(".page");
+    var keysScenes = keys.querySelectorAll(".scene");
     var keyboard = document.getElementById("keyboard");
     var fullscreenbutton = document.getElementById("fullscreenbutton");
     var keyboardtext = document.getElementById("keyboardtext");
@@ -352,29 +353,29 @@ window.addEventListener("load", function() {
             exitFullscreen();
         }
         keyboardtext.value = "";
-        [opening, closed, pad, keys, keyboard].forEach(function(element) {
-            element.classList.toggle("hidden", element != scene);
+        scenes.forEach(function(otherScene) {
+            otherScene.classList.toggle("hidden", otherScene != scene);
         });
     }
 
-    function updateKeysPage(pageIndex) {
-        if (!Number.isInteger(pageIndex) || pageIndex < 0 || keysPages.length <= pageIndex) {
-            pageIndex = 0;
+    function showKeysScene(index) {
+        if (!Number.isInteger(index) || index < 0 || keysScenes.length <= index) {
+            index = 0;
         }
-        sessionStorage.setItem(keysActiveName, pageIndex);
-        for (var i = 0; i < keysPages.length; i += 1) {
-            keysPages[i].classList.toggle("hidden", i != pageIndex);
+        sessionStorage.setItem(keysActiveName, index);
+        for (var i = 0; i < keysScenes.length; i += 1) {
+            keysScenes[i].classList.toggle("hidden", i != index);
         }
     }
 
     function showKeys(name) {
         showScene(keys);
         keysActiveName = "keys" + (name ? ":" + name : "");
-        var pageIndex = parseInt(sessionStorage.getItem(keysActiveName));
-        if (isNaN(pageIndex)) {
-            pageIndex = DEFAULT_KEYS_PAGE[name || ""] || 0;
+        var keysIndex = parseInt(sessionStorage.getItem(keysActiveName));
+        if (isNaN(keysIndex)) {
+            keysIndex = DEFAULT_KEYS_SCENE[name || ""] || 0;
         }
-        updateKeysPage(pageIndex);
+        showKeysScene(keysIndex);
         if (history.state != keysActiveName) {
             history.pushState(keysActiveName, "");
         }
@@ -431,13 +432,13 @@ window.addEventListener("load", function() {
         }
     });
     document.getElementById("switchbutton").addEventListener("click", function() {
-        var pageIndex = 0;
-        for (var i = 0; i < keysPages.length; i += 1) {
-            if (!keysPages[i].classList.contains("hidden")) {
-                pageIndex = i;
+        var keysIndex = 0;
+        for (var i = 0; i < keysScenes.length; i += 1) {
+            if (!keysScenes[i].classList.contains("hidden")) {
+                keysIndex = i;
             }
         }
-        updateKeysPage(pageIndex + 1);
+        showKeysScene(keysIndex + 1);
     });
     [
         {id: "browserbackbutton", key: KEY_BROWSER_BACK},

@@ -4,7 +4,7 @@
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 html {
@@ -21,13 +21,13 @@ html {
 
 html,
 body,
-body > div {
+.scene {
     width: 100%;
     height: 100%;
     margin: 0;
 }
 
-body > div {
+.scene {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -167,7 +167,7 @@ textarea {
     }
 }
 
-#keys {
+#keys .scene {
     padding: 0.5rem;
     padding-bottom: 0;
     justify-content: flex-end;
