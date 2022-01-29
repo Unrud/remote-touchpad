@@ -19,6 +19,21 @@
   <url type="homepage">https://github.com/Unrud/remote-touchpad</url>
   <developer_name>Unrud</developer_name>
   <releases>
+    <release version="1.1.0" date="2022-01-28">
+      <description>
+        <ul>
+          <li>Add more shortcut keys (Arrows, Delete, Enter, …)</li>
+          <li>Add basic support for physical keyboard</li>
+          <li>Allow fullscreen on keys page</li>
+          <li>Enable touchpad on keys page</li>
+          <li>Retain keyboard text when reloading website</li>
+          <li>Improve compatibility with old browsers</li>
+          <li>Write URL and QR code to stdout</li>
+          <li>Ignore unparseable IP</li>
+          <li>Remove trailing new line from QR code</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.0.5" date="2022-01-07">
       <description>
         <ul>
@@ -207,16 +222,16 @@
   </releases>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.0.5/screenshots/1.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.1.0/screenshots/1.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.0.5/screenshots/2.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.1.0/screenshots/2.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.0.5/screenshots/3.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.1.0/screenshots/3.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.0.5/screenshots/4.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.1.0/screenshots/4.png</image>
     </screenshot>
   </screenshots>
   <content_rating type="oars-1.1"/>

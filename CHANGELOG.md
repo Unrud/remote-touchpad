@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.1.0 (2022-01-28)
+
+* Add more shortcut keys (Arrows, Delete, Enter, …)
+* Add basic support for physical keyboard
+* Allow fullscreen on keys page
+* Enable touchpad on keys page
+* Retain keyboard text when reloading website
+* Improve compatibility with old browsers
+* Write URL and QR code to stdout
+* Ignore unparseable IP
+* Remove trailing new line from QR code
+
 ## 1.0.5 (2022-01-07)
 
 * Use relative URL for websocket
