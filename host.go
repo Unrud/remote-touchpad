@@ -53,10 +53,9 @@ func FindDefaultHost() string {
 			panic(err)
 		}
 		ip := net.ParseIP(host)
-		if ip == nil {
-			panic("Invalid IP address: " + host)
+		if ip != nil {
+			addIP(100, ip)
 		}
-		addIP(100, ip)
 	}
 	interfaces, _ := net.Interfaces()
 	for _, inter := range interfaces {
