@@ -46,7 +46,7 @@ const (
 	challengeLength         int           = 8
 	defaultBind             string        = ":0"
 	version                 string        = "1.1.0"
-	pretty_app_name         string        = "Remote Touchpad"
+	prettyAppName           string        = "Remote Touchpad"
 )
 
 func processCommand(backend Backend, command string) error {
@@ -140,7 +140,7 @@ func secureRandBase64(length int) string {
 }
 
 func main() {
-	TerminalSetTitle(pretty_app_name)
+	TerminalSetTitle(prettyAppName)
 	var bind, certFile, keyFile, secret string
 	var showVersion bool
 	flag.BoolVar(&showVersion, "version", false, "show program's version number and exit")
