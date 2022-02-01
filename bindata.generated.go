@@ -88,7 +88,7 @@ func webdataFnJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "webdata/fn.js", size: 16295, mode: os.FileMode(436), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "webdata/fn.js", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -108,7 +108,7 @@ func webdataIconPng() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "webdata/icon.png", size: 2654, mode: os.FileMode(436), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "webdata/icon.png", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -128,7 +128,7 @@ func webdataIconWoff() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "webdata/icon.woff", size: 3504, mode: os.FileMode(436), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "webdata/icon.woff", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -148,7 +148,7 @@ func webdataIndexHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "webdata/index.html", size: 2526, mode: os.FileMode(436), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "webdata/index.html", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -168,7 +168,7 @@ func webdataMainCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "webdata/main.css", size: 3240, mode: os.FileMode(436), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "webdata/main.css", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -188,7 +188,7 @@ func webdataSha256Js() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "webdata/sha256.js", size: 9380, mode: os.FileMode(436), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "webdata/sha256.js", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -208,7 +208,7 @@ func webdataTexPng() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "webdata/tex.png", size: 3878, mode: os.FileMode(436), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "webdata/tex.png", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
