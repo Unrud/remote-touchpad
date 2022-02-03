@@ -1,12 +1,10 @@
 package main
 
-//go:generate go-bindata-assetfs -nometadata -o ./bindata.generated.go webdata/...
+//go:generate go-bindata -nometadata -o ./bindata.generated.go webdata/...
 //go:generate gofmt -w ./bindata.generated.go
 
-import "net/http"
+import "github.com/elazarl/go-bindata-assetfs"
 
-func fixedAssetFS() http.FileSystem {
-	fs := assetFS()
-	fs.AssetInfo = AssetInfo
-	return fs
+func assetFS() *assetfs.AssetFS {
+	return &assetfs.AssetFS{Asset: Asset, AssetDir: AssetDir, AssetInfo: AssetInfo, Prefix: "webdata"}
 }

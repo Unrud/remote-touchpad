@@ -205,7 +205,7 @@ func main() {
 	}
 	port := addr.Port
 	mux := http.NewServeMux()
-	mux.Handle("/", http.FileServer(fixedAssetFS()))
+	mux.Handle("/", http.FileServer(assetFS()))
 	mux.Handle("/ws", websocket.Handler(func(ws *websocket.Conn) {
 		var message string
 		challenge := <-authenticationChallenges
