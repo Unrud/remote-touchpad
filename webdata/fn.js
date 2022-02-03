@@ -179,7 +179,7 @@ function handleStart(evt) {
     }
     var touches = evt.changedTouches;
     for (var i = 0; i < touches.length; i += 1) {
-        if (ongoingTouches.length == 0 && !touches[i].target.classList.contains("touchpad")) {
+        if (ongoingTouches.length == 0 && !touches[i].target.classList.contains("touch")) {
             continue;
         }
         evt.preventDefault();
