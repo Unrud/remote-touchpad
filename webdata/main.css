@@ -76,7 +76,7 @@ button:focus {
     max-width: 100%;
 }
 
-#padlabel {
+#pad > p {
     color: gray;
     text-shadow:
         -1px -1px 0 black,
@@ -89,7 +89,7 @@ button:focus {
 }
 
 @media (max-width: 32rem) {
-    #padlabel {
+    #pad > p {
         font-size: 13vw;
     }
 }
