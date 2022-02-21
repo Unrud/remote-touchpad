@@ -14,11 +14,6 @@ modules:
     sources:
       # Vendor dependencies: go mod vendor -v
       - type: git
-        url: https://github.com/elazarl/go-bindata-assetfs
-        tag: v1.0.1
-        commit: 234c15e7648ff35458026de92b34c637bae5e6f7
-        dest: vendor/github.com/elazarl/go-bindata-assetfs
-      - type: git
         url: https://github.com/godbus/dbus
         tag: v5.0.6
         commit: daa017464e266380cdeb4e6f9613eba9182b59a3
