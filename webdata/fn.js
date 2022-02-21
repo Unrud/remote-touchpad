@@ -153,21 +153,31 @@ function onDraggingTimeout() {
     ws.send("b" + POINTER_BUTTON_LEFT + ";0");
 }
 
-function updateMoveAndScroll() {
-    var moveX = Math.trunc(moveXSum);
-    var moveY = Math.trunc(moveYSum);
-    if (Math.abs(moveX) >= 1 || Math.abs(moveY) >= 1) {
-        moveXSum -= moveX;
-        moveYSum -= moveY;
-        ws.send("m" + moveX + ";" + moveY);
+function updateMove(x, y) {
+    moveXSum += x;
+    moveYSum += y;
+    var xInt = Math.trunc(moveXSum);
+    var yInt = Math.trunc(moveYSum);
+    if (xInt != 0 || yInt != 0) {
+        moveXSum -= xInt;
+        moveYSum -= yInt;
+        ws.send("m" + xInt + ";" + yInt);
     }
-    var scrollX = Math.trunc(scrollXSum);
-    var scrollY = Math.trunc(scrollYSum);
-    if (Math.abs(scrollX) >= 1 || Math.abs(scrollY) >= 1) {
-        scrollXSum -= scrollX;
-        scrollYSum -= scrollY;
-        scrolling = true;
-        ws.send("s" + scrollX + ";" + scrollY);
+}
+
+function updateScroll(x, y, scrollFinish) {
+    scrollXSum += x;
+    scrollYSum += y;
+    var xInt = Math.trunc(scrollXSum);
+    var yInt = Math.trunc(scrollYSum);
+    if (xInt != 0 || yInt != 0) {
+        scrollXSum -= xInt;
+        scrollYSum -= yInt;
+        ws.send((scrollFinish ? "S" : "s") + xInt + ";" + yInt);
+        scrolling = !scrollFinish;
+    } else if (scrollFinish && scrolling) {
+        ws.send("S");
+        scrolling = false;
     }
 }
 
@@ -202,10 +212,7 @@ function handleStart(evt) {
             draggingTimeout = null;
             dragging = true;
         }
-        if (scrolling) {
-            ws.send("S");
-            scrolling = false;
-        }
+        updateScroll(0, 0, true);
     }
 }
 
@@ -219,10 +226,7 @@ function handleEnd(evt) {
         ongoingTouches.splice(idx, 1);
         touchReleasedCount += 1;
         touchLastEnd = evt.timeStamp;
-        if (scrolling) {
-            ws.send("S");
-            scrolling = false;
-        }
+        updateScroll(0, 0, true);
     }
     if (touchReleasedCount > TOUCH_MOVE_THRESHOLD.length) {
         touchMoved = true;
@@ -281,13 +285,10 @@ function handleMove(evt) {
     }
     if (touchMoved && evt.timeStamp - touchLastEnd >= TOUCH_TIMEOUT) {
         if (ongoingTouches.length == 1 || dragging) {
-            moveXSum += sumX;
-            moveYSum += sumY;
+            updateMove(sumX, sumY);
         } else if (ongoingTouches.length == 2) {
-            scrollXSum -= sumX;
-            scrollYSum -= sumY;
+            updateScroll(-sumX, -sumY, false);
         }
-        updateMoveAndScroll();
     }
 }
 
