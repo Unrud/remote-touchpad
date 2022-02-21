@@ -89,25 +89,25 @@ type keybdInput struct {
 	padding [8]byte
 }
 
-type windowsBackend struct{}
+type windowsController struct{}
 
 func init() {
-	RegisterBackend("Windows", InitWindowsBackend, 0)
+	RegisterController("Windows", InitWindowsController, 0)
 }
 
-func InitWindowsBackend() (Backend, error) {
-	p := &windowsBackend{}
+func InitWindowsController() (Controller, error) {
+	p := &windowsController{}
 	if err := sendInputProc.Find(); err != nil {
 		return nil, UnsupportedPlatformError{err}
 	}
 	return p, nil
 }
 
-func (p *windowsBackend) Close() error {
+func (p *windowsController) Close() error {
 	return nil
 }
 
-func (p *windowsBackend) sendInput(inputs []keybdInput) error {
+func (p *windowsController) sendInput(inputs []keybdInput) error {
 	if len(inputs) == 0 {
 		return nil
 	}
@@ -119,7 +119,7 @@ func (p *windowsBackend) sendInput(inputs []keybdInput) error {
 	return nil
 }
 
-func (p *windowsBackend) KeyboardText(text string) error {
+func (p *windowsController) KeyboardText(text string) error {
 	inputs := make([]keybdInput, 0, len(text)*2)
 	for _, runeValue := range text {
 		in := keybdInput{typ: inputKeyboard, wScan: uint16(runeValue), dwFlags: keyeventfUnicode}
@@ -133,7 +133,7 @@ func (p *windowsBackend) KeyboardText(text string) error {
 	return p.sendInput(inputs)
 }
 
-func (p *windowsBackend) KeyboardKey(key Key) error {
+func (p *windowsController) KeyboardKey(key Key) error {
 	input := keybdInput{typ: inputKeyboard}
 	if key == KeyBackSpace {
 		input.wVk = vkBack
@@ -179,7 +179,7 @@ func (p *windowsBackend) KeyboardKey(key Key) error {
 	return p.sendInput(inputs[:])
 }
 
-func (p *windowsBackend) PointerButton(button PointerButton, press bool) error {
+func (p *windowsController) PointerButton(button PointerButton, press bool) error {
 	input := mouseInput{typ: inputMouse}
 	if button == PointerButtonLeft && press {
 		input.dwFlags = mouseeventfLeftdown
@@ -203,7 +203,7 @@ func (p *windowsBackend) PointerButton(button PointerButton, press bool) error {
 	return nil
 }
 
-func (p *windowsBackend) PointerMove(deltaX, deltaY int) error {
+func (p *windowsController) PointerMove(deltaX, deltaY int) error {
 	input := mouseInput{
 		typ:     inputMouse,
 		dx:      int32(deltaX),
@@ -217,7 +217,7 @@ func (p *windowsBackend) PointerMove(deltaX, deltaY int) error {
 	return nil
 }
 
-func (p *windowsBackend) PointerScroll(deltaHorizontal, deltaVertical int, finish bool) error {
+func (p *windowsController) PointerScroll(deltaHorizontal, deltaVertical int, finish bool) error {
 	inputs := make([]mouseInput, 0, 2)
 	if deltaHorizontal != 0 {
 		inputs = append(inputs, mouseInput{

@@ -56,12 +56,12 @@ type config struct {
 	MouseMoveSpeed   float64 `json:"mouseMoveSpeed"`
 }
 
-func processCommand(backend Backend, command string) error {
+func processCommand(controller Controller, command string) error {
 	if len(command) == 0 {
 		return errors.New("empty command")
 	}
 	if command == "S" {
-		return backend.PointerScroll(0, 0, true)
+		return controller.PointerScroll(0, 0, true)
 	}
 	if command[0] == 't' {
 		text := command[1:]
@@ -71,7 +71,7 @@ func processCommand(backend Backend, command string) error {
 		if !utf8.ValidString(text) {
 			return errors.New("invalid utf-8")
 		}
-		return backend.KeyboardText(text)
+		return controller.KeyboardText(text)
 	}
 	arguments := strings.Split(command[1:], ";")
 	if command[0] == 'k' && len(arguments) != 1 ||
@@ -86,20 +86,20 @@ func processCommand(backend Backend, command string) error {
 		if x < 0 || x >= int64(KeyLimit) {
 			return errors.New("unsupported key")
 		}
-		return backend.KeyboardKey(Key(x))
+		return controller.KeyboardKey(Key(x))
 	}
 	y, err := strconv.ParseInt(arguments[1], 10, 32)
 	if err != nil {
 		return err
 	}
 	if command[0] == 'm' {
-		return backend.PointerMove(int(x), int(y))
+		return controller.PointerMove(int(x), int(y))
 	}
 	if command[0] == 's' {
-		return backend.PointerScroll(int(x), int(y), false)
+		return controller.PointerScroll(int(x), int(y), false)
 	}
 	if command[0] == 'S' {
-		return backend.PointerScroll(int(x), int(y), true)
+		return controller.PointerScroll(int(x), int(y), true)
 	}
 	if command[0] == 'b' {
 		if x < 0 || x >= int64(PointerButtonLimit) {
@@ -109,7 +109,7 @@ func processCommand(backend Backend, command string) error {
 		if y == 0 {
 			b = false
 		}
-		return backend.PointerButton(PointerButton(x), b)
+		return controller.PointerButton(PointerButton(x), b)
 	}
 	return errors.New("unsupported command")
 }
@@ -178,25 +178,25 @@ func main() {
 	if secret == "" {
 		secret = secureRandBase64(defaultSecretLength)
 	}
-	var backend Backend
-	var backendName string
+	var controller Controller
+	var controllerName string
 	platformErrors := ""
-	for _, backendInfo := range Backends {
-		backendName = backendInfo.Name
+	for _, controllerInfo := range Controllers {
+		controllerName = controllerInfo.Name
 		var err error
-		backend, err = backendInfo.Init()
+		controller, err = controllerInfo.Init()
 		if err == nil {
 			break
 		} else if _, ok := err.(UnsupportedPlatformError); ok {
-			platformErrors += fmt.Sprintf("%s backend: %v\n", backendName, err)
+			platformErrors += fmt.Sprintf("%s controller: %v\n", controllerName, err)
 		} else {
-			log.Fatalf("%s backend: %v", backendName, err)
+			log.Fatalf("%s controller: %v", controllerName, err)
 		}
 	}
-	if backend == nil {
+	if controller == nil {
 		log.Fatal("unsupported platform:\n" + platformErrors)
 	}
-	defer backend.Close()
+	defer controller.Close()
 	authenticationChallenges := make(chan challenge, authenticationRateBurst)
 	go authenticationChallengeGenerator(secret, authenticationChallenges)
 	listener, err := net.Listen("tcp", bind)
@@ -236,8 +236,8 @@ func main() {
 			if err := websocket.Message.Receive(ws, &message); err != nil {
 				return
 			}
-			if err := processCommand(backend, message); err != nil {
-				log.Printf("%s backend: %v", backendName, err)
+			if err := processCommand(controller, message); err != nil {
+				log.Printf("%s controller: %v", controllerName, err)
 				return
 			}
 		}

@@ -53,19 +53,19 @@ const (
 	KeyLimit
 )
 
-type BackendInfo struct {
+type ControllerInfo struct {
 	Name string
-	Init func() (Backend, error)
+	Init func() (Controller, error)
 
 	priority int
 }
 
-var Backends []BackendInfo
+var Controllers []ControllerInfo
 
-func RegisterBackend(name string, init func() (Backend, error), priority int) {
-	Backends = append(Backends, BackendInfo{name, init, priority})
-	sort.SliceStable(Backends, func(i, j int) bool {
-		return Backends[i].priority < Backends[j].priority
+func RegisterController(name string, init func() (Controller, error), priority int) {
+	Controllers = append(Controllers, ControllerInfo{name, init, priority})
+	sort.SliceStable(Controllers, func(i, j int) bool {
+		return Controllers[i].priority < Controllers[j].priority
 	})
 }
 
@@ -77,7 +77,7 @@ func (e UnsupportedPlatformError) Error() string {
 	return e.err.Error()
 }
 
-type Backend interface {
+type Controller interface {
 	Close() error
 	KeyboardText(text string) error
 	KeyboardKey(key Key) error

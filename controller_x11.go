@@ -44,17 +44,17 @@ const (
 var modifierIndices [6]uint = [...]uint{C.ShiftMapIndex, C.Mod1MapIndex,
 	C.Mod2MapIndex, C.Mod3MapIndex, C.Mod4MapIndex, C.Mod5MapIndex}
 
-type x11Backend struct {
+type x11Controller struct {
 	display                          *C.Display
 	lock                             sync.Mutex
 	scrollHorizontal, scrollVertical int
 }
 
 func init() {
-	RegisterBackend("X11", InitX11Backend, 0)
+	RegisterController("X11", InitX11Controller, 0)
 }
 
-func InitX11Backend() (Backend, error) {
+func InitX11Controller() (Controller, error) {
 	sessionType := os.Getenv("XDG_SESSION_TYPE")
 	if sessionType != "" && sessionType != "x11" {
 		return nil, UnsupportedPlatformError{errors.New(fmt.Sprintf(
@@ -65,10 +65,10 @@ func InitX11Backend() (Backend, error) {
 		return nil, UnsupportedPlatformError{
 			errors.New("failed to connect to X server")}
 	}
-	return &x11Backend{display: display}, nil
+	return &x11Controller{display: display}, nil
 }
 
-func (p *x11Backend) Close() error {
+func (p *x11Controller) Close() error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	if p.display == nil {
@@ -79,7 +79,7 @@ func (p *x11Backend) Close() error {
 	return nil
 }
 
-func (p *x11Backend) findEmptyKeycodeLocked() (C.KeyCode, C.int, error) {
+func (p *x11Controller) findEmptyKeycodeLocked() (C.KeyCode, C.int, error) {
 	var minKeycodes, maxKeycodes C.int
 	C.XDisplayKeycodes(p.display, &minKeycodes, &maxKeycodes)
 	var keysymsPerKeycode C.int
@@ -105,7 +105,7 @@ keycodes:
 	return 0, 0, errors.New("no empty keycode found")
 }
 
-func (p *x11Backend) changeKeyMappingLocked(keysymsPerKeycode C.int,
+func (p *x11Controller) changeKeyMappingLocked(keysymsPerKeycode C.int,
 	keycode C.KeyCode, keysym Keysym) {
 	keycodeMapping := make([]C.KeySym, keysymsPerKeycode)
 	for i := range keycodeMapping {
@@ -116,7 +116,7 @@ func (p *x11Backend) changeKeyMappingLocked(keysymsPerKeycode C.int,
 	C.XFlush(p.display)
 }
 
-func (p *x11Backend) getModKeycodesLocked() map[uint]C.KeyCode {
+func (p *x11Controller) getModKeycodesLocked() map[uint]C.KeyCode {
 	modKeymap := C.XGetModifierMapping(p.display)
 	defer C.XFreeModifiermap(modKeymap)
 	modKeycodes := make(map[uint]C.KeyCode)
@@ -133,7 +133,7 @@ func (p *x11Backend) getModKeycodesLocked() map[uint]C.KeyCode {
 	return modKeycodes
 }
 
-func (p *x11Backend) findKeycodeLocked(keyboard C.XkbDescPtr,
+func (p *x11Controller) findKeycodeLocked(keyboard C.XkbDescPtr,
 	modKeycodes map[uint]C.KeyCode, activeMods C.uint,
 	keysym Keysym) (C.KeyCode, C.uint) {
 	keycode := C.XKeysymToKeycode(p.display, C.KeySym(keysym))
@@ -169,7 +169,7 @@ func (p *x11Backend) findKeycodeLocked(keyboard C.XkbDescPtr,
 	return 0, 0
 }
 
-func (p *x11Backend) sendModsLocked(modKeycodes map[uint]C.KeyCode, mods C.uint,
+func (p *x11Controller) sendModsLocked(modKeycodes map[uint]C.KeyCode, mods C.uint,
 	press bool) {
 	var pressC C.int = C.False
 	if press {
@@ -182,7 +182,7 @@ func (p *x11Backend) sendModsLocked(modKeycodes map[uint]C.KeyCode, mods C.uint,
 	}
 }
 
-func (p *x11Backend) keyboardKeys(keys []Keysym) error {
+func (p *x11Controller) keyboardKeys(keys []Keysym) error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	if p.display == nil {
@@ -240,7 +240,7 @@ func (p *x11Backend) keyboardKeys(keys []Keysym) error {
 	return nil
 }
 
-func (p *x11Backend) KeyboardText(text string) error {
+func (p *x11Controller) KeyboardText(text string) error {
 	keys := make([]Keysym, 0, len(text))
 	for _, runeValue := range text {
 		keysym, err := RuneToKeysym(runeValue)
@@ -252,7 +252,7 @@ func (p *x11Backend) KeyboardText(text string) error {
 	return p.keyboardKeys(keys)
 }
 
-func (p *x11Backend) KeyboardKey(key Key) error {
+func (p *x11Controller) KeyboardKey(key Key) error {
 	keysym, err := KeyToKeysym(key)
 	if err != nil {
 		return err
@@ -261,7 +261,7 @@ func (p *x11Backend) KeyboardKey(key Key) error {
 	return p.keyboardKeys(keys[:])
 }
 
-func (p *x11Backend) sendButton(button uint, press bool) error {
+func (p *x11Controller) sendButton(button uint, press bool) error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	if p.display == nil {
@@ -279,7 +279,7 @@ func (p *x11Backend) sendButton(button uint, press bool) error {
 	return nil
 }
 
-func (p *x11Backend) PointerButton(button PointerButton, press bool) error {
+func (p *x11Controller) PointerButton(button PointerButton, press bool) error {
 	if button == PointerButtonLeft {
 		return p.sendButton(1, press)
 	}
@@ -292,7 +292,7 @@ func (p *x11Backend) PointerButton(button PointerButton, press bool) error {
 	return errors.New("unsupported pointer button")
 }
 
-func (p *x11Backend) PointerMove(deltaX, deltaY int) error {
+func (p *x11Controller) PointerMove(deltaX, deltaY int) error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	if p.display == nil {
@@ -303,7 +303,7 @@ func (p *x11Backend) PointerMove(deltaX, deltaY int) error {
 	return nil
 }
 
-func (p *x11Backend) PointerScroll(deltaHorizontal, deltaVertical int, finish bool) error {
+func (p *x11Controller) PointerScroll(deltaHorizontal, deltaVertical int, finish bool) error {
 	p.lock.Lock()
 	stepsHorizontal := (p.scrollHorizontal + deltaHorizontal) / scrollDiv
 	stepsVertical := (p.scrollVertical + deltaVertical) / scrollDiv
