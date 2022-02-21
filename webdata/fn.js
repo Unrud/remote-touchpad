@@ -295,27 +295,33 @@ function handleKeydown(evt) {
     if (evt.ctrlKey || evt.altKey || evt.isComposing) {
         return;
     }
-    var key = {
-        "OS": KEY_SUPER,
-        "Super": KEY_SUPER,
-        "Meta": KEY_SUPER,
-        "Backspace": KEY_BACK_SPACE,
-        "Enter": KEY_RETURN,
-        "Delete": KEY_DELETE,
-        "Home": KEY_HOME,
-        "End": KEY_END,
-        "Left": KEY_LEFT,
-        "ArrowLeft": KEY_LEFT,
-        "Right": KEY_RIGHT,
-        "ArrowRight": KEY_RIGHT,
-        "Up": KEY_UP,
-        "ArrowUp": KEY_UP,
-        "Down": KEY_DOWN,
-        "ArrowDown": KEY_DOWN
-    }[evt.key];
-    if (key != undefined && !evt.shiftKey) {
-        evt.preventDefault();
-        ws.send("k" + key);
+    var key = null;
+    if (evt.key == "OS" || evt.key == "Super" || evt.key == "Meta") {
+        key = KEY_SUPER;
+    } else if (evt.key == "Backspace") {
+        key = KEY_BACK_SPACE;
+    } else if (evt.key == "Enter") {
+        key = KEY_RETURN;
+    } else if (evt.key == "Delete") {
+        key = KEY_DELETE;
+    } else if (evt.key == "Home") {
+        key = KEY_HOME;
+    } else if (evt.key == "End") {
+        key = KEY_END;
+    } else if (evt.key == "Left" || evt.key == "ArrowLeft") {
+        key = KEY_LEFT;
+    } else if (evt.key == "Right" || evt.key == "ArrowRight") {
+        key = KEY_RIGHT;
+    } else if (evt.key == "Up" || evt.key == "ArrowUp") {
+        key = KEY_UP;
+    } else if (evt.key == "Down" || evt.key == "ArrowDown") {
+        key = KEY_DOWN;
+    }
+    if (key != null) {
+        if (!evt.shiftKey) {
+            evt.preventDefault();
+            ws.send("k" + key);
+        }
     } else if (evt.key.length == 1) {
         evt.preventDefault();
         ws.send("t" + evt.key);
