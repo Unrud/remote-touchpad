@@ -217,6 +217,7 @@ function handleTouchend(evt) {
         if (idx < 0) {
             continue;
         }
+        evt.preventDefault();
         ongoingTouches.splice(idx, 1);
         touchReleasedCount += 1;
         touchLastEnd = evt.timeStamp;
@@ -259,6 +260,7 @@ function handleTouchmove(evt) {
         if (idx < 0) {
             continue;
         }
+        evt.preventDefault();
         if (!touchMoved) {
             var dist = Math.sqrt(Math.pow(touches[i].pageX - ongoingTouches[idx].pageXStart, 2) +
                 Math.pow(touches[i].pageY - ongoingTouches[idx].pageYStart, 2));
