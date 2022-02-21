@@ -498,7 +498,7 @@ window.addEventListener("load", function() {
     document.addEventListener("touchend", handleEnd);
     document.addEventListener("touchcancel", handleEnd);
     document.addEventListener("touchmove", handleMove);
-    window.addEventListener("keydown", function(evt) {
+    document.addEventListener("keydown", function(evt) {
         if (activeScene && activeScene.classList.contains("key")) {
             handleKeydown(evt);
         }
