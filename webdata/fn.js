@@ -408,6 +408,7 @@ window.addEventListener("load", function() {
         "keyboard": 1
     };
     var ready = false;
+    var closed = false;
     var scenes = document.querySelectorAll("body > .scene");
     var openingScene = document.getElementById("opening");
     var closedScene = document.getElementById("closed");
@@ -471,7 +472,21 @@ window.addEventListener("load", function() {
         sessionStorage.setItem("keyboard", keyboardTextarea.value);
     };
 
-    showScene(opening);
+    function updateUI() {
+        if (!ready) {
+            showScene(closed ? closedScene : openingScene);
+        } else if (pointerLockElement()) {
+            showScene(mouseScene);
+        } else if ((history.state || "").split(":")[0] == "keys") {
+            showKeys(history.state.substr("keys:".length));
+        } else if (history.state == "keyboard") {
+            showKeyboard();
+        } else {
+            showScene(padScene);
+        }
+    }
+
+    updateUI();
 
     var wsURL = new URL("ws", location.href);
     wsURL.protocol = wsURL.protocol == "http:" ? "ws:" : "wss:";
@@ -492,12 +507,13 @@ window.addEventListener("load", function() {
             return;
         }
         ready = true;
-        window.onpopstate();
+        updateUI();
     };
 
     ws.onclose = function() {
         ready = false;
-        showScene(closedScene);
+        closed = true;
+        updateUI();
     };
 
     document.getElementById("keysbutton").addEventListener("click", function() {
@@ -506,11 +522,7 @@ window.addEventListener("load", function() {
     document.getElementById("keyboardbutton").addEventListener("click", function() {
         showKeyboard();
     });
-    addFullscreenchangeEventListener(function() {
-        if (fullscreenElement() && !activeScene.classList.contains("fullscreen")) {
-            exitFullscreen();
-        }
-    });
+    addFullscreenchangeEventListener(updateUI);
     if (!fullscreenEnabled()) {
         fullscreenbutton.classList.add("hidden");
     }
@@ -565,19 +577,7 @@ window.addEventListener("load", function() {
         }
         history.back();
     });
-    window.onpopstate = function() {
-        if (ready) {
-            if (pointerLockElement()) {
-                showScene(mouseScene);
-            } else if ((history.state || "").split(":")[0] == "keys") {
-                showKeys(history.state.substr("keys:".length));
-            } else if (history.state == "keyboard") {
-                showKeyboard();
-            } else {
-                showScene(padScene);
-            }
-        }
-    };
+    window.addEventListener("popstate", updateUI);
     document.getElementById("reloadbutton").addEventListener("click", function() {
         location.reload();
     });
@@ -595,12 +595,7 @@ window.addEventListener("load", function() {
             handleKeydown(evt);
         }
     });
-    addPointerlockchangeEventListener(function() {
-        if (pointerLockElement() && !ready) {
-            exitPointerLock();
-        }
-        window.onpopstate();
-    });
+    addPointerlockchangeEventListener(updateUI);
     document.addEventListener("mousedown", function(event) {
         if (activeScene != mouseScene && event.buttons == 1 && event.target.classList.contains("touch")) {
             requestPointerLock(mouseScene);
