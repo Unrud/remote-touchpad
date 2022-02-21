@@ -181,7 +181,7 @@ function updateScroll(x, y, scrollFinish) {
     }
 }
 
-function handleStart(evt) {
+function handleTouchstart(evt) {
     // Might get called multiple times for the same touches
     if (ongoingTouches.length == 0) {
         touchStart = evt.timeStamp;
@@ -210,7 +210,7 @@ function handleStart(evt) {
     }
 }
 
-function handleEnd(evt) {
+function handleTouchend(evt) {
     var touches = evt.changedTouches;
     for (var i = 0; i < touches.length; i += 1) {
         var idx = ongoingTouchIndexById(touches[i].identifier);
@@ -250,7 +250,7 @@ function handleEnd(evt) {
     }
 }
 
-function handleMove(evt) {
+function handleTouchmove(evt) {
     var sumX = 0;
     var sumY = 0;
     var touches = evt.changedTouches;
@@ -495,10 +495,10 @@ window.addEventListener("load", function() {
             history.back();
         });
     });
-    document.addEventListener("touchstart", handleStart);
-    document.addEventListener("touchend", handleEnd);
-    document.addEventListener("touchcancel", handleEnd);
-    document.addEventListener("touchmove", handleMove);
+    document.addEventListener("touchstart", handleTouchstart);
+    document.addEventListener("touchend", handleTouchend);
+    document.addEventListener("touchcancel", handleTouchend);
+    document.addEventListener("touchmove", handleTouchmove);
     document.addEventListener("keydown", function(evt) {
         if (activeScene && activeScene.classList.contains("key")) {
             handleKeydown(evt);
