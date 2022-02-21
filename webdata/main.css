@@ -76,7 +76,8 @@ button:focus {
     max-width: 100%;
 }
 
-#pad > p {
+#pad > p,
+#mouse > p {
     color: gray;
     text-shadow:
         -1px -1px 0 black,
@@ -89,7 +90,8 @@ button:focus {
 }
 
 @media (max-width: 32rem) {
-    #pad > p {
+    #pad > p,
+    #mouse > p {
         font-size: 13vw;
     }
 }

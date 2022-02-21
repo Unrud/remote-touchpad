@@ -67,6 +67,7 @@ var scrollYSum = 0;
 var dragging = false;
 var draggingTimeout = null;
 var scrolling = false;
+var mouseButtons = 0;
 
 function fullscreenEnabled() {
     return (document.fullscreenEnabled ||
@@ -106,6 +107,36 @@ function fullscreenElement() {
         document.mozFullScreenElement ||
         document.msFullscreenElement ||
         null);
+}
+
+function requestPointerLock(element) {
+    if (element.requestPointerLock) {
+        element.requestPointerLock();
+    } else if (element.mozRequestPointerLock) {
+        element.mozRequestPointerLock();
+    }
+}
+
+function exitPointerLock() {
+    if (document.exitPointerLock) {
+        document.exitPointerLock();
+    } else if (document.mozExitPointerLock) {
+        document.mozExitPointerLock();
+    }
+}
+
+function pointerLockElement() {
+    return (document.pointerLockElement ||
+        document.mozPointerLockElement ||
+        null);
+}
+
+function addPointerlockchangeEventListener(listener) {
+    if ("onpointerlockchange" in document) {
+        document.addEventListener("pointerlockchange", listener);
+    } else if ("onmozpointerlockchange" in document) {
+        document.addEventListener("mozpointerlockchange", listener);
+    }
 }
 
 function copyTouch(touch, timeStamp) {
@@ -325,6 +356,36 @@ function handleKeydown(evt) {
     }
 }
 
+function updateMouseButtons(buttons) {
+    for (var button = 0; button < 3; button += 1) {
+        var flag = 1 << button;
+        if ((buttons&flag) != (mouseButtons&flag)) {
+            ws.send("b" + button + ";" + (buttons&flag ? 1 : 0));
+        }
+    }
+    mouseButtons = buttons;
+}
+
+function handleMousedown(evt) {
+    updateMouseButtons(evt.buttons);
+}
+
+function handleMouseup(evt) {
+    updateMouseButtons(evt.buttons);
+}
+
+function handleMousemove(evt) {
+    updateMove(evt.movementX, evt.movementY);
+}
+
+function handleWheel(evt) {
+    if (evt.deltaMode == WheelEvent.DOM_DELTA_PIXEL) {
+        updateScroll(evt.deltaX, evt.deltaY, true);
+    } else if (evt.deltaMode == WheelEvent.DOM_DELTA_LINE) {
+        updateScroll(evt.deltaX*20, evt.deltaY*20, true);
+    }
+}
+
 function challengeResponse(message) {
     var shaObj = new jsSHA("SHA-256", "TEXT");
     shaObj.setHMACKey(message, "TEXT");
@@ -347,6 +408,7 @@ window.addEventListener("load", function() {
     var keyboard = document.getElementById("keyboard");
     var fullscreenbutton = document.getElementById("fullscreenbutton");
     var keyboardtext = document.getElementById("keyboardtext");
+    var mouse = document.getElementById("mouse")
     var activeScene;
     var keysActiveName;
 
@@ -354,6 +416,9 @@ window.addEventListener("load", function() {
         activeScene = scene;
         if (fullscreenElement() && !scene.classList.contains("fullscreen")) {
             exitFullscreen();
+        }
+        if (pointerLockElement() && activeScene != mouse) {
+            exitPointerLock();
         }
         keyboardtext.value = "";
         scenes.forEach(function(otherScene) {
@@ -480,7 +545,9 @@ window.addEventListener("load", function() {
     });
     window.onpopstate = function() {
         if (authenticated) {
-            if ((history.state || "").split(":")[0] == "keys") {
+            if (pointerLockElement()) {
+                showScene(mouse);
+            } else if ((history.state || "").split(":")[0] == "keys") {
                 showKeys(history.state.substr("keys:".length));
             } else if (history.state == "keyboard") {
                 showKeyboard();
@@ -506,4 +573,24 @@ window.addEventListener("load", function() {
             handleKeydown(evt);
         }
     });
+    addPointerlockchangeEventListener(function() {
+        if (pointerLockElement() && !authenticated) {
+            exitPointerLock();
+        }
+        window.onpopstate();
+    });
+    document.addEventListener("mousedown", function(event) {
+        if (activeScene != mouse && event.buttons == 1 && event.target.classList.contains("touch")) {
+            requestPointerLock(mouse);
+        }
+    });
+    ["touchstart", "touchend", "touchcancel", "touchmove"].forEach(function(type) {
+        mouse.addEventListener(type, function(evt) {
+            evt.preventDefault();
+        });
+    });
+    mouse.addEventListener("mousedown", handleMousedown);
+    mouse.addEventListener("mouseup", handleMouseup);
+    mouse.addEventListener("mousemove", handleMousemove);
+    mouse.addEventListener("wheel", handleWheel);
 });
