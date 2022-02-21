@@ -110,6 +110,14 @@ function fullscreenElement() {
         null);
 }
 
+function addFullscreenchangeEventListener(listener) {
+    if ("onfullscreenchange" in document) {
+        document.addEventListener("fullscreenchange", listener);
+    } else if ("onwebkitfullscreenchange" in document) {
+        document.addEventListener("webkitfullscreenchange", listener);
+    }
+}
+
 function requestPointerLock(element) {
     if (element.requestPointerLock) {
         element.requestPointerLock();
@@ -497,6 +505,11 @@ window.addEventListener("load", function() {
     });
     document.getElementById("keyboardbutton").addEventListener("click", function() {
         showKeyboard();
+    });
+    addFullscreenchangeEventListener(function() {
+        if (fullscreenElement() && !activeScene.classList.contains("fullscreen")) {
+            exitFullscreen();
+        }
     });
     if (!fullscreenEnabled()) {
         fullscreenbutton.classList.add("hidden");
