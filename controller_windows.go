@@ -230,7 +230,7 @@ func (p *windowsController) PointerScroll(deltaHorizontal, deltaVertical int, fi
 		inputs = append(inputs, mouseInput{
 			typ:       inputMouse,
 			dwFlags:   mouseeventfWheel,
-			mouseData: uint32(deltaVertical * scrollMult),
+			mouseData: uint32(-deltaVertical * scrollMult),
 		})
 	}
 	if len(inputs) == 0 {
