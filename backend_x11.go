@@ -299,12 +299,17 @@ func (p *x11Backend) PointerMove(deltaX, deltaY int) error {
 	return nil
 }
 
-func (p *x11Backend) PointerScroll(deltaHorizontal, deltaVertical int) error {
+func (p *x11Backend) PointerScroll(deltaHorizontal, deltaVertical int, finish bool) error {
 	p.lock.Lock()
 	stepsHorizontal := (p.scrollHorizontal + deltaHorizontal) / scrollDiv
 	stepsVertical := (p.scrollVertical + deltaVertical) / scrollDiv
-	p.scrollHorizontal = (p.scrollHorizontal + deltaHorizontal) % scrollDiv
-	p.scrollVertical = (p.scrollVertical + deltaVertical) % scrollDiv
+	if finish {
+		p.scrollHorizontal = 0
+		p.scrollVertical = 0
+	} else {
+		p.scrollHorizontal = (p.scrollHorizontal + deltaHorizontal) % scrollDiv
+		p.scrollVertical = (p.scrollVertical + deltaVertical) % scrollDiv
+	}
 	p.lock.Unlock()
 	var buttonHorizontal uint = 7
 	if stepsHorizontal < 0 {
@@ -332,13 +337,5 @@ func (p *x11Backend) PointerScroll(deltaHorizontal, deltaVertical int) error {
 			return err
 		}
 	}
-	return nil
-}
-
-func (p *x11Backend) PointerScrollFinish() error {
-	p.lock.Lock()
-	defer p.lock.Unlock()
-	p.scrollHorizontal = 0
-	p.scrollVertical = 0
 	return nil
 }

@@ -213,7 +213,7 @@ func (p *windowsBackend) PointerMove(deltaX, deltaY int) error {
 	return nil
 }
 
-func (p *windowsBackend) PointerScroll(deltaHorizontal, deltaVertical int) error {
+func (p *windowsBackend) PointerScroll(deltaHorizontal, deltaVertical int, finish bool) error {
 	inputs := make([]mouseInput, 0, 2)
 	if deltaHorizontal != 0 {
 		inputs = append(inputs, mouseInput{
@@ -237,9 +237,5 @@ func (p *windowsBackend) PointerScroll(deltaHorizontal, deltaVertical int) error
 		unsafe.Sizeof(inputs[0])); int(r) != len(inputs) {
 		return err
 	}
-	return nil
-}
-
-func (p *windowsBackend) PointerScrollFinish() error {
 	return nil
 }

@@ -76,6 +76,5 @@ type Backend interface {
 	KeyboardKey(key Key) error
 	PointerButton(button PointerButton, press bool) error
 	PointerMove(deltaX, deltaY int) error
-	PointerScroll(deltaHorizontal, deltaVertical int) error
-	PointerScrollFinish() error
+	PointerScroll(deltaHorizontal, deltaVertical int, finish bool) error
 }

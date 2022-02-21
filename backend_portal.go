@@ -268,7 +268,7 @@ func (p *portalBackend) PointerMove(deltaX, deltaY int) error {
 	return nil
 }
 
-func (p *portalBackend) pointerScrollFull(deltaHorizontal, deltaVertical int, finish bool) error {
+func (p *portalBackend) PointerScroll(deltaHorizontal, deltaVertical int, finish bool) error {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
 	if p.bus == nil {
@@ -281,12 +281,4 @@ func (p *portalBackend) pointerScrollFull(deltaHorizontal, deltaVertical int, fi
 		return err
 	}
 	return nil
-}
-
-func (p *portalBackend) PointerScroll(deltaHorizontal, deltaVertical int) error {
-	return p.pointerScrollFull(deltaHorizontal, deltaVertical, false)
-}
-
-func (p *portalBackend) PointerScrollFinish() error {
-	return p.pointerScrollFull(0, 0, true)
 }

@@ -53,8 +53,8 @@ func processCommand(backend Backend, command string) error {
 	if len(command) == 0 {
 		return errors.New("empty command")
 	}
-	if command == "sf" {
-		return backend.PointerScrollFinish()
+	if command == "S" {
+		return backend.PointerScroll(0, 0, true)
 	}
 	if command[0] == 't' {
 		text := command[1:]
@@ -89,7 +89,10 @@ func processCommand(backend Backend, command string) error {
 		return backend.PointerMove(int(x), int(y))
 	}
 	if command[0] == 's' {
-		return backend.PointerScroll(int(x), int(y))
+		return backend.PointerScroll(int(x), int(y), false)
+	}
+	if command[0] == 'S' {
+		return backend.PointerScroll(int(x), int(y), true)
 	}
 	if command[0] == 'b' {
 		if x < 0 || x >= int64(PointerButtonLimit) {

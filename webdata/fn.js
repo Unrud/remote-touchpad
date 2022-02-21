@@ -203,7 +203,7 @@ function handleStart(evt) {
             dragging = true;
         }
         if (scrolling) {
-            ws.send("sf");
+            ws.send("S");
             scrolling = false;
         }
     }
@@ -220,7 +220,7 @@ function handleEnd(evt) {
         touchReleasedCount += 1;
         touchLastEnd = evt.timeStamp;
         if (scrolling) {
-            ws.send("sf");
+            ws.send("S");
             scrolling = false;
         }
     }
