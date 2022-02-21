@@ -53,7 +53,8 @@ var KEY_BACK_SPACE = 15;
 var KEY_DELETE = 16;
 var KEY_RETURN = 17;
 
-var ws;
+var ws = null;
+var config = null;
 
 var touchMoved = false;
 var touchStart = 0;
@@ -312,9 +313,9 @@ function handleTouchmove(evt) {
     }
     if (touchMoved && evt.timeStamp - touchLastEnd >= TOUCH_TIMEOUT) {
         if (ongoingTouches.length == 1 || dragging) {
-            updateMove(sumX, sumY);
+            updateMove(sumX*config.moveSpeed, sumY*config.moveSpeed);
         } else if (ongoingTouches.length == 2) {
-            updateScroll(-sumX, -sumY, false);
+            updateScroll(-sumX*config.scrollSpeed, -sumY*config.scrollSpeed, false);
         }
     }
 }
@@ -375,14 +376,14 @@ function handleMouseup(evt) {
 }
 
 function handleMousemove(evt) {
-    updateMove(evt.movementX, evt.movementY);
+    updateMove(evt.movementX*config.mouseMoveSpeed, evt.movementY*config.mouseMoveSpeed);
 }
 
 function handleWheel(evt) {
     if (evt.deltaMode == WheelEvent.DOM_DELTA_PIXEL) {
-        updateScroll(evt.deltaX, evt.deltaY, true);
+        updateScroll(evt.deltaX*config.mouseScrollSpeed, evt.deltaY*config.mouseScrollSpeed, true);
     } else if (evt.deltaMode == WheelEvent.DOM_DELTA_LINE) {
-        updateScroll(evt.deltaX*20, evt.deltaY*20, true);
+        updateScroll(evt.deltaX*20*config.mouseScrollSpeed, evt.deltaY*20*config.mouseScrollSpeed, true);
     }
 }
 
@@ -398,7 +399,7 @@ window.addEventListener("load", function() {
         "": 0,
         "keyboard": 1
     };
-    var authenticated = false;
+    var ready = false;
     var scenes = document.querySelectorAll("body > .scene");
     var opening = document.getElementById("opening");
     var closed = document.getElementById("closed");
@@ -468,18 +469,26 @@ window.addEventListener("load", function() {
     wsURL.protocol = wsURL.protocol == "http:" ? "ws:" : "wss:";
     ws = new WebSocket(wsURL);
 
+    var authenticated = false;
     ws.onmessage = function(evt) {
-        if (authenticated) {
+        if (!authenticated) {
+            ws.send(challengeResponse(evt.data));
+            authenticated = true;
+            return;
+        }
+        try {
+            config = JSON.parse(evt.data);
+        } catch (e) {
+            console.log(e);
             ws.close();
             return;
         }
-        ws.send(challengeResponse(evt.data));
-        authenticated = true;
+        ready = true;
         window.onpopstate();
     };
 
     ws.onclose = function() {
-        authenticated = false;
+        ready = false;
         showScene(closed);
     };
 
@@ -544,7 +553,7 @@ window.addEventListener("load", function() {
         history.back();
     });
     window.onpopstate = function() {
-        if (authenticated) {
+        if (ready) {
             if (pointerLockElement()) {
                 showScene(mouse);
             } else if ((history.state || "").split(":")[0] == "keys") {
@@ -574,7 +583,7 @@ window.addEventListener("load", function() {
         }
     });
     addPointerlockchangeEventListener(function() {
-        if (pointerLockElement() && !authenticated) {
+        if (pointerLockElement() && !ready) {
             exitPointerLock();
         }
         window.onpopstate();

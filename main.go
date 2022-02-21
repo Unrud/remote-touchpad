@@ -49,6 +49,13 @@ const (
 	prettyAppName           string        = "Remote Touchpad"
 )
 
+type config struct {
+	ScrollSpeed      float64 `json:"scrollSpeed"`
+	MoveSpeed        float64 `json:"moveSpeed"`
+	MouseScrollSpeed float64 `json:"mouseScrollSpeed"`
+	MouseMoveSpeed   float64 `json:"mouseMoveSpeed"`
+}
+
 func processCommand(backend Backend, command string) error {
 	if len(command) == 0 {
 		return errors.New("empty command")
@@ -146,11 +153,16 @@ func main() {
 	TerminalSetTitle(prettyAppName)
 	var bind, certFile, keyFile, secret string
 	var showVersion bool
+	var config config
 	flag.BoolVar(&showVersion, "version", false, "show program's version number and exit")
 	flag.StringVar(&bind, "bind", defaultBind, "bind server to [HOSTNAME]:PORT")
 	flag.StringVar(&secret, "secret", "", "shared secret for client authentication")
 	flag.StringVar(&certFile, "cert", "", "file containing TLS certificate")
 	flag.StringVar(&keyFile, "key", "", "file containing TLS private key")
+	flag.Float64Var(&config.MoveSpeed, "move-speed", 1, "move speed multiplier")
+	flag.Float64Var(&config.ScrollSpeed, "scroll-speed", 1, "scroll speed multiplier")
+	flag.Float64Var(&config.MouseMoveSpeed, "mouse-move-speed", 1, "mouse move speed multiplier")
+	flag.Float64Var(&config.MouseScrollSpeed, "mouse-scroll-speed", 1, "mouse scroll speed multiplier")
 	flag.Parse()
 	if showVersion {
 		fmt.Println(version)
@@ -219,6 +231,7 @@ func main() {
 		if !challenge.verify(message) {
 			return
 		}
+		websocket.JSON.Send(ws, config)
 		for {
 			if err := websocket.Message.Receive(ws, &message); err != nil {
 				return
