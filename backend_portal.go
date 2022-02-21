@@ -48,6 +48,10 @@ type portalBackend struct {
 	lock          sync.RWMutex
 }
 
+func init() {
+	RegisterBackend("RemoteDesktop portal", InitPortalBackend, 1)
+}
+
 func InitPortalBackend() (Backend, error) {
 	bus, err := dbus.SessionBusPrivate()
 	if err != nil {

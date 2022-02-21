@@ -91,6 +91,10 @@ type keybdInput struct {
 
 type windowsBackend struct{}
 
+func init() {
+	RegisterBackend("Windows", InitWindowsBackend, 0)
+}
+
 func InitWindowsBackend() (Backend, error) {
 	p := &windowsBackend{}
 	if err := sendInputProc.Find(); err != nil {

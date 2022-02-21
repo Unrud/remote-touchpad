@@ -50,6 +50,10 @@ type x11Backend struct {
 	scrollHorizontal, scrollVertical int
 }
 
+func init() {
+	RegisterBackend("X11", InitX11Backend, 0)
+}
+
 func InitX11Backend() (Backend, error) {
 	sessionType := os.Getenv("XDG_SESSION_TYPE")
 	if sessionType != "" && sessionType != "x11" {

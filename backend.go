@@ -19,6 +19,8 @@
 
 package main
 
+import "sort"
+
 type PointerButton int
 type Key int
 
@@ -54,12 +56,17 @@ const (
 type BackendInfo struct {
 	Name string
 	Init func() (Backend, error)
+
+	priority int
 }
 
-var Backends []BackendInfo = []BackendInfo{
-	{"X11", InitX11Backend},
-	{"RemoteDesktop portal", InitPortalBackend},
-	{"Windows", InitWindowsBackend},
+var Backends []BackendInfo
+
+func RegisterBackend(name string, init func() (Backend, error), priority int) {
+	Backends = append(Backends, BackendInfo{name, init, priority})
+	sort.SliceStable(Backends, func(i, j int) bool {
+		return Backends[i].priority < Backends[j].priority
+	})
 }
 
 type UnsupportedPlatformError struct {
