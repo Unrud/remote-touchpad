@@ -201,12 +201,6 @@ function handleStart(evt) {
             ongoingTouches[idx] = touch;
         }
         touchLastEnd = 0;
-        if (!dragging) {
-            moveXSum = Math.trunc(moveXSum);
-            moveYSum = Math.trunc(moveYSum);
-        }
-        scrollXSum = Math.trunc(scrollXSum);
-        scrollYSum = Math.trunc(scrollYSum);
         if (draggingTimeout != null) {
             clearTimeout(draggingTimeout);
             draggingTimeout = null;
