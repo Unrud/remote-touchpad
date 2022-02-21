@@ -409,15 +409,15 @@ window.addEventListener("load", function() {
     };
     var ready = false;
     var scenes = document.querySelectorAll("body > .scene");
-    var opening = document.getElementById("opening");
-    var closed = document.getElementById("closed");
-    var pad = document.getElementById("pad");
-    var keys = document.getElementById("keys");
-    var keysScenes = keys.querySelectorAll(".scene");
-    var keyboard = document.getElementById("keyboard");
+    var openingScene = document.getElementById("opening");
+    var closedScene = document.getElementById("closed");
+    var padScene = document.getElementById("pad");
+    var keysScene = document.getElementById("keys");
+    var keysSubScenes = keysScene.querySelectorAll(".scene");
+    var keyboardScene = document.getElementById("keyboard");
     var fullscreenbutton = document.getElementById("fullscreenbutton");
-    var keyboardtext = document.getElementById("keyboardtext");
-    var mouse = document.getElementById("mouse")
+    var keyboardTextarea = keyboardScene.querySelector("textarea");
+    var mouseScene = document.getElementById("mouse")
     var activeScene;
     var keysActiveName;
 
@@ -426,27 +426,27 @@ window.addEventListener("load", function() {
         if (fullscreenElement() && !scene.classList.contains("fullscreen")) {
             exitFullscreen();
         }
-        if (pointerLockElement() && activeScene != mouse) {
+        if (pointerLockElement() && activeScene != mouseScene) {
             exitPointerLock();
         }
-        keyboardtext.value = "";
+        keyboardTextarea.value = "";
         scenes.forEach(function(otherScene) {
             otherScene.classList.toggle("hidden", otherScene != scene);
         });
     }
 
     function showKeysScene(index) {
-        if (!Number.isInteger(index) || index < 0 || keysScenes.length <= index) {
+        if (!Number.isInteger(index) || index < 0 || keysSubScenes.length <= index) {
             index = 0;
         }
         sessionStorage.setItem(keysActiveName, index);
-        for (var i = 0; i < keysScenes.length; i += 1) {
-            keysScenes[i].classList.toggle("hidden", i != index);
+        for (var i = 0; i < keysSubScenes.length; i += 1) {
+            keysSubScenes[i].classList.toggle("hidden", i != index);
         }
     }
 
     function showKeys(name) {
-        showScene(keys);
+        showScene(keysScene);
         keysActiveName = "keys" + (name ? ":" + name : "");
         var keysIndex = parseInt(sessionStorage.getItem(keysActiveName));
         if (isNaN(keysIndex)) {
@@ -459,16 +459,16 @@ window.addEventListener("load", function() {
     }
 
     function showKeyboard() {
-        showScene(keyboard);
-        keyboardtext.value = sessionStorage.getItem("keyboard") || "";
-        keyboardtext.focus();
+        showScene(keyboardScene);
+        keyboardTextarea.value = sessionStorage.getItem("keyboard") || "";
+        keyboardTextarea.focus();
         if (history.state != "keyboard") {
             history.pushState("keyboard", "");
         }
     }
 
-    keyboardtext.oninput = function() {
-        sessionStorage.setItem("keyboard", keyboardtext.value);
+    keyboardTextarea.oninput = function() {
+        sessionStorage.setItem("keyboard", keyboardTextarea.value);
     };
 
     showScene(opening);
@@ -497,7 +497,7 @@ window.addEventListener("load", function() {
 
     ws.onclose = function() {
         ready = false;
-        showScene(closed);
+        showScene(closedScene);
     };
 
     document.getElementById("keysbutton").addEventListener("click", function() {
@@ -523,8 +523,8 @@ window.addEventListener("load", function() {
     });
     document.getElementById("switchbutton").addEventListener("click", function() {
         var keysIndex = 0;
-        for (var i = 0; i < keysScenes.length; i += 1) {
-            if (!keysScenes[i].classList.contains("hidden")) {
+        for (var i = 0; i < keysSubScenes.length; i += 1) {
+            if (!keysSubScenes[i].classList.contains("hidden")) {
                 keysIndex = i;
             }
         }
@@ -558,23 +558,23 @@ window.addEventListener("load", function() {
         showKeys("keyboard");
     });
     document.getElementById("sendbutton").addEventListener("click", function() {
-        if (keyboardtext.value) {
-            ws.send("t" + keyboardtext.value);
-            keyboardtext.value = "";
-            keyboardtext.oninput();
+        if (keyboardTextarea.value) {
+            ws.send("t" + keyboardTextarea.value);
+            keyboardTextarea.value = "";
+            keyboardTextarea.oninput();
         }
         history.back();
     });
     window.onpopstate = function() {
         if (ready) {
             if (pointerLockElement()) {
-                showScene(mouse);
+                showScene(mouseScene);
             } else if ((history.state || "").split(":")[0] == "keys") {
                 showKeys(history.state.substr("keys:".length));
             } else if (history.state == "keyboard") {
                 showKeyboard();
             } else {
-                showScene(pad);
+                showScene(padScene);
             }
         }
     };
@@ -602,17 +602,17 @@ window.addEventListener("load", function() {
         window.onpopstate();
     });
     document.addEventListener("mousedown", function(event) {
-        if (activeScene != mouse && event.buttons == 1 && event.target.classList.contains("touch")) {
-            requestPointerLock(mouse);
+        if (activeScene != mouseScene && event.buttons == 1 && event.target.classList.contains("touch")) {
+            requestPointerLock(mouseScene);
         }
     });
     ["touchstart", "touchend", "touchcancel", "touchmove"].forEach(function(type) {
-        mouse.addEventListener(type, function(evt) {
+        mouseScene.addEventListener(type, function(evt) {
             evt.preventDefault();
         });
     });
-    mouse.addEventListener("mousedown", handleMousedown);
-    mouse.addEventListener("mouseup", handleMouseup);
-    mouse.addEventListener("mousemove", handleMousemove);
-    mouse.addEventListener("wheel", handleWheel);
+    mouseScene.addEventListener("mousedown", handleMousedown);
+    mouseScene.addEventListener("mouseup", handleMouseup);
+    mouseScene.addEventListener("mousemove", handleMousemove);
+    mouseScene.addEventListener("wheel", handleWheel);
 });
