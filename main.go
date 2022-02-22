@@ -65,9 +65,6 @@ func processCommand(controller Controller, command string) error {
 	}
 	if command[0] == 't' {
 		text := command[1:]
-		// normalize line endings
-		text = strings.Replace(text, "\r\n", "\n", -1)
-		text = strings.Replace(text, "\r", "\n", -1)
 		if !utf8.ValidString(text) {
 			return errors.New("invalid utf-8")
 		}

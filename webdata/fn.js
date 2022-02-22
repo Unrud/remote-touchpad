@@ -571,7 +571,8 @@ window.addEventListener("load", function() {
     });
     document.getElementById("sendbutton").addEventListener("click", function() {
         if (keyboardTextarea.value) {
-            ws.send("t" + keyboardTextarea.value);
+            // normalize line endings
+            ws.send("t" + keyboardTextarea.value.replace(/\r\n?/g, "\n"));
             keyboardTextarea.value = "";
             keyboardTextarea.oninput();
         }
