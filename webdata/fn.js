@@ -155,6 +155,7 @@ var controller = (function() {
         if (updateTimoueActive && !fromTimeout) {
             return;
         }
+        updateTimoueActive = false;
         var finished = true;
         var xInt = Math.trunc(moveXSum);
         var yInt = Math.trunc(moveYSum);
