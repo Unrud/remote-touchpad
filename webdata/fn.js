@@ -67,8 +67,10 @@ var scrollXSum = 0;
 var scrollYSum = 0;
 var dragging = false;
 var draggingTimeout = null;
+var scrollFinish = false;
 var scrolling = false;
 var mouseButtons = 0;
+var updateTimeoutActive = false;
 
 function fullscreenEnabled() {
     return (document.fullscreenEnabled ||
@@ -193,32 +195,51 @@ function onDraggingTimeout() {
     ws.send("b" + POINTER_BUTTON_LEFT + ";0");
 }
 
-function updateMove(x, y) {
-    moveXSum += x;
-    moveYSum += y;
-    var xInt = Math.trunc(moveXSum);
-    var yInt = Math.trunc(moveYSum);
+function startUpdate(fromTimeout) {
+    if (updateTimeoutActive && !fromTimeout) {
+        return;
+    }
+    var updateFinished = true;
+    var xInt, yInt;
+    xInt = Math.trunc(moveXSum);
+    yInt = Math.trunc(moveYSum);
     if (xInt != 0 || yInt != 0) {
+        ws.send("m" + xInt + ";" + yInt);
         moveXSum -= xInt;
         moveYSum -= yInt;
-        ws.send("m" + xInt + ";" + yInt);
+        updateFinished = false;
     }
-}
-
-function updateScroll(x, y, scrollFinish) {
-    scrollXSum += x;
-    scrollYSum += y;
-    var xInt = Math.trunc(scrollXSum);
-    var yInt = Math.trunc(scrollYSum);
+    xInt = Math.trunc(scrollXSum);
+    yInt = Math.trunc(scrollYSum);
     if (xInt != 0 || yInt != 0) {
+        ws.send((scrollFinish ? "S" : "s") + xInt + ";" + yInt);
         scrollXSum -= xInt;
         scrollYSum -= yInt;
-        ws.send((scrollFinish ? "S" : "s") + xInt + ";" + yInt);
         scrolling = !scrollFinish;
+        scrollFinish = false;
+        updateFinished = false;
     } else if (scrollFinish && scrolling) {
         ws.send("S");
         scrolling = false;
+        scrollFinish = false;
     }
+    updateTimeoutActive = !updateFinished && config.updateRate > 0
+    if (updateTimeoutActive) {
+        setTimeout(startUpdate, 1000/config.updateRate, true);
+    }
+}
+
+function updateMove(x, y) {
+    moveXSum += x;
+    moveYSum += y;
+    startUpdate();
+}
+
+function updateScroll(x, y, finish) {
+    scrollXSum += x;
+    scrollYSum += y;
+    scrollFinish |= finish;
+    startUpdate();
 }
 
 function handleTouchstart(evt) {
