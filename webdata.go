@@ -7,12 +7,12 @@ import (
 )
 
 //go:embed webdata/*
-var webdataWithPrefix embed.FS
-var webdata fs.FS
+var webdataFSWithPrefix embed.FS
+var WebdataFS fs.FS
 
 func init() {
 	var err error
-	webdata, err = fs.Sub(webdataWithPrefix, "webdata")
+	WebdataFS, err = fs.Sub(webdataFSWithPrefix, "webdata")
 	if err != nil {
 		log.Fatal(err)
 	}
