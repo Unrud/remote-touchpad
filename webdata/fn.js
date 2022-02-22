@@ -65,7 +65,7 @@ var util = (function() {
             document.mozFullScreenEnabled ||
             document.msFullscreenEnabled ||
             false);
-    }
+    };
 
     util.requestFullscreen = function(element, options) {
         if (element.requestFullscreen) {
@@ -77,7 +77,7 @@ var util = (function() {
         } else if (element.msRequestFullscreen) {
             element.msRequestFullscreen(options);
         }
-    }
+    };
 
     util.exitFullscreen = function() {
         if (document.exitFullscreen) {
@@ -89,7 +89,7 @@ var util = (function() {
         } else if (document.msExitFullscreen) {
             document.msExitFullscreen();
         }
-    }
+    };
 
     util.fullscreenElement = function() {
         return (document.fullscreenElement ||
@@ -97,7 +97,7 @@ var util = (function() {
             document.mozFullScreenElement ||
             document.msFullscreenElement ||
             null);
-    }
+    };
 
     util.addFullscreenchangeEventListener = function(listener) {
         if ("onfullscreenchange" in document) {
@@ -105,7 +105,7 @@ var util = (function() {
         } else if ("onwebkitfullscreenchange" in document) {
             document.addEventListener("webkitfullscreenchange", listener);
         }
-    }
+    };
 
     util.requestPointerLock = function(element) {
         if (element.requestPointerLock) {
@@ -113,7 +113,7 @@ var util = (function() {
         } else if (element.mozRequestPointerLock) {
             element.mozRequestPointerLock();
         }
-    }
+    };
 
     util.exitPointerLock = function() {
         if (document.exitPointerLock) {
@@ -121,13 +121,13 @@ var util = (function() {
         } else if (document.mozExitPointerLock) {
             document.mozExitPointerLock();
         }
-    }
+    };
 
     util.pointerLockElement = function() {
         return (document.pointerLockElement ||
             document.mozPointerLockElement ||
             null);
-    }
+    };
 
     util.addPointerlockchangeEventListener = function(listener) {
         if ("onpointerlockchange" in document) {
@@ -135,7 +135,7 @@ var util = (function() {
         } else if ("onmozpointerlockchange" in document) {
             document.addEventListener("mozpointerlockchange", listener);
         }
-    }
+    };
 
     return util;
 })();
@@ -179,7 +179,7 @@ var controller = (function() {
             scrolling = false;
             scrollFinish = false;
         }
-        updateTimoueActive = !finished && config.updateRate > 0
+        updateTimoueActive = !finished && config.updateRate > 0;
         if (updateTimoueActive) {
             setTimeout(startUpdate, 1000/config.updateRate, true);
         }
@@ -189,27 +189,27 @@ var controller = (function() {
         moveXSum += deltaX;
         moveYSum += deltaY;
         startUpdate();
-    }
+    };
 
     controller.pointerScroll = function(deltaHorizontal, deltaVertical, finish) {
         scrollHSum += deltaHorizontal;
         scrollVSum += deltaVertical;
         scrollFinish |= finish;
         startUpdate();
-    }
+    };
 
     controller.pointerButton = function(button, press) {
         ws.send("b" + button + ";" + (press ? 1 : 0));
-    }
+    };
 
 
     controller.keyboardKey = function(key) {
         ws.send("k" + key);
-    }
+    };
 
     controller.keyboardText = function(text) {
         ws.send("t" + text);
-    }
+    };
 
     return controller;
 })();
@@ -267,7 +267,7 @@ var touchpad = (function() {
 
     function onDraggingTimeout() {
         draggingTimeout = null;
-        controller.pointerButton(POINTER_BUTTON_LEFT, false)
+        controller.pointerButton(POINTER_BUTTON_LEFT, false);
     }
 
     touchpad.handleTouchstart = function(evt) {
@@ -297,7 +297,7 @@ var touchpad = (function() {
             }
             controller.pointerScroll(0, 0, true);
         }
-    }
+    };
 
     touchpad.handleTouchend = touchpad.handleTouchcancel = function(evt) {
         var touches = evt.changedTouches;
@@ -318,7 +318,7 @@ var touchpad = (function() {
         if (ongoingTouches.length == 0 && releasedCount >= 1) {
             if (dragging) {
                 dragging = false;
-                controller.pointerButton(POINTER_BUTTON_LEFT, false)
+                controller.pointerButton(POINTER_BUTTON_LEFT, false);
             }
             if (!moved && evt.timeStamp - startTimeStamp < TOUCH_TIMEOUT) {
                 var button = 0;
@@ -329,16 +329,16 @@ var touchpad = (function() {
                 } else if (releasedCount == 3) {
                     button = POINTER_BUTTON_MIDDLE;
                 }
-                controller.pointerButton(button, true)
+                controller.pointerButton(button, true);
                 if (button == POINTER_BUTTON_LEFT) {
                     draggingTimeout = setTimeout(onDraggingTimeout, TOUCH_TIMEOUT);
                 } else {
-                    controller.pointerButton(button, false)
+                    controller.pointerButton(button, false);
                 }
             }
             releasedCount = 0;
         }
-    }
+    };
 
     touchpad.handleTouchmove = function(evt) {
         var sumX = 0;
@@ -375,14 +375,14 @@ var touchpad = (function() {
                 controller.pointerScroll(-sumX*config.scrollSpeed, -sumY*config.scrollSpeed, false);
             }
         }
-    }
+    };
 
     return touchpad;
 })();
 
 var keyboard = (function() {
     var keyboard = {};
-    
+
     keyboard.handleKeydown = function(evt) {
         if (evt.ctrlKey || evt.altKey || evt.isComposing) {
             return;
@@ -418,7 +418,7 @@ var keyboard = (function() {
             evt.preventDefault();
             controller.keyboardText(evt.key);
         }
-    }
+    };
 
     return keyboard;
 })();
@@ -432,7 +432,7 @@ var mouse = (function() {
         for (var button = 0; button < 3; button += 1) {
             var flag = 1 << button;
             if ((newButtons&flag) != (buttons&flag)) {
-                controller.pointerButton(button, newButtons&flag)
+                controller.pointerButton(button, newButtons&flag);
             }
         }
         buttons = newButtons;
@@ -440,11 +440,11 @@ var mouse = (function() {
 
     mouse.handleMousedown = mouse.handleMouseup = function(evt) {
         updateButtons(evt.buttons);
-    }
+    };
 
     mouse.handleMousemove = function(evt) {
         controller.pointerMove(evt.movementX*config.mouseMoveSpeed, evt.movementY*config.mouseMoveSpeed);
-    }
+    };
 
     mouse.handleWheel = function(evt) {
         if (evt.deltaMode == WheelEvent.DOM_DELTA_PIXEL) {
@@ -452,7 +452,7 @@ var mouse = (function() {
         } else if (evt.deltaMode == WheelEvent.DOM_DELTA_LINE) {
             controller.pointerScroll(evt.deltaX*20*config.mouseScrollSpeed, evt.deltaY*20*config.mouseScrollSpeed, true);
         }
-    }
+    };
 
     return mouse;
 })();
@@ -480,9 +480,9 @@ window.addEventListener("load", function() {
     var keyboardScene = document.getElementById("keyboard");
     var fullscreenbutton = document.getElementById("fullscreenbutton");
     var keyboardTextarea = keyboardScene.querySelector("textarea");
-    var mouseScene = document.getElementById("mouse")
-    var activeScene;
-    var keysActiveName;
+    var mouseScene = document.getElementById("mouse");
+    var activeScene = null;
+    var keysActiveName = "";
 
     function showScene(scene) {
         activeScene = scene;
