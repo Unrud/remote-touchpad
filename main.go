@@ -177,6 +177,9 @@ func main() {
 	if secret == "" {
 		secret = secureRandBase64(defaultSecretLength)
 	}
+	if len(Controllers) == 0 {
+		log.Fatal("compiled without controller")
+	}
 	var controller Controller
 	var controllerName string
 	platformErrors := ""
