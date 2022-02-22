@@ -1,5 +1,15 @@
 # Changelog
 
+## unreleased
+
+* Add command-line options for move and scroll speed
+* Add hardware mouse support
+* Limit update rate
+* Windows: Reverse vertical scroll direction
+* Show error message if compiled without controller
+* Don't show disabled controllers in "unsupported platform" error message
+* Switch from go-bindata-assetfs to go:embed
+
 ## 1.1.0 (2022-01-28)
 
 * Add more shortcut keys (Arrows, Delete, Enter, …)
