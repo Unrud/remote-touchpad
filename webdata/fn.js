@@ -56,365 +56,405 @@ var KEY_RETURN = 17;
 var ws = null;
 var config = null;
 
-var touchMoved = false;
-var touchStart = 0;
-var touchLastEnd = 0;
-var touchReleasedCount = 0;
-var ongoingTouches = [];
-var moveXSum = 0;
-var moveYSum = 0;
-var scrollXSum = 0;
-var scrollYSum = 0;
-var dragging = false;
-var draggingTimeout = null;
-var scrollFinish = false;
-var scrolling = false;
-var mouseButtons = 0;
-var updateTimeoutActive = false;
+var util = (function() {
+    var util = {};
 
-function fullscreenEnabled() {
-    return (document.fullscreenEnabled ||
-        document.webkitFullscreenEnabled ||
-        document.mozFullScreenEnabled ||
-        document.msFullscreenEnabled ||
-        false);
-}
-
-function requestFullscreen(element, options) {
-    if (element.requestFullscreen) {
-        element.requestFullscreen(options);
-    } else if (element.webkitRequestFullscreen) {
-        element.webkitRequestFullscreen(options);
-    } else if (element.mozRequestFullScreen) {
-        element.mozRequestFullScreen(options);
-    } else if (element.msRequestFullscreen) {
-        element.msRequestFullscreen(options);
+    util.fullscreenEnabled = function() {
+        return (document.fullscreenEnabled ||
+            document.webkitFullscreenEnabled ||
+            document.mozFullScreenEnabled ||
+            document.msFullscreenEnabled ||
+            false);
     }
-}
 
-function exitFullscreen() {
-    if (document.exitFullscreen) {
-        document.exitFullscreen();
-    } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-    } else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-    } else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
-    }
-}
-
-function fullscreenElement() {
-    return (document.fullscreenElement ||
-        document.webkitFullscreenElement ||
-        document.mozFullScreenElement ||
-        document.msFullscreenElement ||
-        null);
-}
-
-function addFullscreenchangeEventListener(listener) {
-    if ("onfullscreenchange" in document) {
-        document.addEventListener("fullscreenchange", listener);
-    } else if ("onwebkitfullscreenchange" in document) {
-        document.addEventListener("webkitfullscreenchange", listener);
-    }
-}
-
-function requestPointerLock(element) {
-    if (element.requestPointerLock) {
-        element.requestPointerLock();
-    } else if (element.mozRequestPointerLock) {
-        element.mozRequestPointerLock();
-    }
-}
-
-function exitPointerLock() {
-    if (document.exitPointerLock) {
-        document.exitPointerLock();
-    } else if (document.mozExitPointerLock) {
-        document.mozExitPointerLock();
-    }
-}
-
-function pointerLockElement() {
-    return (document.pointerLockElement ||
-        document.mozPointerLockElement ||
-        null);
-}
-
-function addPointerlockchangeEventListener(listener) {
-    if ("onpointerlockchange" in document) {
-        document.addEventListener("pointerlockchange", listener);
-    } else if ("onmozpointerlockchange" in document) {
-        document.addEventListener("mozpointerlockchange", listener);
-    }
-}
-
-function copyTouch(touch, timeStamp) {
-    return {
-        identifier: touch.identifier,
-        pageX: touch.pageX,
-        pageXStart: touch.pageX,
-        pageY: touch.pageY,
-        pageYStart: touch.pageY,
-        timeStamp: timeStamp
-    };
-}
-
-function ongoingTouchIndexById(idToFind) {
-    for (var i = 0; i < ongoingTouches.length; i += 1) {
-        if (ongoingTouches[i].identifier == idToFind) {
-            return i;
+    util.requestFullscreen = function(element, options) {
+        if (element.requestFullscreen) {
+            element.requestFullscreen(options);
+        } else if (element.webkitRequestFullscreen) {
+            element.webkitRequestFullscreen(options);
+        } else if (element.mozRequestFullScreen) {
+            element.mozRequestFullScreen(options);
+        } else if (element.msRequestFullscreen) {
+            element.msRequestFullscreen(options);
         }
     }
-    return -1;
-}
 
-function calculatePointerAccelerationMult(speed) {
-    for (var i = 0; i < POINTER_ACCELERATION.length; i += 1) {
-        var s2 = POINTER_ACCELERATION[i][0];
-        var a2 = POINTER_ACCELERATION[i][1];
-        if (s2 <= speed) {
-            continue;
+    util.exitFullscreen = function() {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
         }
-        if (i == 0) {
-            return a2;
-        }
-        var s1 = POINTER_ACCELERATION[i - 1][0];
-        var a1 = POINTER_ACCELERATION[i - 1][1];
-        return ((speed - s1) / (s2 - s1)) * (a2 - a1) + a1;
     }
-    if (POINTER_ACCELERATION.length > 0) {
-        return POINTER_ACCELERATION[POINTER_ACCELERATION.length - 1][1];
-    }
-    return 1;
-}
 
-function onDraggingTimeout() {
-    draggingTimeout = null;
-    ws.send("b" + POINTER_BUTTON_LEFT + ";0");
-}
+    util.fullscreenElement = function() {
+        return (document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.msFullscreenElement ||
+            null);
+    }
 
-function startUpdate(fromTimeout) {
-    if (updateTimeoutActive && !fromTimeout) {
-        return;
+    util.addFullscreenchangeEventListener = function(listener) {
+        if ("onfullscreenchange" in document) {
+            document.addEventListener("fullscreenchange", listener);
+        } else if ("onwebkitfullscreenchange" in document) {
+            document.addEventListener("webkitfullscreenchange", listener);
+        }
     }
-    var updateFinished = true;
-    var xInt, yInt;
-    xInt = Math.trunc(moveXSum);
-    yInt = Math.trunc(moveYSum);
-    if (xInt != 0 || yInt != 0) {
-        ws.send("m" + xInt + ";" + yInt);
-        moveXSum -= xInt;
-        moveYSum -= yInt;
-        updateFinished = false;
-    }
-    xInt = Math.trunc(scrollXSum);
-    yInt = Math.trunc(scrollYSum);
-    if (xInt != 0 || yInt != 0) {
-        ws.send((scrollFinish ? "S" : "s") + xInt + ";" + yInt);
-        scrollXSum -= xInt;
-        scrollYSum -= yInt;
-        scrolling = !scrollFinish;
-        scrollFinish = false;
-        updateFinished = false;
-    } else if (scrollFinish && scrolling) {
-        ws.send("S");
-        scrolling = false;
-        scrollFinish = false;
-    }
-    updateTimeoutActive = !updateFinished && config.updateRate > 0
-    if (updateTimeoutActive) {
-        setTimeout(startUpdate, 1000/config.updateRate, true);
-    }
-}
 
-function updateMove(x, y) {
-    moveXSum += x;
-    moveYSum += y;
-    startUpdate();
-}
+    util.requestPointerLock = function(element) {
+        if (element.requestPointerLock) {
+            element.requestPointerLock();
+        } else if (element.mozRequestPointerLock) {
+            element.mozRequestPointerLock();
+        }
+    }
 
-function updateScroll(x, y, finish) {
-    scrollXSum += x;
-    scrollYSum += y;
-    scrollFinish |= finish;
-    startUpdate();
-}
+    util.exitPointerLock = function() {
+        if (document.exitPointerLock) {
+            document.exitPointerLock();
+        } else if (document.mozExitPointerLock) {
+            document.mozExitPointerLock();
+        }
+    }
 
-function handleTouchstart(evt) {
-    // Might get called multiple times for the same touches
-    if (ongoingTouches.length == 0) {
-        touchStart = evt.timeStamp;
-        touchMoved = false;
+    util.pointerLockElement = function() {
+        return (document.pointerLockElement ||
+            document.mozPointerLockElement ||
+            null);
     }
-    var touches = evt.changedTouches;
-    for (var i = 0; i < touches.length; i += 1) {
-        if (ongoingTouches.length == 0 && !touches[i].target.classList.contains("touch")) {
-            continue;
-        }
-        evt.preventDefault();
-        var touch = copyTouch(touches[i], evt.timeStamp);
-        var idx = ongoingTouchIndexById(touch.identifier);
-        if (idx < 0) {
-            ongoingTouches.push(touch);
-        } else {
-            ongoingTouches[idx] = touch;
-        }
-        touchLastEnd = 0;
-        if (draggingTimeout != null) {
-            clearTimeout(draggingTimeout);
-            draggingTimeout = null;
-            dragging = true;
-        }
-        updateScroll(0, 0, true);
-    }
-}
 
-function handleTouchend(evt) {
-    var touches = evt.changedTouches;
-    for (var i = 0; i < touches.length; i += 1) {
-        var idx = ongoingTouchIndexById(touches[i].identifier);
-        if (idx < 0) {
-            continue;
+    util.addPointerlockchangeEventListener = function(listener) {
+        if ("onpointerlockchange" in document) {
+            document.addEventListener("pointerlockchange", listener);
+        } else if ("onmozpointerlockchange" in document) {
+            document.addEventListener("mozpointerlockchange", listener);
         }
-        evt.preventDefault();
-        ongoingTouches.splice(idx, 1);
-        touchReleasedCount += 1;
-        touchLastEnd = evt.timeStamp;
-        updateScroll(0, 0, true);
     }
-    if (touchReleasedCount > TOUCH_MOVE_THRESHOLD.length) {
-        touchMoved = true;
-    }
-    if (ongoingTouches.length == 0 && touchReleasedCount >= 1) {
-        if (dragging) {
-            dragging = false;
-            ws.send("b" + POINTER_BUTTON_LEFT + ";0");
+
+    return util;
+})();
+
+var controller = (function() {
+    var controller = {};
+
+    var moveXSum = 0;
+    var moveYSum = 0;
+    var scrollHSum = 0;
+    var scrollVSum = 0;
+    var scrolling = false;
+    var scrollFinish = false;
+    var updateTimoueActive = false;
+
+    function startUpdate(fromTimeout) {
+        if (updateTimoueActive && !fromTimeout) {
+            return;
         }
-        if (!touchMoved && evt.timeStamp - touchStart < TOUCH_TIMEOUT) {
-            var button = 0;
-            if (touchReleasedCount == 1) {
-                button = POINTER_BUTTON_LEFT;
-            } else if (touchReleasedCount == 2) {
-                button = POINTER_BUTTON_RIGHT;
-            } else if (touchReleasedCount == 3) {
-                button = POINTER_BUTTON_MIDDLE;
-            }
-            ws.send("b" + button + ";1");
-            if (button == POINTER_BUTTON_LEFT) {
-                draggingTimeout = setTimeout(onDraggingTimeout, TOUCH_TIMEOUT);
-            } else {
-                ws.send("b" + button + ";0");
+        var finished = true;
+        var xInt = Math.trunc(moveXSum);
+        var yInt = Math.trunc(moveYSum);
+        if (xInt != 0 || yInt != 0) {
+            ws.send("m" + xInt + ";" + yInt);
+            moveXSum -= xInt;
+            moveYSum -= yInt;
+            finished = false;
+        }
+        var hInt = Math.trunc(scrollHSum);
+        var vInt = Math.trunc(scrollVSum);
+        if (hInt != 0 || vInt != 0) {
+            ws.send((scrollFinish ? "S" : "s") + hInt + ";" + vInt);
+            scrollHSum -= hInt;
+            scrollVSum -= vInt;
+            scrolling = !scrollFinish;
+            scrollFinish = false;
+            finished = false;
+        } else if (scrollFinish && scrolling) {
+            ws.send("S");
+            scrolling = false;
+            scrollFinish = false;
+        }
+        updateTimoueActive = !finished && config.updateRate > 0
+        if (updateTimoueActive) {
+            setTimeout(startUpdate, 1000/config.updateRate, true);
+        }
+    }
+
+    controller.pointerMove = function(deltaX, deltaY) {
+        moveXSum += deltaX;
+        moveYSum += deltaY;
+        startUpdate();
+    }
+
+    controller.pointerScroll = function(deltaHorizontal, deltaVertical, finish) {
+        scrollHSum += deltaHorizontal;
+        scrollVSum += deltaVertical;
+        scrollFinish |= finish;
+        startUpdate();
+    }
+
+    controller.pointerButton = function(button, press) {
+        ws.send("b" + button + ";" + (press ? 1 : 0));
+    }
+
+
+    controller.keyboardKey = function(key) {
+        ws.send("k" + key);
+    }
+
+    controller.keyboardText = function(text) {
+        ws.send("t" + text);
+    }
+
+    return controller;
+})();
+
+var touchpad = (function() {
+    var touchpad = {};
+
+    var moved = false;
+    var startTimeStamp = 0;
+    var lastEndTimeStamp = 0;
+    var releasedCount = 0;
+    var ongoingTouches = [];
+    var dragging = false;
+    var draggingTimeout = null;
+
+    function copyTouch(touch, timeStamp) {
+        return {
+            identifier: touch.identifier,
+            pageX: touch.pageX,
+            pageXStart: touch.pageX,
+            pageY: touch.pageY,
+            pageYStart: touch.pageY,
+            timeStamp: timeStamp
+        };
+    }
+
+    function ongoingTouchIndexById(idToFind) {
+        for (var i = 0; i < ongoingTouches.length; i += 1) {
+            if (ongoingTouches[i].identifier == idToFind) {
+                return i;
             }
         }
-        touchReleasedCount = 0;
+        return -1;
     }
-}
 
-function handleTouchmove(evt) {
-    var sumX = 0;
-    var sumY = 0;
-    var touches = evt.changedTouches;
-    for (var i = 0; i < touches.length; i += 1) {
-        var idx = ongoingTouchIndexById(touches[i].identifier);
-        if (idx < 0) {
-            continue;
-        }
-        evt.preventDefault();
-        if (!touchMoved) {
-            var dist = Math.sqrt(Math.pow(touches[i].pageX - ongoingTouches[idx].pageXStart, 2) +
-                Math.pow(touches[i].pageY - ongoingTouches[idx].pageYStart, 2));
-            if (ongoingTouches.length > TOUCH_MOVE_THRESHOLD.length ||
-                dist > TOUCH_MOVE_THRESHOLD[ongoingTouches.length - 1] ||
-                evt.timeStamp - touchStart >= TOUCH_TIMEOUT) {
-                touchMoved = true;
+    function calculateAccelerationMult(speed) {
+        for (var i = 0; i < POINTER_ACCELERATION.length; i += 1) {
+            var s2 = POINTER_ACCELERATION[i][0];
+            var a2 = POINTER_ACCELERATION[i][1];
+            if (s2 <= speed) {
+                continue;
             }
+            if (i == 0) {
+                return a2;
+            }
+            var s1 = POINTER_ACCELERATION[i - 1][0];
+            var a1 = POINTER_ACCELERATION[i - 1][1];
+            return ((speed - s1) / (s2 - s1)) * (a2 - a1) + a1;
         }
-        var dx = touches[i].pageX - ongoingTouches[idx].pageX;
-        var dy = touches[i].pageY - ongoingTouches[idx].pageY;
-        var timeDelta = evt.timeStamp - ongoingTouches[idx].timeStamp;
-        sumX += dx * calculatePointerAccelerationMult(Math.abs(dx) / timeDelta * 1000);
-        sumY += dy * calculatePointerAccelerationMult(Math.abs(dy) / timeDelta * 1000);
-        ongoingTouches[idx].pageX = touches[i].pageX;
-        ongoingTouches[idx].pageY = touches[i].pageY;
-        ongoingTouches[idx].timeStamp = evt.timeStamp;
-    }
-    if (touchMoved && evt.timeStamp - touchLastEnd >= TOUCH_TIMEOUT) {
-        if (ongoingTouches.length == 1 || dragging) {
-            updateMove(sumX*config.moveSpeed, sumY*config.moveSpeed);
-        } else if (ongoingTouches.length == 2) {
-            updateScroll(-sumX*config.scrollSpeed, -sumY*config.scrollSpeed, false);
+        if (POINTER_ACCELERATION.length > 0) {
+            return POINTER_ACCELERATION[POINTER_ACCELERATION.length - 1][1];
         }
+        return 1;
     }
-}
 
-function handleKeydown(evt) {
-    if (evt.ctrlKey || evt.altKey || evt.isComposing) {
-        return;
+    function onDraggingTimeout() {
+        draggingTimeout = null;
+        controller.pointerButton(POINTER_BUTTON_LEFT, false)
     }
-    var key = null;
-    if (evt.key == "OS" || evt.key == "Super" || evt.key == "Meta") {
-        key = KEY_SUPER;
-    } else if (evt.key == "Backspace") {
-        key = KEY_BACK_SPACE;
-    } else if (evt.key == "Enter") {
-        key = KEY_RETURN;
-    } else if (evt.key == "Delete") {
-        key = KEY_DELETE;
-    } else if (evt.key == "Home") {
-        key = KEY_HOME;
-    } else if (evt.key == "End") {
-        key = KEY_END;
-    } else if (evt.key == "Left" || evt.key == "ArrowLeft") {
-        key = KEY_LEFT;
-    } else if (evt.key == "Right" || evt.key == "ArrowRight") {
-        key = KEY_RIGHT;
-    } else if (evt.key == "Up" || evt.key == "ArrowUp") {
-        key = KEY_UP;
-    } else if (evt.key == "Down" || evt.key == "ArrowDown") {
-        key = KEY_DOWN;
-    }
-    if (key != null) {
-        if (!evt.shiftKey) {
+
+    touchpad.handleTouchstart = function(evt) {
+        // Might get called multiple times for the same touches
+        if (ongoingTouches.length == 0) {
+            startTimeStamp = evt.timeStamp;
+            moved = false;
+        }
+        var touches = evt.changedTouches;
+        for (var i = 0; i < touches.length; i += 1) {
+            if (ongoingTouches.length == 0 && !touches[i].target.classList.contains("touch")) {
+                continue;
+            }
             evt.preventDefault();
-            ws.send("k" + key);
+            var touch = copyTouch(touches[i], evt.timeStamp);
+            var idx = ongoingTouchIndexById(touch.identifier);
+            if (idx < 0) {
+                ongoingTouches.push(touch);
+            } else {
+                ongoingTouches[idx] = touch;
+            }
+            lastEndTimeStamp = 0;
+            if (draggingTimeout != null) {
+                clearTimeout(draggingTimeout);
+                draggingTimeout = null;
+                dragging = true;
+            }
+            controller.pointerScroll(0, 0, true);
         }
-    } else if (evt.key.length == 1) {
-        evt.preventDefault();
-        ws.send("t" + evt.key);
     }
-}
 
-function updateMouseButtons(buttons) {
-    for (var button = 0; button < 3; button += 1) {
-        var flag = 1 << button;
-        if ((buttons&flag) != (mouseButtons&flag)) {
-            ws.send("b" + button + ";" + (buttons&flag ? 1 : 0));
+    touchpad.handleTouchend = touchpad.handleTouchcancel = function(evt) {
+        var touches = evt.changedTouches;
+        for (var i = 0; i < touches.length; i += 1) {
+            var idx = ongoingTouchIndexById(touches[i].identifier);
+            if (idx < 0) {
+                continue;
+            }
+            evt.preventDefault();
+            ongoingTouches.splice(idx, 1);
+            releasedCount += 1;
+            lastEndTimeStamp = evt.timeStamp;
+            controller.pointerScroll(0, 0, true);
+        }
+        if (releasedCount > TOUCH_MOVE_THRESHOLD.length) {
+            moved = true;
+        }
+        if (ongoingTouches.length == 0 && releasedCount >= 1) {
+            if (dragging) {
+                dragging = false;
+                controller.pointerButton(POINTER_BUTTON_LEFT, false)
+            }
+            if (!moved && evt.timeStamp - startTimeStamp < TOUCH_TIMEOUT) {
+                var button = 0;
+                if (releasedCount == 1) {
+                    button = POINTER_BUTTON_LEFT;
+                } else if (releasedCount == 2) {
+                    button = POINTER_BUTTON_RIGHT;
+                } else if (releasedCount == 3) {
+                    button = POINTER_BUTTON_MIDDLE;
+                }
+                controller.pointerButton(button, true)
+                if (button == POINTER_BUTTON_LEFT) {
+                    draggingTimeout = setTimeout(onDraggingTimeout, TOUCH_TIMEOUT);
+                } else {
+                    controller.pointerButton(button, false)
+                }
+            }
+            releasedCount = 0;
         }
     }
-    mouseButtons = buttons;
-}
 
-function handleMousedown(evt) {
-    updateMouseButtons(evt.buttons);
-}
-
-function handleMouseup(evt) {
-    updateMouseButtons(evt.buttons);
-}
-
-function handleMousemove(evt) {
-    updateMove(evt.movementX*config.mouseMoveSpeed, evt.movementY*config.mouseMoveSpeed);
-}
-
-function handleWheel(evt) {
-    if (evt.deltaMode == WheelEvent.DOM_DELTA_PIXEL) {
-        updateScroll(evt.deltaX*config.mouseScrollSpeed, evt.deltaY*config.mouseScrollSpeed, true);
-    } else if (evt.deltaMode == WheelEvent.DOM_DELTA_LINE) {
-        updateScroll(evt.deltaX*20*config.mouseScrollSpeed, evt.deltaY*20*config.mouseScrollSpeed, true);
+    touchpad.handleTouchmove = function(evt) {
+        var sumX = 0;
+        var sumY = 0;
+        var touches = evt.changedTouches;
+        for (var i = 0; i < touches.length; i += 1) {
+            var idx = ongoingTouchIndexById(touches[i].identifier);
+            if (idx < 0) {
+                continue;
+            }
+            evt.preventDefault();
+            if (!moved) {
+                var dist = Math.sqrt(Math.pow(touches[i].pageX - ongoingTouches[idx].pageXStart, 2) +
+                    Math.pow(touches[i].pageY - ongoingTouches[idx].pageYStart, 2));
+                if (ongoingTouches.length > TOUCH_MOVE_THRESHOLD.length ||
+                    dist > TOUCH_MOVE_THRESHOLD[ongoingTouches.length - 1] ||
+                    evt.timeStamp - startTimeStamp >= TOUCH_TIMEOUT) {
+                    moved = true;
+                }
+            }
+            var dx = touches[i].pageX - ongoingTouches[idx].pageX;
+            var dy = touches[i].pageY - ongoingTouches[idx].pageY;
+            var timeDelta = evt.timeStamp - ongoingTouches[idx].timeStamp;
+            sumX += dx * calculateAccelerationMult(Math.abs(dx) / timeDelta * 1000);
+            sumY += dy * calculateAccelerationMult(Math.abs(dy) / timeDelta * 1000);
+            ongoingTouches[idx].pageX = touches[i].pageX;
+            ongoingTouches[idx].pageY = touches[i].pageY;
+            ongoingTouches[idx].timeStamp = evt.timeStamp;
+        }
+        if (moved && evt.timeStamp - lastEndTimeStamp >= TOUCH_TIMEOUT) {
+            if (ongoingTouches.length == 1 || dragging) {
+                controller.pointerMove(sumX*config.moveSpeed, sumY*config.moveSpeed);
+            } else if (ongoingTouches.length == 2) {
+                controller.pointerScroll(-sumX*config.scrollSpeed, -sumY*config.scrollSpeed, false);
+            }
+        }
     }
-}
+
+    return touchpad;
+})();
+
+var keyboard = (function() {
+    var keyboard = {};
+    
+    keyboard.handleKeydown = function(evt) {
+        if (evt.ctrlKey || evt.altKey || evt.isComposing) {
+            return;
+        }
+        var key = null;
+        if (evt.key == "OS" || evt.key == "Super" || evt.key == "Meta") {
+            key = KEY_SUPER;
+        } else if (evt.key == "Backspace") {
+            key = KEY_BACK_SPACE;
+        } else if (evt.key == "Enter") {
+            key = KEY_RETURN;
+        } else if (evt.key == "Delete") {
+            key = KEY_DELETE;
+        } else if (evt.key == "Home") {
+            key = KEY_HOME;
+        } else if (evt.key == "End") {
+            key = KEY_END;
+        } else if (evt.key == "Left" || evt.key == "ArrowLeft") {
+            key = KEY_LEFT;
+        } else if (evt.key == "Right" || evt.key == "ArrowRight") {
+            key = KEY_RIGHT;
+        } else if (evt.key == "Up" || evt.key == "ArrowUp") {
+            key = KEY_UP;
+        } else if (evt.key == "Down" || evt.key == "ArrowDown") {
+            key = KEY_DOWN;
+        }
+        if (key != null) {
+            if (!evt.shiftKey) {
+                evt.preventDefault();
+                controller.keyboardKey(key);
+            }
+        } else if (evt.key.length == 1) {
+            evt.preventDefault();
+            controller.keyboardText(evt.key);
+        }
+    }
+
+    return keyboard;
+})();
+
+var mouse = (function() {
+    var mouse = {};
+
+    var buttons = 0;
+
+    function updateButtons(newButtons) {
+        for (var button = 0; button < 3; button += 1) {
+            var flag = 1 << button;
+            if ((newButtons&flag) != (buttons&flag)) {
+                controller.pointerButton(button, newButtons&flag)
+            }
+        }
+        buttons = newButtons;
+    }
+
+    mouse.handleMousedown = mouse.handleMouseup = function(evt) {
+        updateButtons(evt.buttons);
+    }
+
+    mouse.handleMousemove = function(evt) {
+        controller.pointerMove(evt.movementX*config.mouseMoveSpeed, evt.movementY*config.mouseMoveSpeed);
+    }
+
+    mouse.handleWheel = function(evt) {
+        if (evt.deltaMode == WheelEvent.DOM_DELTA_PIXEL) {
+            controller.pointerScroll(evt.deltaX*config.mouseScrollSpeed, evt.deltaY*config.mouseScrollSpeed, true);
+        } else if (evt.deltaMode == WheelEvent.DOM_DELTA_LINE) {
+            controller.pointerScroll(evt.deltaX*20*config.mouseScrollSpeed, evt.deltaY*20*config.mouseScrollSpeed, true);
+        }
+    }
+
+    return mouse;
+})();
 
 function challengeResponse(message) {
     var shaObj = new jsSHA("SHA-256", "TEXT");
@@ -445,11 +485,11 @@ window.addEventListener("load", function() {
 
     function showScene(scene) {
         activeScene = scene;
-        if (fullscreenElement() && !scene.classList.contains("fullscreen")) {
-            exitFullscreen();
+        if (util.fullscreenElement() && !scene.classList.contains("fullscreen")) {
+            util.exitFullscreen();
         }
-        if (pointerLockElement() && activeScene != mouseScene) {
-            exitPointerLock();
+        if (util.pointerLockElement() && activeScene != mouseScene) {
+            util.exitPointerLock();
         }
         keyboardTextarea.value = "";
         scenes.forEach(function(otherScene) {
@@ -496,7 +536,7 @@ window.addEventListener("load", function() {
     function updateUI() {
         if (!ready) {
             showScene(closed ? closedScene : openingScene);
-        } else if (pointerLockElement()) {
+        } else if (util.pointerLockElement()) {
             showScene(mouseScene);
         } else if ((history.state || "").split(":")[0] == "keys") {
             showKeys(history.state.substr("keys:".length));
@@ -543,15 +583,17 @@ window.addEventListener("load", function() {
     document.getElementById("keyboardbutton").addEventListener("click", function() {
         showKeyboard();
     });
-    addFullscreenchangeEventListener(updateUI);
-    if (!fullscreenEnabled()) {
+    util.addFullscreenchangeEventListener(function() {
+        updateUI();
+    });
+    if (!util.fullscreenEnabled()) {
         fullscreenbutton.classList.add("hidden");
     }
     fullscreenbutton.addEventListener("click", function() {
-        if (fullscreenElement()) {
-            exitFullscreen();
+        if (util.fullscreenElement()) {
+            util.exitFullscreen();
         } else {
-            requestFullscreen(document.documentElement, {navigationUI: "hide"});
+            util.requestFullscreen(document.documentElement, {navigationUI: "hide"});
         }
     });
     document.getElementById("switchbutton").addEventListener("click", function() {
@@ -584,7 +626,7 @@ window.addEventListener("load", function() {
         {id: "downbutton", key: KEY_DOWN}
     ].forEach(function(o) {
         document.getElementById(o.id).addEventListener("click", function() {
-            ws.send("k" + o.key);
+            controller.keyboardKey(o.key);
         });
     });
     document.getElementById("keyboardkeysbutton").addEventListener("click", function() {
@@ -593,13 +635,15 @@ window.addEventListener("load", function() {
     document.getElementById("sendbutton").addEventListener("click", function() {
         if (keyboardTextarea.value) {
             // normalize line endings
-            ws.send("t" + keyboardTextarea.value.replace(/\r\n?/g, "\n"));
+            controller.keyboardText(keyboardTextarea.value.replace(/\r\n?/g, "\n"));
             keyboardTextarea.value = "";
             keyboardTextarea.oninput();
         }
         history.back();
     });
-    window.addEventListener("popstate", updateUI);
+    window.addEventListener("popstate", function() {
+        updateUI();
+    });
     document.getElementById("reloadbutton").addEventListener("click", function() {
         location.reload();
     });
@@ -608,19 +652,21 @@ window.addEventListener("load", function() {
             history.back();
         });
     });
-    document.addEventListener("touchstart", handleTouchstart);
-    document.addEventListener("touchend", handleTouchend);
-    document.addEventListener("touchcancel", handleTouchend);
-    document.addEventListener("touchmove", handleTouchmove);
+    document.addEventListener("touchstart", touchpad.handleTouchstart);
+    document.addEventListener("touchend", touchpad.handleTouchend);
+    document.addEventListener("touchcancel", touchpad.handleTouchcancel);
+    document.addEventListener("touchmove", touchpad.handleTouchmove);
     document.addEventListener("keydown", function(evt) {
         if (activeScene && activeScene.classList.contains("key")) {
-            handleKeydown(evt);
+            keyboard.handleKeydown(evt);
         }
     });
-    addPointerlockchangeEventListener(updateUI);
+    util.addPointerlockchangeEventListener(function() {
+        updateUI();
+    });
     document.addEventListener("mousedown", function(event) {
         if (activeScene != mouseScene && event.buttons == 1 && event.target.classList.contains("touch")) {
-            requestPointerLock(mouseScene);
+            util.requestPointerLock(mouseScene);
         }
     });
     ["touchstart", "touchend", "touchcancel", "touchmove"].forEach(function(type) {
@@ -628,8 +674,8 @@ window.addEventListener("load", function() {
             evt.preventDefault();
         });
     });
-    mouseScene.addEventListener("mousedown", handleMousedown);
-    mouseScene.addEventListener("mouseup", handleMouseup);
-    mouseScene.addEventListener("mousemove", handleMousemove);
-    mouseScene.addEventListener("wheel", handleWheel);
+    mouseScene.addEventListener("mousedown", mouse.handleMousedown);
+    mouseScene.addEventListener("mouseup", mouse.handleMouseup);
+    mouseScene.addEventListener("mousemove", mouse.handleMousemove);
+    mouseScene.addEventListener("wheel", mouse.handleWheel);
 });
