@@ -579,9 +579,8 @@ window.addEventListener("load", function() {
         try {
             config = JSON.parse(evt.data);
         } catch (e) {
-            console.log(e);
             ws.close();
-            return;
+            throw (e);
         }
         ready = true;
         updateUI();
