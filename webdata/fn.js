@@ -277,11 +277,12 @@ var touchpad = (function() {
             moved = false;
         }
         var touches = evt.changedTouches;
+        var foundTouch = false;
         for (var i = 0; i < touches.length; i += 1) {
             if (ongoingTouches.length == 0 && !touches[i].target.classList.contains("touch")) {
                 continue;
             }
-            evt.preventDefault();
+            foundTouch = true;
             var touch = copyTouch(touches[i], evt.timeStamp);
             var idx = ongoingTouchIndexById(touch.identifier);
             if (idx < 0) {
@@ -289,29 +290,38 @@ var touchpad = (function() {
             } else {
                 ongoingTouches[idx] = touch;
             }
-            lastEndTimeStamp = 0;
-            if (draggingTimeout != null) {
-                clearTimeout(draggingTimeout);
-                draggingTimeout = null;
-                dragging = true;
-            }
-            controller.pointerScroll(0, 0, true);
         }
+        if (!foundTouch) {
+            return;
+        }
+        evt.preventDefault();
+        lastEndTimeStamp = 0;
+        if (draggingTimeout != null) {
+            clearTimeout(draggingTimeout);
+            draggingTimeout = null;
+            dragging = true;
+        }
+        controller.pointerScroll(0, 0, true);
     };
 
     touchpad.handleTouchend = touchpad.handleTouchcancel = function(evt) {
         var touches = evt.changedTouches;
+        var foundTouch = false;
         for (var i = 0; i < touches.length; i += 1) {
             var idx = ongoingTouchIndexById(touches[i].identifier);
             if (idx < 0) {
                 continue;
             }
-            evt.preventDefault();
+            foundTouch = true;
             ongoingTouches.splice(idx, 1);
             releasedCount += 1;
-            lastEndTimeStamp = evt.timeStamp;
-            controller.pointerScroll(0, 0, true);
         }
+        if (!foundTouch) {
+            return;
+        }
+        evt.preventDefault();
+        lastEndTimeStamp = evt.timeStamp;
+        controller.pointerScroll(0, 0, true);
         if (releasedCount > TOUCH_MOVE_THRESHOLD.length) {
             moved = true;
         }
@@ -344,12 +354,13 @@ var touchpad = (function() {
         var sumX = 0;
         var sumY = 0;
         var touches = evt.changedTouches;
+        var foundTouch = false;
         for (var i = 0; i < touches.length; i += 1) {
             var idx = ongoingTouchIndexById(touches[i].identifier);
             if (idx < 0) {
                 continue;
             }
-            evt.preventDefault();
+            foundTouch = true;
             if (!moved) {
                 var dist = Math.sqrt(Math.pow(touches[i].pageX - ongoingTouches[idx].pageXStart, 2) +
                     Math.pow(touches[i].pageY - ongoingTouches[idx].pageYStart, 2));
@@ -368,6 +379,10 @@ var touchpad = (function() {
             ongoingTouches[idx].pageY = touches[i].pageY;
             ongoingTouches[idx].timeStamp = evt.timeStamp;
         }
+        if (!foundTouch) {
+            return;
+        }
+        evt.preventDefault();
         if (moved && evt.timeStamp - lastEndTimeStamp >= TOUCH_TIMEOUT) {
             if (ongoingTouches.length == 1 || dragging) {
                 controller.pointerMove(sumX*config.moveSpeed, sumY*config.moveSpeed);
