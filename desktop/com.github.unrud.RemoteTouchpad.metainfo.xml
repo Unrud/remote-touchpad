@@ -19,6 +19,19 @@
   <url type="homepage">https://github.com/Unrud/remote-touchpad</url>
   <developer_name>Unrud</developer_name>
   <releases>
+    <release version="1.2.0" date="2022-02-26">
+      <description>
+        <ul>
+          <li>Add command-line options for move and scroll speed</li>
+          <li>Add hardware mouse support</li>
+          <li>Limit update rate</li>
+          <li>Windows: Reverse vertical scroll direction</li>
+          <li>Show error message if compiled without controller</li>
+          <li>Don't show disabled controllers in "unsupported platform" error message</li>
+          <li>Switch from go-bindata-assetfs to go:embed</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.1.0" date="2022-01-28">
       <description>
         <ul>
@@ -222,16 +235,16 @@
   </releases>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.1.0/screenshots/1.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.2.0/screenshots/1.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.1.0/screenshots/2.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.2.0/screenshots/2.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.1.0/screenshots/3.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.2.0/screenshots/3.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.1.0/screenshots/4.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.2.0/screenshots/4.png</image>
     </screenshot>
   </screenshots>
   <content_rating type="oars-1.1"/>

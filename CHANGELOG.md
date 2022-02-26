@@ -1,6 +1,6 @@
 # Changelog
 
-## unreleased
+## 1.2.0 (2022-02-26)
 
 * Add command-line options for move and scroll speed
 * Add hardware mouse support
