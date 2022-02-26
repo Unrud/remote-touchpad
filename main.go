@@ -157,7 +157,7 @@ func main() {
 	flag.StringVar(&secret, "secret", "", "shared secret for client authentication")
 	flag.StringVar(&certFile, "cert", "", "file containing TLS certificate")
 	flag.StringVar(&keyFile, "key", "", "file containing TLS private key")
-	flag.UintVar(&config.UpdateRate, "update-rate", 20, "number of updates per second")
+	flag.UintVar(&config.UpdateRate, "update-rate", 30, "number of updates per second")
 	flag.Float64Var(&config.MoveSpeed, "move-speed", 1, "move speed multiplier")
 	flag.Float64Var(&config.ScrollSpeed, "scroll-speed", 1, "scroll speed multiplier")
 	flag.Float64Var(&config.MouseMoveSpeed, "mouse-move-speed", 1, "mouse move speed multiplier")
