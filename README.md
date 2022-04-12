@@ -15,6 +15,32 @@ Supports Flatpak's RemoteDesktop portal (for Wayland), Windows and X11.
   * Portal & X11: `go install -tags portal,x11 github.com/unrud/remote-touchpad@latest`
   * Windows: `go install github.com/unrud/remote-touchpad@latest`
 
+## Command line options
+
+    $ remote-touchpad --help
+
+      Usage of remote-touchpad:
+        -bind string
+           bind server to [HOSTNAME]:PORT (default ":0")
+        -cert string
+           file containing TLS certificate
+        -key string
+           file containing TLS private key
+        -mouse-move-speed float
+           mouse move speed multiplier (default 1)
+        -mouse-scroll-speed float
+           mouse scroll speed multiplier (default 1)
+        -move-speed float
+           move speed multiplier (default 1)
+        -scroll-speed float
+           scroll speed multiplier (default 1)
+        -secret string
+           shared secret for client authentication
+        -update-rate uint
+           number of updates per second (default 30)
+        -version
+           show program's version number and exit
+
 ## Screenshots
 
 ![screenshot 1](https://raw.githubusercontent.com/Unrud/remote-touchpad/master/screenshots/1.png)
