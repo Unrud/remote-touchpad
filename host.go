@@ -28,7 +28,7 @@ import (
 
 const ipv4Rating int = +1
 
-func FindDefaultHost() string {
+func findDefaultHost() string {
 	type hostsValue struct {
 		prio int
 		host string

@@ -27,6 +27,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/unrud/remote-touchpad/inputcontrol"
+	"github.com/unrud/remote-touchpad/terminal"
 	"golang.org/x/net/websocket"
 	"log"
 	mathrand "math/rand"
@@ -57,7 +59,7 @@ type config struct {
 	MouseMoveSpeed   float64 `json:"mouseMoveSpeed"`
 }
 
-func processCommand(controller Controller, command string) error {
+func processCommand(controller inputcontrol.Controller, command string) error {
 	if len(command) == 0 {
 		return errors.New("empty command")
 	}
@@ -81,10 +83,10 @@ func processCommand(controller Controller, command string) error {
 		return err
 	}
 	if command[0] == 'k' {
-		if x < 0 || x >= int64(KeyLimit) {
+		if x < 0 || x >= int64(inputcontrol.KeyLimit) {
 			return errors.New("unsupported key")
 		}
-		return controller.KeyboardKey(Key(x))
+		return controller.KeyboardKey(inputcontrol.Key(x))
 	}
 	y, err := strconv.ParseInt(arguments[1], 10, 32)
 	if err != nil {
@@ -100,14 +102,14 @@ func processCommand(controller Controller, command string) error {
 		return controller.PointerScroll(int(x), int(y), true)
 	}
 	if command[0] == 'b' {
-		if x < 0 || x >= int64(PointerButtonLimit) {
+		if x < 0 || x >= int64(inputcontrol.PointerButtonLimit) {
 			return errors.New("unsupported pointer button")
 		}
 		b := true
 		if y == 0 {
 			b = false
 		}
-		return controller.PointerButton(PointerButton(x), b)
+		return controller.PointerButton(inputcontrol.PointerButton(x), b)
 	}
 	return errors.New("unsupported command")
 }
@@ -148,7 +150,7 @@ func secureRandBase64(length int) string {
 }
 
 func main() {
-	TerminalSetTitle(prettyAppName)
+	terminal.SetTitle(prettyAppName)
 	var bind, certFile, keyFile, secret string
 	var showVersion bool
 	var config config
@@ -177,19 +179,19 @@ func main() {
 	if secret == "" {
 		secret = secureRandBase64(defaultSecretLength)
 	}
-	if len(Controllers) == 0 {
+	if len(inputcontrol.Controllers) == 0 {
 		log.Fatal("compiled without controller")
 	}
-	var controller Controller
+	var controller inputcontrol.Controller
 	var controllerName string
 	platformErrors := ""
-	for _, controllerInfo := range Controllers {
+	for _, controllerInfo := range inputcontrol.Controllers {
 		controllerName = controllerInfo.Name
 		var err error
 		controller, err = controllerInfo.Init()
 		if err == nil {
 			break
-		} else if _, ok := err.(UnsupportedPlatformError); ok {
+		} else if _, ok := err.(inputcontrol.UnsupportedPlatformError); ok {
 			platformErrors += fmt.Sprintf("%s controller: %v\n", controllerName, err)
 		} else {
 			log.Fatalf("%s controller: %v", controllerName, err)
@@ -218,11 +220,11 @@ func main() {
 		}
 	}
 	if host == "" {
-		host = FindDefaultHost()
+		host = findDefaultHost()
 	}
 	port := addr.Port
 	mux := http.NewServeMux()
-	mux.Handle("/", http.FileServer(http.FS(WebdataFS)))
+	mux.Handle("/", http.FileServer(http.FS(webdataFS)))
 	mux.Handle("/ws", websocket.Handler(func(ws *websocket.Conn) {
 		var message string
 		challenge := <-authenticationChallenges
@@ -254,7 +256,7 @@ func main() {
 	}
 	url := fmt.Sprintf("%s://%s/#%s", scheme, domain, secret)
 	fmt.Println(url)
-	if qrCode, err := GenerateQRCode(url, TerminalSupportsColor(os.Stdout.Fd())); err == nil {
+	if qrCode, err := terminal.GenerateQRCode(url, terminal.SupportsColor(os.Stdout.Fd())); err == nil {
 		fmt.Print(qrCode)
 	} else {
 		log.Printf("QR code error: %v", err)

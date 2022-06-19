@@ -17,7 +17,7 @@
  *    along with Remote-Touchpad.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package main
+package terminal
 
 import qrcode "github.com/skip2/go-qrcode"
 
@@ -33,7 +33,7 @@ func qrCodeToString(bits [][]bool, colorize bool) string {
 	s := ""
 	for y := -1; y < len(bits); y += 2 {
 		if colorize {
-			s += TerminalForegroundBlack + TerminalBackgroundWhite
+			s += ForegroundBlack + BackgroundWhite
 		}
 		for x := range bits[0] {
 			upper := false
@@ -55,7 +55,7 @@ func qrCodeToString(bits [][]bool, colorize bool) string {
 			}
 		}
 		if colorize {
-			s += TerminalForegroundReset + TerminalBackgroundReset
+			s += ForegroundReset + BackgroundReset
 		}
 		s += "\n"
 	}

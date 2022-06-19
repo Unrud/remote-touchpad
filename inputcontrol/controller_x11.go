@@ -19,7 +19,7 @@
  *    along with Remote-Touchpad.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package main
+package inputcontrol
 
 // #cgo LDFLAGS: -lX11 -lXtst
 // #include <X11/Xlib.h>

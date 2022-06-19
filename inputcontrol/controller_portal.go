@@ -19,7 +19,7 @@
  *    along with Remote-Touchpad.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package main
+package inputcontrol
 
 import (
 	"errors"

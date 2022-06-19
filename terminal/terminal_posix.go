@@ -1,3 +1,5 @@
+//go:build !windows
+
 /*
  *    Copyright (c) 2018-2019 Unrud <unrud@outlook.com>
  *
@@ -17,33 +19,21 @@
  *    along with Remote-Touchpad.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package main
+package terminal
 
-import (
-	"syscall"
-	"unsafe"
-)
+// #include <unistd.h>
+import "C"
+import "os"
 
-const (
-	enableProcessedOuput            uint32 = 0x1
-	enableWrapAtEolOutput           uint32 = 0x2
-	enableVirtualTerminalProcessing uint32 = 0x4
-)
-
-var (
-	kernel32DLL         = syscall.NewLazyDLL("kernel32.dll")
-	setConsoleModeProc  = kernel32DLL.NewProc("SetConsoleMode")
-	setConsoleTitleProc = kernel32DLL.NewProc("SetConsoleTitleW")
-)
-
-func TerminalSupportsColor(fd uintptr) bool {
-	r, _, _ := setConsoleModeProc.Call(fd, uintptr(enableProcessedOuput|
-		enableWrapAtEolOutput|enableVirtualTerminalProcessing))
-	return r != 0
+func SupportsColor(fd uintptr) bool {
+	return C.isatty(C.int(fd)) != 0
 }
 
-func TerminalSetTitle(title string) bool {
-	r, _, _ := setConsoleTitleProc.Call(
-		uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(title))))
-	return r != 0
+func SetTitle(title string) bool {
+	if C.isatty(C.int(os.Stdout.Fd())) != 0 {
+		os.Stdout.Write([]byte("\x1b]2;" + title + "\x07"))
+		os.Stdout.Sync()
+		return true
+	}
+	return false
 }

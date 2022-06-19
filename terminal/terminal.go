@@ -17,11 +17,11 @@
  *    along with Remote-Touchpad.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package main
+package terminal
 
 const (
-	TerminalForegroundBlack string = "\033[30m"
-	TerminalForegroundReset string = "\033[39m"
-	TerminalBackgroundWhite string = "\033[47m"
-	TerminalBackgroundReset string = "\033[49m"
+	ForegroundBlack string = "\033[30m"
+	ForegroundReset string = "\033[39m"
+	BackgroundWhite string = "\033[47m"
+	BackgroundReset string = "\033[49m"
 )
