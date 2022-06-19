@@ -12,7 +12,11 @@ finish-args:
 modules:
   - name: remote-touchpad
     sources:
-      # Vendor dependencies: go mod vendor -v
+      - type: git
+        path: ..
+      - type: shell
+        commands:
+          - . /usr/lib/sdk/golang/enable.sh; go mod vendor -e
       - type: git
         url: https://github.com/godbus/dbus
         tag: v5.0.6
@@ -26,12 +30,6 @@ modules:
         url: https://github.com/golang/net
         commit: cd36cc0744dd695657988f15f08446dc81e16efc
         dest: vendor/golang.org/x/net
-      - type: file
-        path: modules.txt
-        dest: vendor
-      - type: git
-        path: ..
-        branch: master
     buildsystem: simple
     build-commands:
       - . /usr/lib/sdk/golang/enable.sh; go build -tags portal,x11
