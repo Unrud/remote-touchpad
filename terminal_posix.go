@@ -1,4 +1,4 @@
-// +build !windows
+//go:build !windows
 
 /*
  *    Copyright (c) 2018-2019 Unrud <unrud@outlook.com>

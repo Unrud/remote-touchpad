@@ -1,4 +1,4 @@
-// +build portal
+//go:build portal
 
 /*
  *    Copyright (c) 2018 Unrud <unrud@outlook.com>
