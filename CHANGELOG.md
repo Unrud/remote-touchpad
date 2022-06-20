@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1 (2022-06-20)
+
+* Update dependencies
+
 ## 1.2.0 (2022-02-26)
 
 * Add command-line options for move and scroll speed
