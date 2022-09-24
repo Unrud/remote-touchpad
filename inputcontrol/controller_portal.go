@@ -150,7 +150,7 @@ func InitPortalController() (Controller, error) {
 
 func getResponse(bus *dbus.Conn, object dbus.BusObject, method string,
 	flags dbus.Flags, args ...interface{}) (uint32, map[string]dbus.Variant, error) {
-	ch := make(chan *dbus.Signal)
+	ch := make(chan *dbus.Signal, 512)
 	bus.Signal(ch)
 	defer bus.RemoveSignal(ch)
 	var requestPath dbus.ObjectPath
