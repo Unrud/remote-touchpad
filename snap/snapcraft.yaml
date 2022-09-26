@@ -9,7 +9,7 @@ license: GPL-3.0+
 grade: stable
 adopt-info: remote-touchpad
 
-base: core18
+base: core20
 confinement: strict
 
 apps:
@@ -20,7 +20,7 @@ apps:
       - desktop
       - x11
   remote-touchpad-wait-on-error:
-    command: usr/bin/remote-touchpad-wait-on-error
+    command: bin/remote-touchpad-wait-on-error
     plugs:
       - network-bind
       - desktop
@@ -44,9 +44,13 @@ parts:
     stage-packages:
       - libxt6
       - libxtst6
+    override-pull: |
+      snapcraftctl pull
+      # WORKAROUND: Point icon directly to SVG otherwise snapcraft can't find it
+      sed -e 's|Icon=com.github.unrud.RemoteTouchpad|Icon=/usr/share/icons/hicolor/scalable/apps/com.github.unrud.RemoteTouchpad.svg|' -i desktop/com.github.unrud.RemoteTouchpad.desktop
     override-build: |
       snapcraftctl build
-      install -Dm0755 -t "${SNAPCRAFT_PART_INSTALL}/usr/bin" desktop/remote-touchpad-wait-on-error
+      install -Dm0755 -t "${SNAPCRAFT_PART_INSTALL}/bin" desktop/remote-touchpad-wait-on-error
       install -Dm0644 -t "${SNAPCRAFT_PART_INSTALL}/usr/share/metainfo" desktop/com.github.unrud.RemoteTouchpad.metainfo.xml
       install -Dm0644 -t "${SNAPCRAFT_PART_INSTALL}/usr/share/applications" desktop/com.github.unrud.RemoteTouchpad.desktop
       install -Dm0644 -t "${SNAPCRAFT_PART_INSTALL}/usr/share/icons/hicolor/scalable/apps" desktop/com.github.unrud.RemoteTouchpad.svg
