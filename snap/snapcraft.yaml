@@ -40,9 +40,11 @@ parts:
       - gcc
       - libc6-dev
       - libxt-dev
+      - libxrandr-dev
       - libxtst-dev
     stage-packages:
       - libxt6
+      - libxrandr2
       - libxtst6
     override-pull: |
       snapcraftctl pull

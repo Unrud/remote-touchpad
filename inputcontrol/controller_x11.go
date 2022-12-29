@@ -21,16 +21,19 @@
 
 package inputcontrol
 
-// #cgo LDFLAGS: -lX11 -lXtst
+// #cgo LDFLAGS: -lX11 -lXrandr -lXtst
 // #include <X11/Xlib.h>
 // #include <X11/Intrinsic.h>
+// #include <X11/extensions/Xrandr.h>
 // #include <X11/extensions/XTest.h>
 // #include <X11/XKBlib.h>
+// Window MacroDefaultRootWindow(Display *dpy) {
+//     return DefaultRootWindow(dpy);
+// }
 import "C"
 import (
 	"errors"
-	"fmt"
-	"os"
+	"strings"
 	"sync"
 	"time"
 	"unsafe"
@@ -55,17 +58,35 @@ func init() {
 }
 
 func InitX11Controller() (Controller, error) {
-	sessionType := os.Getenv("XDG_SESSION_TYPE")
-	if sessionType != "" && sessionType != "x11" {
-		return nil, UnsupportedPlatformError{errors.New(fmt.Sprintf(
-			"unsupported session type '%v'", sessionType))}
-	}
 	display := C.XOpenDisplay(nil)
 	if display == nil {
 		return nil, UnsupportedPlatformError{
 			errors.New("failed to connect to X server")}
 	}
-	return &x11Controller{display: display}, nil
+	p := &x11Controller{display: display}
+	if p.xIsXwayland() {
+		p.Close()
+		return nil, UnsupportedPlatformError{
+			errors.New("X server is Xwayland")}
+	}
+	return p, nil
+}
+
+func (p *x11Controller) xIsXwayland() bool {
+	resources := C.XRRGetScreenResourcesCurrent(p.display, C.MacroDefaultRootWindow(p.display))
+	if resources == nil {
+		return false
+	}
+	defer C.XRRFreeScreenResources(resources)
+	if resources.noutput < 1 {
+		return false
+	}
+	output := C.XRRGetOutputInfo(p.display, resources, *resources.outputs)
+	if output == nil {
+		return false
+	}
+	defer C.XRRFreeOutputInfo(output)
+	return strings.HasPrefix(C.GoString(output.name), "XWAYLAND")
 }
 
 func (p *x11Controller) Close() error {
