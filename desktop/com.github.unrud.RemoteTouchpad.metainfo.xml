@@ -19,6 +19,15 @@
   <url type="homepage">https://github.com/Unrud/remote-touchpad</url>
   <developer_name>Unrud</developer_name>
   <releases>
+    <release version="1.2.3" date="2022-12-29">
+      <description>
+        <ul>
+          <li>Improve XWayland detection</li>
+          <li>Update dependencies</li>
+          <li>Flatpak: Add Wayland socket to disable X11 socket</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.2.2" date="2022-09-23">
       <description>
         <ul>
@@ -250,16 +259,16 @@
   </releases>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.2.2/screenshots/1.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.2.3/screenshots/1.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.2.2/screenshots/2.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.2.3/screenshots/2.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.2.2/screenshots/3.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.2.3/screenshots/3.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.2.2/screenshots/4.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.2.3/screenshots/4.png</image>
     </screenshot>
   </screenshots>
   <content_rating type="oars-1.1"/>

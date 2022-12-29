@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.3 (2022-12-29)
+
+* Improve XWayland detection
+* Update dependencies
+* Flatpak: Add Wayland socket to disable X11 socket
+
 ## 1.2.2 (2022-09-23)
 
 * Update dependencies
