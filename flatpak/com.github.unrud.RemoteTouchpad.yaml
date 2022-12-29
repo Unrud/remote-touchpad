@@ -7,6 +7,7 @@ sdk-extensions:
   - org.freedesktop.Sdk.Extension.golang
 finish-args:
   - --socket=fallback-x11
+  - --socket=wayland
   - --share=network
 modules:
   - name: remote-touchpad
