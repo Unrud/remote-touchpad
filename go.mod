@@ -7,3 +7,5 @@ require (
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	golang.org/x/net v0.7.0
 )
+
+require github.com/bendahl/uinput v1.6.0 // indirect
