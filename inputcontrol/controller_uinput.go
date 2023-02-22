@@ -115,6 +115,7 @@ func InitUinputController() (Controller, error) {
 	}
 	mouse, err := uinput.CreateMouse("/dev/uinput", []byte("remote-tp-mouse"))
 	if err != nil {
+		keyboard.Close()
 		return nil, err
 	}
 	p := &uinputController{keyboard, mouse}
@@ -128,12 +129,13 @@ func (p *uinputController) Close() error {
 }
 
 func (p *uinputController) sendKeysym(sym Keysym) error {
-	if sym >= 0x0041 && sym <= 0x005a {
+	if sym >= 0x0041 && sym <= 0x005a { // capital letters
 		p.keyboard.KeyDown(uinput.KeyLeftshift)
 		p.keyboard.KeyPress(ukeysMap[sym + 0x20])
 		p.keyboard.KeyUp(uinput.KeyLeftshift)
+	} else if key, ok := ukeysMap[sym]; ok {
+		p.keyboard.KeyPress(key)
 	}
-	p.keyboard.KeyPress(ukeysMap[sym])
 	return nil
 }
 
