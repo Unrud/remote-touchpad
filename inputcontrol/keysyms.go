@@ -66,59 +66,44 @@ func RuneToKeysym(runeValue rune) (Keysym, error) {
 }
 
 func KeyToKeysym(key Key) (Keysym, error) {
-	if key == KeyBackSpace {
+	switch key {
+	case KeyBackSpace:
 		return xkBackSpace, nil
-	}
-	if key == KeyReturn {
+	case KeyReturn:
 		return xkReturn, nil
-	}
-	if key == KeyDelete {
+	case KeyDelete:
 		return xkDelete, nil
-	}
-	if key == KeyHome {
+	case KeyHome:
 		return xkHome, nil
-	}
-	if key == KeyLeft {
+	case KeyLeft:
 		return xkLeft, nil
-	}
-	if key == KeyUp {
+	case KeyUp:
 		return xkUp, nil
-	}
-	if key == KeyRight {
+	case KeyRight:
 		return xkRight, nil
-	}
-	if key == KeyDown {
+	case KeyDown:
 		return xkDown, nil
-	}
-	if key == KeyEnd {
+	case KeyEnd:
 		return xkEnd, nil
-	}
-	if key == KeySuper {
+	case KeySuper:
 		return xkSuperL, nil
-	}
-	if key == KeyVolumeMute {
+	case KeyVolumeMute:
 		return xf86xkAudioMute, nil
-	}
-	if key == KeyVolumeDown {
+	case KeyVolumeDown:
 		return xf86xkAudioLowerVolume, nil
-	}
-	if key == KeyVolumeUp {
+	case KeyVolumeUp:
 		return xf86xkAudioRaiseVolume, nil
-	}
-	if key == KeyMediaPlayPause {
+	case KeyMediaPlayPause:
 		return xf86xkAudioPlay, nil
-	}
-	if key == KeyMediaPrevTrack {
+	case KeyMediaPrevTrack:
 		return xf86xkAudioPrev, nil
-	}
-	if key == KeyMediaNextTrack {
+	case KeyMediaNextTrack:
 		return xf86xkAudioNext, nil
-	}
-	if key == KeyBrowserBack {
+	case KeyBrowserBack:
 		return xf86xkBack, nil
-	}
-	if key == KeyBrowserForward {
+	case KeyBrowserForward:
 		return xf86xkForward, nil
+	default:
+		return 0, errors.New("key not mapped to keysym")
 	}
-	return 0, errors.New("key not mapped to keysym")
 }

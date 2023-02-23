@@ -237,13 +237,14 @@ func (p *portalController) PointerButton(button PointerButton, press bool) error
 		return errors.New("dbus connection closed")
 	}
 	var btn int32
-	if button == PointerButtonLeft {
+	switch button {
+	case PointerButtonLeft:
 		btn = btnLeft
-	} else if button == PointerButtonMiddle {
+	case PointerButtonMiddle:
 		btn = btnMiddle
-	} else if button == PointerButtonRight {
+	case PointerButtonRight:
 		btn = btnRight
-	} else {
+	default:
 		return errors.New("unsupported pointer button")
 	}
 	state := btnReleased

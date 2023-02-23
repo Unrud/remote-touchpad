@@ -135,43 +135,44 @@ func (p *windowsController) KeyboardText(text string) error {
 
 func (p *windowsController) KeyboardKey(key Key) error {
 	input := keybdInput{typ: inputKeyboard}
-	if key == KeyBackSpace {
+	switch key {
+	case KeyBackSpace:
 		input.wVk = vkBack
-	} else if key == KeyReturn {
+	case KeyReturn:
 		input.wVk = vkReturn
-	} else if key == KeyEnd {
+	case KeyEnd:
 		input.wVk = vkEnd
-	} else if key == KeyHome {
+	case KeyHome:
 		input.wVk = vkHome
-	} else if key == KeyLeft {
+	case KeyLeft:
 		input.wVk = vkLeft
-	} else if key == KeyUp {
+	case KeyUp:
 		input.wVk = vkUp
-	} else if key == KeyRight {
+	case KeyRight:
 		input.wVk = vkRight
-	} else if key == KeyDown {
+	case KeyDown:
 		input.wVk = vkDown
-	} else if key == KeyDelete {
+	case KeyDelete:
 		input.wVk = vkDelete
-	} else if key == KeySuper {
+	case KeySuper:
 		input.wVk = vkLwin
-	} else if key == KeyBrowserBack {
+	case KeyBrowserBack:
 		input.wVk = vkBrowserBack
-	} else if key == KeyBrowserForward {
+	case KeyBrowserForward:
 		input.wVk = vkBrowserForward
-	} else if key == KeyVolumeMute {
+	case KeyVolumeMute:
 		input.wVk = vkVolumeMute
-	} else if key == KeyVolumeDown {
+	case KeyVolumeDown:
 		input.wVk = vkVolumeDown
-	} else if key == KeyVolumeUp {
+	case KeyVolumeUp:
 		input.wVk = vkVolumeUp
-	} else if key == KeyMediaNextTrack {
+	case KeyMediaNextTrack:
 		input.wVk = vkMediaNextTrack
-	} else if key == KeyMediaPrevTrack {
+	case KeyMediaPrevTrack:
 		input.wVk = vkMediaPrevTrack
-	} else if key == KeyMediaPlayPause {
+	case KeyMediaPlayPause:
 		input.wVk = vkMediaPlayPause
-	} else {
+	default:
 		return errors.New("key not mapped to virtual-key code")
 	}
 	inputs := [...]keybdInput{input, input}

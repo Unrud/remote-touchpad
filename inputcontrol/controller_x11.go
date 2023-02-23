@@ -301,16 +301,16 @@ func (p *x11Controller) sendButton(button uint, press bool) error {
 }
 
 func (p *x11Controller) PointerButton(button PointerButton, press bool) error {
-	if button == PointerButtonLeft {
+	switch button {
+	case PointerButtonLeft:
 		return p.sendButton(1, press)
-	}
-	if button == PointerButtonRight {
+	case PointerButtonRight:
 		return p.sendButton(3, press)
-	}
-	if button == PointerButtonMiddle {
+	case PointerButtonMiddle:
 		return p.sendButton(2, press)
+	default:
+		return errors.New("unsupported pointer button")
 	}
-	return errors.New("unsupported pointer button")
 }
 
 func (p *x11Controller) PointerMove(deltaX, deltaY int) error {
