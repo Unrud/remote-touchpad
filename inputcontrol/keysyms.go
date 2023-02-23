@@ -1,4 +1,4 @@
-//go:build portal || x11 || uinput
+//go:build portal || x11
 
 /*
  *    Copyright (c) 2018 Unrud <unrud@outlook.com>
