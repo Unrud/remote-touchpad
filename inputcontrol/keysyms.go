@@ -23,7 +23,7 @@ package inputcontrol
 
 //go:generate go run keysyms.generator.go
 
-import "errors"
+import "fmt"
 
 type Keysym int32
 
@@ -57,8 +57,8 @@ func RuneToKeysym(runeValue rune) (Keysym, error) {
 	keysym, found := keysymsMap[runeValue]
 	if !found {
 		if runeValue < 0x100 || runeValue > 0x10ffff {
-			return 0, errors.New("rune not mappend to keysym and " +
-				"out of range for direct unicode mapping")
+			return 0, fmt.Errorf("rune not mappend to keysym and "+
+				"out of range for direct unicode mapping: %q", runeValue)
 		}
 		keysym = Keysym(0x01000000 + runeValue)
 	}
@@ -104,6 +104,6 @@ func KeyToKeysym(key Key) (Keysym, error) {
 	case KeyBrowserForward:
 		return xf86xkForward, nil
 	default:
-		return 0, errors.New("key not mapped to keysym")
+		return 0, fmt.Errorf("key not mapped to keysym: %#v", key)
 	}
 }

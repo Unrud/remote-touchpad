@@ -22,7 +22,7 @@
 package inputcontrol
 
 import (
-	"errors"
+	"fmt"
 	"syscall"
 	"unsafe"
 )
@@ -173,7 +173,7 @@ func (p *windowsController) KeyboardKey(key Key) error {
 	case KeyMediaPlayPause:
 		input.wVk = vkMediaPlayPause
 	default:
-		return errors.New("key not mapped to virtual-key code")
+		return fmt.Errorf("key not mapped to virtual-key code: %#v", key)
 	}
 	inputs := [...]keybdInput{input, input}
 	inputs[1].dwFlags |= keyeventfKeyup
@@ -195,7 +195,7 @@ func (p *windowsController) PointerButton(button PointerButton, press bool) erro
 	} else if button == PointerButtonRight {
 		input.dwFlags = mouseeventfRightup
 	} else {
-		return errors.New("unsupported pointer button")
+		return fmt.Errorf("unsupported pointer button: %#v", button)
 	}
 	if r, _, err := sendInputProc.Call(1, uintptr(unsafe.Pointer(&input)),
 		unsafe.Sizeof(input)); int(r) != 1 {

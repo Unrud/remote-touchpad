@@ -33,6 +33,7 @@ package inputcontrol
 import "C"
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -309,7 +310,7 @@ func (p *x11Controller) PointerButton(button PointerButton, press bool) error {
 	case PointerButtonMiddle:
 		return p.sendButton(2, press)
 	default:
-		return errors.New("unsupported pointer button")
+		return fmt.Errorf("unsupported pointer button: %#v", button)
 	}
 }
 

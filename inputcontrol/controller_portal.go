@@ -245,7 +245,7 @@ func (p *portalController) PointerButton(button PointerButton, press bool) error
 	case PointerButtonRight:
 		btn = btnRight
 	default:
-		return errors.New("unsupported pointer button")
+		return fmt.Errorf("unsupported pointer button: %#v", button)
 	}
 	state := btnReleased
 	if press {
