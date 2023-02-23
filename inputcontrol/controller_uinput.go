@@ -21,10 +21,12 @@
 
 package inputcontrol
 
-import "github.com/bendahl/uinput"
-import "errors"
+import (
+	"errors"
+	"github.com/bendahl/uinput"
+)
 
-var ukeysMap = map[Keysym]int {
+var ukeysMap = map[Keysym]int{
 	0x0061: uinput.KeyA,
 	0x0062: uinput.KeyB,
 	0x0063: uinput.KeyC,
@@ -63,35 +65,35 @@ var ukeysMap = map[Keysym]int {
 	0x0038: uinput.Key8,
 	0x0039: uinput.Key9,
 
-	0xff1b: uinput.KeyEsc,
-	0x002d: uinput.KeyMinus,
-	0x002b: uinput.KeyKpplus,
-	0x002a: uinput.KeyKpasterisk,
-	0x003d: uinput.KeyEqual,
-	0xff08: uinput.KeyBackspace,
-	0xff09: uinput.KeyTab,
-	0x0028: uinput.KeyLeftbrace,
-	0x0029: uinput.KeyRightbrace,
-	0xff0d: uinput.KeyEnter,
-	0x003b: uinput.KeySemicolon,
-	0x0027: uinput.KeyApostrophe,
-	0x0060: uinput.KeyGrave,
-	0x005c: uinput.KeyBackslash,
-	0x002c: uinput.KeyComma,
-	0x0abd: uinput.KeyDot,
-	0x002f: uinput.KeySlash,
-	0x0020: uinput.KeySpace,
-	0xff50: uinput.KeyHome,
-	0xff52: uinput.KeyUp,
-	0xff51: uinput.KeyLeft,
-	0xff53: uinput.KeyRight,
-	0xff57: uinput.KeyEnd,
-	0xff54: uinput.KeyDown,
-	0xffff: uinput.KeyDelete,
+	0xff1b:     uinput.KeyEsc,
+	0x002d:     uinput.KeyMinus,
+	0x002b:     uinput.KeyKpplus,
+	0x002a:     uinput.KeyKpasterisk,
+	0x003d:     uinput.KeyEqual,
+	0xff08:     uinput.KeyBackspace,
+	0xff09:     uinput.KeyTab,
+	0x0028:     uinput.KeyLeftbrace,
+	0x0029:     uinput.KeyRightbrace,
+	0xff0d:     uinput.KeyEnter,
+	0x003b:     uinput.KeySemicolon,
+	0x0027:     uinput.KeyApostrophe,
+	0x0060:     uinput.KeyGrave,
+	0x005c:     uinput.KeyBackslash,
+	0x002c:     uinput.KeyComma,
+	0x0abd:     uinput.KeyDot,
+	0x002f:     uinput.KeySlash,
+	0x0020:     uinput.KeySpace,
+	0xff50:     uinput.KeyHome,
+	0xff52:     uinput.KeyUp,
+	0xff51:     uinput.KeyLeft,
+	0xff53:     uinput.KeyRight,
+	0xff57:     uinput.KeyEnd,
+	0xff54:     uinput.KeyDown,
+	0xffff:     uinput.KeyDelete,
 	0x1008FF12: uinput.KeyMute,
 	0x1008FF11: uinput.KeyVolumedown,
 	0x1008FF13: uinput.KeyVolumeup,
-	0xffeb: uinput.KeyLeftmeta,
+	0xffeb:     uinput.KeyLeftmeta,
 	0x1008ff26: uinput.KeyBack,
 	0x1008ff27: uinput.KeyForward,
 	0x1008ff17: uinput.KeyNextsong,
@@ -101,7 +103,7 @@ var ukeysMap = map[Keysym]int {
 
 type uinputController struct {
 	keyboard uinput.Keyboard
-	mouse uinput.Mouse
+	mouse    uinput.Mouse
 }
 
 func init() {
@@ -131,7 +133,7 @@ func (p *uinputController) Close() error {
 func (p *uinputController) sendKeysym(sym Keysym) error {
 	if sym >= 0x0041 && sym <= 0x005a { // capital letters
 		p.keyboard.KeyDown(uinput.KeyLeftshift)
-		p.keyboard.KeyPress(ukeysMap[sym + 0x20])
+		p.keyboard.KeyPress(ukeysMap[sym+0x20])
 		p.keyboard.KeyUp(uinput.KeyLeftshift)
 	} else if key, ok := ukeysMap[sym]; ok {
 		p.keyboard.KeyPress(key)
@@ -145,7 +147,7 @@ func (p *uinputController) KeyboardText(text string) error {
 		if err != nil {
 			return err
 		}
-		err = p.sendKeysym(keysym);
+		err = p.sendKeysym(keysym)
 
 	}
 	return nil
@@ -161,25 +163,25 @@ func (p *uinputController) KeyboardKey(key Key) error {
 
 func (p *uinputController) PointerButton(button PointerButton, press bool) error {
 	switch button {
-		case PointerButtonLeft:
+	case PointerButtonLeft:
 		if press {
 			p.mouse.LeftPress()
 		} else {
 			p.mouse.LeftRelease()
 		}
-		case PointerButtonRight:
+	case PointerButtonRight:
 		if press {
 			p.mouse.RightPress()
 		} else {
 			p.mouse.RightRelease()
 		}
-		case PointerButtonMiddle:
+	case PointerButtonMiddle:
 		if press {
 			p.mouse.MiddlePress()
 		} else {
 			p.mouse.MiddleRelease()
 		}
-		default:
+	default:
 		return errors.New("unsupported pointer button")
 	}
 	return nil
