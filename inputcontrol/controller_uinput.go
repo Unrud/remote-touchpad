@@ -25,67 +25,14 @@ package inputcontrol
 import (
 	"fmt"
 	"github.com/bendahl/uinput"
-	"unicode"
+	"os"
+	"time"
 )
 
-var ukeysMap = map[rune]int{
-	'a':  uinput.KeyA,
-	'b':  uinput.KeyB,
-	'c':  uinput.KeyC,
-	'd':  uinput.KeyD,
-	'e':  uinput.KeyE,
-	'f':  uinput.KeyF,
-	'g':  uinput.KeyG,
-	'h':  uinput.KeyH,
-	'i':  uinput.KeyI,
-	'j':  uinput.KeyJ,
-	'k':  uinput.KeyK,
-	'l':  uinput.KeyL,
-	'm':  uinput.KeyM,
-	'n':  uinput.KeyN,
-	'o':  uinput.KeyO,
-	'p':  uinput.KeyP,
-	'q':  uinput.KeyQ,
-	'r':  uinput.KeyR,
-	's':  uinput.KeyS,
-	't':  uinput.KeyT,
-	'u':  uinput.KeyU,
-	'v':  uinput.KeyV,
-	'w':  uinput.KeyW,
-	'x':  uinput.KeyX,
-	'y':  uinput.KeyY,
-	'z':  uinput.KeyZ,
-	'0':  uinput.Key0,
-	'1':  uinput.Key1,
-	'2':  uinput.Key2,
-	'3':  uinput.Key3,
-	'4':  uinput.Key4,
-	'5':  uinput.Key5,
-	'6':  uinput.Key6,
-	'7':  uinput.Key7,
-	'8':  uinput.Key8,
-	'9':  uinput.Key9,
-	0x1b: uinput.KeyEsc,
-	'-':  uinput.KeyMinus,
-	'+':  uinput.KeyKpplus,
-	'*':  uinput.KeyKpasterisk,
-	'=':  uinput.KeyEqual,
-	0x08: uinput.KeyBackspace,
-	'\t': uinput.KeyTab,
-	'(':  uinput.KeyLeftbrace,
-	')':  uinput.KeyRightbrace,
-	'\n': uinput.KeyEnter,
-	';':  uinput.KeySemicolon,
-	'\'': uinput.KeyApostrophe,
-	'`':  uinput.KeyGrave,
-	'\\': uinput.KeyBackslash,
-	',':  uinput.KeyComma,
-	'.':  uinput.KeyDot,
-	'/':  uinput.KeySlash,
-	' ':  uinput.KeySpace,
-}
+const shiftKeysDelay time.Duration = 50 * time.Millisecond
 
 type uinputController struct {
+	keymap   *Keymap
 	keyboard uinput.Keyboard
 	mouse    uinput.Mouse
 }
@@ -95,6 +42,14 @@ func init() {
 }
 
 func InitUinputController() (Controller, error) {
+	keymapName := "defkeymap"
+	if s, ok := os.LookupEnv("REMOTE_TOUCHPAD_UINPUT_KEYMAP"); ok {
+		keymapName = s
+	}
+	keymap, err := LoadKeymap(keymapName)
+	if err != nil {
+		return nil, err
+	}
 	keyboard, err := uinput.CreateKeyboard("/dev/uinput", []byte("remote-touchpad-keyboard"))
 	if err != nil {
 		return nil, err
@@ -104,7 +59,7 @@ func InitUinputController() (Controller, error) {
 		keyboard.Close()
 		return nil, err
 	}
-	return &uinputController{keyboard, mouse}, nil
+	return &uinputController{keymap, keyboard, mouse}, nil
 }
 
 func (p *uinputController) Close() error {
@@ -115,33 +70,53 @@ func (p *uinputController) Close() error {
 	return p.mouse.Close()
 }
 
-// No support for keyboard layouts, only works with QWERTY
 func (p *uinputController) KeyboardText(text string) error {
-	for _, runeValue := range text {
-		modifierShift := false
-		if unicode.IsUpper(runeValue) {
-			modifierShift = true
-			runeValue = unicode.ToLower(runeValue)
+	var activeShiftKeys KeyCombo
+	updateShiftKeys := func(keyCombo KeyCombo) error {
+		if activeShiftKeys.ShiftKeys == keyCombo.ShiftKeys {
+			activeShiftKeys.Key = keyCombo.Key
+			return nil
 		}
-		uinputKey, found := ukeysMap[runeValue]
+		if activeShiftKeys.Key != 0 {
+			time.Sleep(shiftKeysDelay)
+			activeShiftKeys.Key = 0
+		}
+		for i := range keyCombo.ShiftKeys {
+			if activeShiftKeys.ShiftKeys[i] != keyCombo.ShiftKeys[i] {
+				if activeShiftKeys.ShiftKeys[i] != 0 {
+					if err := p.keyboard.KeyUp(activeShiftKeys.ShiftKeys[i]); err != nil {
+						return err
+					}
+					activeShiftKeys.ShiftKeys[i] = 0
+				}
+				if keyCombo.ShiftKeys[i] != 0 {
+					if err := p.keyboard.KeyDown(keyCombo.ShiftKeys[i]); err != nil {
+						return err
+					}
+					activeShiftKeys.ShiftKeys[i] = keyCombo.ShiftKeys[i]
+				}
+			}
+		}
+		if keyCombo.Key != 0 {
+			activeShiftKeys.Key = keyCombo.Key
+			time.Sleep(shiftKeysDelay)
+		}
+		return nil
+	}
+	defer updateShiftKeys(KeyCombo{})
+	for _, runeValue := range text {
+		keyCombo, found := p.keymap.Get(runeValue)
 		if !found {
 			return fmt.Errorf("unsupported rune: %q", runeValue)
 		}
-		if modifierShift {
-			if err := p.keyboard.KeyDown(uinput.KeyLeftshift); err != nil {
-				return err
-			}
-		}
-		if err := p.keyboard.KeyPress(uinputKey); err != nil {
+		if err := updateShiftKeys(keyCombo); err != nil {
 			return err
 		}
-		if modifierShift {
-			if err := p.keyboard.KeyUp(uinput.KeyLeftshift); err != nil {
-				return err
-			}
+		if err := p.keyboard.KeyPress(keyCombo.Key); err != nil {
+			return err
 		}
 	}
-	return nil
+	return updateShiftKeys(KeyCombo{Key: 1})
 }
 
 func (p *uinputController) KeyboardKey(key Key) error {
