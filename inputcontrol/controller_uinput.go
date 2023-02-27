@@ -25,6 +25,7 @@ package inputcontrol
 import (
 	"fmt"
 	"github.com/bendahl/uinput"
+	"log"
 	"os"
 	"time"
 )
@@ -42,9 +43,9 @@ func init() {
 }
 
 func InitUinputController() (Controller, error) {
-	keymapName := "defkeymap"
-	if s, ok := os.LookupEnv("REMOTE_TOUCHPAD_UINPUT_KEYMAP"); ok {
-		keymapName = s
+	keymapName, keymapSet := os.LookupEnv("REMOTE_TOUCHPAD_UINPUT_KEYMAP")
+	if !keymapSet {
+		keymapName = "defkeymap"
 	}
 	keymap, err := LoadKeymap(keymapName)
 	if err != nil {
@@ -58,6 +59,9 @@ func InitUinputController() (Controller, error) {
 	if err != nil {
 		keyboard.Close()
 		return nil, err
+	}
+	if !keymapSet {
+		log.Print("Hint: Set the keyboard mapping with the REMOTE_TOUCHPAD_UINPUT_KEYMAP environment variable")
 	}
 	return &uinputController{keymap, keyboard, mouse}, nil
 }
