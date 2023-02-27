@@ -38,7 +38,7 @@ type uinputController struct {
 }
 
 func init() {
-	RegisterController("uinput", InitUinputController, 0)
+	RegisterController("uinput", InitUinputController, 10)
 }
 
 func InitUinputController() (Controller, error) {
