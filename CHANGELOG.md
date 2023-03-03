@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.0 (2023-03-03)
+
+* Initial support for uinput
+* Update dependencies
+
 ## 1.2.3 (2022-12-29)
 
 * Improve XWayland detection
