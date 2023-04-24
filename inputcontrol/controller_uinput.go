@@ -23,6 +23,7 @@
 package inputcontrol
 
 import (
+	"errors"
 	"fmt"
 	"github.com/bendahl/uinput"
 	"log"
@@ -52,10 +53,16 @@ func InitUinputController() (Controller, error) {
 		return nil, err
 	}
 	keyboard, err := uinput.CreateKeyboard("/dev/uinput", []byte("remote-touchpad-keyboard"))
+	if errors.Is(err, os.ErrNotExist) || errors.Is(err, os.ErrPermission) {
+		err = &UnsupportedPlatformError{err}
+	}
 	if err != nil {
 		return nil, err
 	}
 	mouse, err := uinput.CreateMouse("/dev/uinput", []byte("remote-touchpad-mouse"))
+	if errors.Is(err, os.ErrNotExist) || errors.Is(err, os.ErrPermission) {
+		err = &UnsupportedPlatformError{err}
+	}
 	if err != nil {
 		keyboard.Close()
 		return nil, err

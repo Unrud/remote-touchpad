@@ -61,7 +61,7 @@ func LoadKeymap(name string) (*Keymap, error) {
 	}
 	bkeymap, err := exec.Command("loadkeys", "--bkeymap", name).Output()
 	if err != nil {
-		return nil, err
+		return nil, &UnsupportedPlatformError{err}
 	}
 	if !strings.HasPrefix(string(bkeymap), bkeymapFileSignature) {
 		return nil, fmt.Errorf("invalid bkeymap: signature not found")
