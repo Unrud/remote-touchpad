@@ -67,6 +67,30 @@
             <button onclick="app.key(app.KEY_RIGHT)">→</button>
         </div>
     </div>
+    <div class="page">
+        <button onclick="app.key(app.KEY_BACK_SPACE)">⌫</button>
+        <button onclick="app.text(this.textContent)">/</button>
+        <button onclick="app.text(this.textContent)">*</button>
+        <button onclick="app.text(this.textContent)">-</button>
+
+        <button style="grid-row: 2" onclick="app.text(this.textContent)">7</button>
+        <button onclick="app.text(this.textContent)">8</button>
+        <button onclick="app.text(this.textContent)">9</button>
+        <button onclick="app.text(this.textContent)">+</button>
+
+        <button style="grid-row: 3" onclick="app.text(this.textContent)">4</button>
+        <button onclick="app.text(this.textContent)">5</button>
+        <button onclick="app.text(this.textContent)">6</button>
+        <button onclick="app.text(this.textContent)">=</button>
+
+        <button style="grid-row: 4" onclick="app.text(this.textContent)">1</button>
+        <button onclick="app.text(this.textContent)">2</button>
+        <button onclick="app.text(this.textContent)">3</button>
+        <button style="grid-row: 4 / 6; grid-column: 4" onclick="app.key(app.KEY_RETURN)">⮠</button>
+
+        <button style="grid-row: 5; grid-column: 1 / 3" onclick="app.text(this.textContent)">0</button>
+        <button onclick="app.text(this.textContent)"><script>document.write(Intl.NumberFormat().formatToParts(1.1).find(x => x.type === "decimal").value)</script></button>
+    </div>
     <button class="top right" onclick="app.setKeysPage(1, true)">⮂</button>
     <button class="top left" onclick="history.back()">⯇</button>
 </div>
