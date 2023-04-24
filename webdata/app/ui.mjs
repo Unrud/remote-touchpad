@@ -23,7 +23,9 @@ import Touchpad from "./touchpad.mjs";
 import * as compat from "./compat.mjs";
 
 const IGNORE_CLICK_AFTER_TOUCH_DURATION = 1000; // milliseconds
+const CLICK_VIBRATION_PATTERN = [10];
 
+const buttons = document.querySelectorAll("button");
 const scenes = document.querySelectorAll("body > .scene");
 const openingScene = document.getElementById("opening");
 const closedScene = document.getElementById("closed");
@@ -60,6 +62,9 @@ export default class UI {
         window.addEventListener("popstate", () => { this.#update(); });
         compat.addFullscreenchangeEventListener(() => { this.#update(); });
         compat.addPointerlockchangeEventListener(() => { this.#update(); });
+        for (const button of buttons) {
+            button.addEventListener("click", this.#handleButtonClick.bind(this));
+        }
         this.#update();
     }
 
@@ -93,6 +98,12 @@ export default class UI {
 
     #handleTextInput() {
         sessionStorage.setItem("text-input", textInput.value);
+    }
+
+    #handleButtonClick(event) {
+        event.target.classList.add("click");
+        setTimeout(() => event.target.classList.remove("click"), 0);
+        compat.vibrate(CLICK_VIBRATION_PATTERN);
     }
 
     #handleSendText() {

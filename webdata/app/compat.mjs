@@ -74,3 +74,9 @@ export const addPointerlockchangeEventListener = (listener) => {
         document.addEventListener("pointerlockchange", listener);
     }
 };
+
+export const vibrate = (pattern) => {
+    if (navigator.vibrate) {
+        navigator.vibrate(pattern);
+    }
+};

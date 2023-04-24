@@ -86,10 +86,16 @@ button {
     font-family: "icon";
     overflow: hidden;
     cursor: pointer;
+    transition: box-shadow 0.2s ease-out;
 }
 
 button:focus {
     outline: none;
+}
+
+button.click {
+    box-shadow: 0 0 1rem white inset;
+    transition: none;
 }
 
 button.top,
