@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
-<script src="fn.js"></script>
+<script src="fn.js" defer></script>
 <script src="sha256.js"></script>
 <title>Remote Touchpad</title>
 <link href="main.css" media="screen" rel="stylesheet">
@@ -13,61 +12,66 @@
     <noscript><p>JavaScript is required!</p></noscript>
     <p>Connecting…</p>
 </div>
-<div id="closed" class="scene hidden">
+
+<div id="closed" class="scene">
     <p>Disconnected</p>
-    <button id="reloadbutton">↻</button>
+    <button class="large" onclick="location.reload()">↻</button>
 </div>
-<div id="pad" class="scene touch key fullscreen hidden">
-    <p class="touch">Touchpad</p>
-    <button id="keysbutton">≡</button>
-    <button id="fullscreenbutton">⤢</button>
-    <button id="keyboardbutton">⌨</button>
+
+<div id="pad" class="scene touch-input mouse-input keyboard-input allow-fullscreen">
+    <p class="background">Touchpad</p>
+    <button class="top left" onclick="app.showKeys()">≡</button>
+    <button class="bottom left visible-if-fullscreen-enabled" onclick="app.toggleFullscreen()">⤢</button>
+    <button class="bottom right" onclick="app.showTextInput()">⌨</button>
 </div>
-<div id="keyboard" class="scene hidden">
-    <textarea cols=1 rows=1></textarea>
+
+<div id="text-input" class="scene">
+    <textarea class="grow" cols=1 rows=1></textarea>
     <div class="buttons">
-        <button id="keyboardkeysbutton">≡</button>
-        <button id="sendbutton">➣</button>
+        <button onclick="app.showKeys('text-input', 1)">≡</button>
+        <button class="grow" id="send-text">➣</button>
     </div>
 </div>
-<div id="keys" class="scene touch key fullscreen hidden">
-    <div class="scene touch">
-        <div class="buttons">
-            <button id="browserbackbutton">⭠</button>
-            <button id="superbutton">🪟</button>
-            <button id="browserforwardbutton">⭢</button>
+
+<div id="keys" class="scene touch-input mouse-input keyboard-input allow-fullscreen">
+    <div class="page">
+        <div class="buttons" style="grid-column: 1 / 4">
+            <button onclick="app.key(app.KEY_BROWSER_BACK)">⭠</button>
+            <button onclick="app.key(app.KEY_SUPER)">🪟</button>
+            <button onclick="app.key(app.KEY_BROWSER_FORWARD)">⭢</button>
         </div>
-        <div class="buttons">
-            <button id="prevtrackbutton">⏮</button>
-            <button id="playpausebutton">⏯</button>
-            <button id="nexttrackbutton">⏭</button>
+        <div class="buttons" style="grid-column: 1 / 4">
+            <button onclick="app.key(app.KEY_MEDIA_PREV_TRACK)">⏮</button>
+            <button onclick="app.key(app.KEY_MEDIA_PLAY_PAUSE)">⏯</button>
+            <button onclick="app.key(app.KEY_MEDIA_NEXT_TRACK)">⏭</button>
         </div>
-        <div class="buttons">
-            <button id="volumedownbutton">🔉</button>
-            <button id="volumemutebutton">🔇</button>
-            <button id="volumeupbutton">🔊</button>
-        </div>
-    </div>
-    <div class="scene touch">
-        <div class="buttons">
-            <button id="backspacebutton">⌫</button>
-            <button id="returnbutton">⮠</button>
-            <button id="deletebutton">⌦</button>
-        </div>
-        <div class="buttons">
-            <button id="homebutton">⭰</button>
-            <button id="upbutton">↑</button>
-            <button id="endbutton">⭲</button>
-        </div>
-        <div class="buttons">
-            <button id="leftbutton">←</button>
-            <button id="downbutton">↓</button>
-            <button id="rightbutton">→</button>
+        <div class="buttons" style="grid-column: 1 / 4">
+            <button onclick="app.key(app.KEY_VOLUME_DOWN)">🔉</button>
+            <button onclick="app.key(app.KEY_VOLUME_MUTE)">🔇</button>
+            <button onclick="app.key(app.KEY_VOLUME_UP)">🔊</button>
         </div>
     </div>
-    <button id="switchbutton">⮂</button>
-    <button class="backbutton">⯇</button>
+    <div class="page">
+        <div class="buttons" style="grid-column: 1 / 4">
+            <button onclick="app.key(app.KEY_BACK_SPACE)">⌫</button>
+            <button onclick="app.key(app.KEY_RETURN)">⮠</button>
+            <button onclick="app.key(app.KEY_DELETE)">⌦</button>
+        </div>
+        <div class="buttons" style="grid-column: 1 / 4">
+            <button onclick="app.key(app.KEY_HOME)">⭰</button>
+            <button onclick="app.key(app.KEY_UP)">↑</button>
+            <button onclick="app.key(app.KEY_END)">⭲</button>
+        </div>
+        <div class="buttons" style="grid-column: 1 / 4">
+            <button onclick="app.key(app.KEY_LEFT)">←</button>
+            <button onclick="app.key(app.KEY_DOWN)">↓</button>
+            <button onclick="app.key(app.KEY_RIGHT)">→</button>
+        </div>
+    </div>
+    <button class="top right" onclick="app.setKeysPage(1, true)">⮂</button>
+    <button class="top left" onclick="history.back()">⯇</button>
 </div>
-<div id="mouse" class="scene key fullscreen hidden">
-    <p>Mouse</p>
+
+<div id="mouse" class="scene allow-keyboard allow-fullscreen">
+    <p class="background">Mouse</p>
 </div>

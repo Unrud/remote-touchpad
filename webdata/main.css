@@ -17,6 +17,7 @@ html {
     color: white;
     background-image: url(tex.png);
     touch-action: none;
+    overflow: hidden;
 }
 
 html,
@@ -33,6 +34,9 @@ body,
     flex-direction: column;
     justify-content: center;
     box-sizing: border-box;
+    align-items: center;
+    gap: 2rem;
+    padding: 0.5rem;
 }
 
 p {
@@ -42,12 +46,40 @@ p {
     text-align: center;
 }
 
+p.background {
+    color: gray;
+    text-shadow:
+        -1px -1px 0 black,
+        1px -1px 0 black,
+        -1px 1px 0 black,
+        1px 1px 0 black;
+    opacity: 0.08;
+    font-weight: bold;
+    font-size: 4rem;
+    pointer-events: none;
+}
+
+@media (max-width: 32rem) {
+    p.background {
+        font-size: 13vw;
+    }
+}
+
+.large {
+    font-size: 4rem;
+}
+
 button {
+    box-sizing: border-box;
     padding: 0;
     background-color: transparent;
     border: 1px solid black;
     height: 1.5em;
     width: 2em;
+    min-width: 1.2em;
+    min-height: 1.2em;
+    max-width: 100%;
+    max-height: 100%;
     border-radius: 2px;
     font-size: 2rem;
     color: white;
@@ -60,71 +92,52 @@ button:focus {
     outline: none;
 }
 
-#opening,
-#closed {
-    padding: 0 0.5rem;
-}
-
-#opening noscript p,
-#closed p {
-    margin-bottom: 1em;
-}
-
-#reloadbutton {
-    font-size: 4rem;
-    margin: 0 auto;
-    max-width: 100%;
-}
-
-#pad > p,
-#mouse > p {
-    color: gray;
-    text-shadow:
-        -1px -1px 0 black,
-        1px -1px 0 black,
-        -1px 1px 0 black,
-        1px 1px 0 black;
-    opacity: 0.08;
-    font-weight: bold;
-    font-size: 4rem;
-}
-
-@media (max-width: 32rem) {
-    #pad > p,
-    #mouse > p {
-        font-size: 13vw;
-    }
-}
-
-#pad > button, #keys > button {
+button.top,
+button.bottom,
+button.left,
+button.right {
     position: absolute;
     max-width: 50%;
     max-height: 50%;
 }
 
-#fullscreenbutton {
-    left: 0;
-    bottom: 0;
-    border-bottom: none;
-    border-left: none;
-}
-
-#keyboardbutton {
-    right: 0;
-    bottom: 0;
-    border-right: none;
-    border-bottom: none;
-}
-
-#keysbutton {
-    left: 0;
+button.top {
     top: 0;
     border-top: none;
+}
+
+button.bottom {
+    bottom: 0;
+    border-bottom: none;
+}
+
+button.left {
+    left: 0;
     border-left: none;
+}
+
+button.right {
+    right: 0;
+    border-right: none;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: row;
+    min-height: 0;
+    min-width: 0;
+}
+
+.buttons > button:not(:last-child) {
+    border-right: none;
+}
+
+.scene > .grow,
+.buttons > .grow {
+    flex-grow: 1;
 }
 
 textarea {
-    flex-grow: 1;
     border: none;
     resize: none;
     font-size: 2rem;
@@ -134,77 +147,57 @@ textarea {
     padding: 0 0.5rem;
 }
 
-#keyboard .buttons {
-    display: flex;
-    flex-direction: row;
+#keys {
+    padding: 0;
+    justify-content: end;
 }
 
-#keyboard .buttons > button {
+#keys .page {
+    display: grid;
+    gap: 0.5rem;
+    min-height: 0;
+    min-width: 0;
+    grid-auto-rows: minmax(min-content, 6rem);
+    grid-auto-columns: minmax(min-content, 8rem);
+    padding: 0.5rem;
+}
+
+#keys .page * {
+    width: 100%;
+    height: 100%;
+}
+
+#text-input {
+    align-items: stretch;
+    padding: 0;
+    gap: 0;
+}
+
+#text-input .buttons > button {
     border-bottom: none;
-    border-left: none;
+    border-right: none;
 }
 
-#keyboard .buttons > button:last-of-type {
-    flex-grow: 1;
-    border-right: none;
+#text-input .buttons > button:first-child {
+    border-left: none;
 }
 
 @media (min-aspect-ratio: 4/3) {
-    #keyboard {
+    #text-input {
         flex-direction: row;
     }
 
-    #keyboard .buttons {
+    #text-input .buttons {
         flex-direction: column;
     }
 
-    #keyboard .buttons > button {
-        border-top: none;
-        border-right: none;
+    #text-input .buttons > button,
+    #text-input .buttons > button:first-child {
+        border-top: 1px solid black;
         border-left: 1px solid black;
     }
 
-    #keyboard .buttons > button:last-of-type {
-        border-top: 1px solid black;
+    #text-input .buttons > button:first-child {
+        border-top: none;
     }
-}
-
-#keys .scene {
-    padding: 0.5rem;
-    padding-bottom: 0;
-    justify-content: flex-end;
-}
-
-#switchbutton {
-    right: 0;
-    top: 0;
-    border-top: none;
-    border-right: none;
-}
-
-#keys .backbutton {
-    left: 0;
-    top: 0;
-    border-top: none;
-    border-left: none;
-}
-
-#keys .buttons {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 0.5rem;
-    flex-shrink: 1;
-    height: 6rem;
-    min-height: 0;
-}
-
-#keys .buttons > button:not(:last-of-type) {
-    border-right: none;
-}
-
-#keys .buttons > button {
-    flex-shrink: 1;
-    height: 100%;
-    width: 8rem;
-    min-width: 0;
 }

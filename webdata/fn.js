@@ -1,6 +1,6 @@
 "use strict";
 /*
- *    Copyright (c) 2018-2019 Unrud <unrud@outlook.com>
+ *    Copyright (c) 2018-2019, 2023 Unrud <unrud@outlook.com>
  *
  *    This file is part of Remote-Touchpad.
  *
@@ -18,88 +18,81 @@
  *    along with Remote-Touchpad.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+(() => {
+
 // [1 Touch, 2 Touches, 3 Touches] (as pixel)
-var TOUCH_MOVE_THRESHOLD = [10, 15, 15];
+const TOUCH_MOVE_THRESHOLD = [10, 15, 15];
 // Max time between consecutive touches for clicking or dragging (as milliseconds)
-var TOUCH_TIMEOUT = 250;
+const TOUCH_TIMEOUT = 250;
 // [[pixel/second, multiplicator], ...]
-var POINTER_ACCELERATION = [
+const POINTER_ACCELERATION = [
     [0, 0],
     [87, 1],
     [173, 1],
-    [553, 2]
+    [553, 2],
 ];
 
-var POINTER_BUTTON_LEFT = 0;
-var POINTER_BUTTON_RIGHT = 1;
-var POINTER_BUTTON_MIDDLE = 2;
+const POINTER_BUTTON_LEFT = 0;
+const POINTER_BUTTON_RIGHT = 1;
+const POINTER_BUTTON_MIDDLE = 2;
 
-var KEY_VOLUME_MUTE = 0;
-var KEY_VOLUME_DOWN = 1;
-var KEY_VOLUME_UP = 2;
-var KEY_MEDIA_PLAY_PAUSE = 3;
-var KEY_MEDIA_PREV_TRACK = 4;
-var KEY_MEDIA_NEXT_TRACK = 5;
-var KEY_BROWSER_BACK = 6;
-var KEY_BROWSER_FORWARD = 7;
-var KEY_SUPER = 8;
-var KEY_LEFT = 9;
-var KEY_RIGHT = 10;
-var KEY_UP = 11;
-var KEY_DOWN = 12;
-var KEY_HOME = 13;
-var KEY_END = 14;
-var KEY_BACK_SPACE = 15;
-var KEY_DELETE = 16;
-var KEY_RETURN = 17;
+const KEY_VOLUME_MUTE = 0;
+const KEY_VOLUME_DOWN = 1;
+const KEY_VOLUME_UP = 2;
+const KEY_MEDIA_PLAY_PAUSE = 3;
+const KEY_MEDIA_PREV_TRACK = 4;
+const KEY_MEDIA_NEXT_TRACK = 5;
+const KEY_BROWSER_BACK = 6;
+const KEY_BROWSER_FORWARD = 7;
+const KEY_SUPER = 8;
+const KEY_LEFT = 9;
+const KEY_RIGHT = 10;
+const KEY_UP = 11;
+const KEY_DOWN = 12;
+const KEY_HOME = 13;
+const KEY_END = 14;
+const KEY_BACK_SPACE = 15;
+const KEY_DELETE = 16;
+const KEY_RETURN = 17;
 
-var ws = null;
-var config = null;
+const wsURL = new URL("ws", location.href);
+wsURL.protocol = wsURL.protocol == "http:" ? "ws:" : "wss:";
+const ws = new WebSocket(wsURL);
 
-var util = (function() {
-    var util = {};
+let config = null;
 
-    util.fullscreenEnabled = function() {
+const compat = (() => {
+    const compat = {};
+
+    compat.fullscreenEnabled = () => {
         return (document.fullscreenEnabled ||
             document.webkitFullscreenEnabled ||
-            document.mozFullScreenEnabled ||
-            document.msFullscreenEnabled ||
             false);
     };
 
-    util.requestFullscreen = function(element, options) {
+    compat.requestFullscreen = (element, options) => {
         if (element.requestFullscreen) {
             element.requestFullscreen(options);
         } else if (element.webkitRequestFullscreen) {
             element.webkitRequestFullscreen(options);
-        } else if (element.mozRequestFullScreen) {
-            element.mozRequestFullScreen(options);
-        } else if (element.msRequestFullscreen) {
-            element.msRequestFullscreen(options);
         }
     };
 
-    util.exitFullscreen = function() {
+    compat.exitFullscreen = () => {
         if (document.exitFullscreen) {
             document.exitFullscreen();
         } else if (document.webkitExitFullscreen) {
             document.webkitExitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-            document.mozCancelFullScreen();
-        } else if (document.msExitFullscreen) {
-            document.msExitFullscreen();
         }
     };
 
-    util.fullscreenElement = function() {
+    compat.fullscreenElement = () => {
         return (document.fullscreenElement ||
             document.webkitFullscreenElement ||
-            document.mozFullScreenElement ||
-            document.msFullscreenElement ||
             null);
     };
 
-    util.addFullscreenchangeEventListener = function(listener) {
+    compat.addFullscreenchangeEventListener = (listener) => {
         if ("onfullscreenchange" in document) {
             document.addEventListener("fullscreenchange", listener);
         } else if ("onwebkitfullscreenchange" in document) {
@@ -107,66 +100,58 @@ var util = (function() {
         }
     };
 
-    util.requestPointerLock = function(element) {
+    compat.requestPointerLock = (element) => {
         if (element.requestPointerLock) {
             element.requestPointerLock();
-        } else if (element.mozRequestPointerLock) {
-            element.mozRequestPointerLock();
         }
     };
 
-    util.exitPointerLock = function() {
+    compat.exitPointerLock = () => {
         if (document.exitPointerLock) {
             document.exitPointerLock();
-        } else if (document.mozExitPointerLock) {
-            document.mozExitPointerLock();
         }
     };
 
-    util.pointerLockElement = function() {
-        return (document.pointerLockElement ||
-            document.mozPointerLockElement ||
-            null);
+    compat.pointerLockElement = () => {
+        return document.pointerLockElement || null;
     };
 
-    util.addPointerlockchangeEventListener = function(listener) {
+    compat.addPointerlockchangeEventListener = (listener) => {
         if ("onpointerlockchange" in document) {
             document.addEventListener("pointerlockchange", listener);
-        } else if ("onmozpointerlockchange" in document) {
-            document.addEventListener("mozpointerlockchange", listener);
         }
     };
 
-    return util;
+    return compat;
 })();
 
-var controller = (function() {
-    var controller = {};
+const controller = (() => {
+    const controller = {};
 
-    var moveXSum = 0;
-    var moveYSum = 0;
-    var scrollHSum = 0;
-    var scrollVSum = 0;
-    var scrolling = false;
-    var scrollFinish = false;
-    var updateTimoueActive = false;
+    let moveXSum = 0;
+    let moveYSum = 0;
+    let scrollHSum = 0;
+    let scrollVSum = 0;
+    let scrolling = false;
+    let scrollFinish = false;
+    let updateTimeoutActive = false;
 
-    function startUpdate(fromTimeout) {
-        if (updateTimoueActive && !fromTimeout) {
+    const startUpdate = (fromTimeout) => {
+        if (updateTimeoutActive && !fromTimeout) {
             return;
         }
-        updateTimoueActive = false;
-        var finished = true;
-        var xInt = Math.trunc(moveXSum);
-        var yInt = Math.trunc(moveYSum);
+        updateTimeoutActive = false;
+        let finished = true;
+        const xInt = Math.trunc(moveXSum);
+        const yInt = Math.trunc(moveYSum);
         if (xInt != 0 || yInt != 0) {
             ws.send("m" + xInt + ";" + yInt);
             moveXSum -= xInt;
             moveYSum -= yInt;
             finished = false;
         }
-        var hInt = Math.trunc(scrollHSum);
-        var vInt = Math.trunc(scrollVSum);
+        const hInt = Math.trunc(scrollHSum);
+        const vInt = Math.trunc(scrollVSum);
         if (hInt != 0 || vInt != 0) {
             ws.send((scrollFinish ? "S" : "s") + hInt + ";" + vInt);
             scrollHSum -= hInt;
@@ -179,112 +164,112 @@ var controller = (function() {
             scrolling = false;
             scrollFinish = false;
         }
-        updateTimoueActive = !finished && config.updateRate > 0;
-        if (updateTimoueActive) {
+        updateTimeoutActive = !finished && config.updateRate > 0;
+        if (updateTimeoutActive) {
             setTimeout(startUpdate, 1000/config.updateRate, true);
         }
-    }
+    };
 
-    controller.pointerMove = function(deltaX, deltaY) {
+    controller.pointerMove = (deltaX, deltaY) => {
         moveXSum += deltaX;
         moveYSum += deltaY;
         startUpdate();
     };
 
-    controller.pointerScroll = function(deltaHorizontal, deltaVertical, finish) {
+    controller.pointerScroll = (deltaHorizontal, deltaVertical, finish) => {
         scrollHSum += deltaHorizontal;
         scrollVSum += deltaVertical;
         scrollFinish |= finish;
         startUpdate();
     };
 
-    controller.pointerButton = function(button, press) {
+    controller.pointerButton = (button, press) => {
         ws.send("b" + button + ";" + (press ? 1 : 0));
     };
 
 
-    controller.keyboardKey = function(key) {
+    controller.keyboardKey = (key) => {
         ws.send("k" + key);
     };
 
-    controller.keyboardText = function(text) {
+    controller.keyboardText = (text) => {
         ws.send("t" + text);
     };
 
     return controller;
 })();
 
-var touchpad = (function() {
-    var touchpad = {};
+const touchpad = (() => {
+    const touchpad = {};
 
-    var moved = false;
-    var startTimeStamp = 0;
-    var lastEndTimeStamp = 0;
-    var releasedCount = 0;
-    var ongoingTouches = [];
-    var dragging = false;
-    var draggingTimeout = null;
+    let moved = false;
+    let startTimeStamp = 0;
+    let lastEndTimeStamp = 0;
+    let releasedCount = 0;
+    let ongoingTouches = [];
+    let dragging = false;
+    let draggingTimeout = null;
 
-    function copyTouch(touch, timeStamp) {
+    const copyTouch = (touch, timeStamp) => {
         return {
             identifier: touch.identifier,
             pageX: touch.pageX,
             pageXStart: touch.pageX,
             pageY: touch.pageY,
             pageYStart: touch.pageY,
-            timeStamp: timeStamp
+            timeStamp: timeStamp,
         };
-    }
+    };
 
-    function ongoingTouchIndexById(idToFind) {
-        for (var i = 0; i < ongoingTouches.length; i += 1) {
+    const ongoingTouchIndexById = (idToFind) => {
+        for (let i = 0; i < ongoingTouches.length; i += 1) {
             if (ongoingTouches[i].identifier == idToFind) {
                 return i;
             }
         }
         return -1;
-    }
+    };
 
-    function calculateAccelerationMult(speed) {
-        for (var i = 0; i < POINTER_ACCELERATION.length; i += 1) {
-            var s2 = POINTER_ACCELERATION[i][0];
-            var a2 = POINTER_ACCELERATION[i][1];
+    const calculateAccelerationMult = (speed) => {
+        for (let i = 0; i < POINTER_ACCELERATION.length; i += 1) {
+            const s2 = POINTER_ACCELERATION[i][0];
+            const a2 = POINTER_ACCELERATION[i][1];
             if (s2 <= speed) {
                 continue;
             }
             if (i == 0) {
                 return a2;
             }
-            var s1 = POINTER_ACCELERATION[i - 1][0];
-            var a1 = POINTER_ACCELERATION[i - 1][1];
+            const s1 = POINTER_ACCELERATION[i - 1][0];
+            const a1 = POINTER_ACCELERATION[i - 1][1];
             return ((speed - s1) / (s2 - s1)) * (a2 - a1) + a1;
         }
         if (POINTER_ACCELERATION.length > 0) {
             return POINTER_ACCELERATION[POINTER_ACCELERATION.length - 1][1];
         }
         return 1;
-    }
+    };
 
-    function onDraggingTimeout() {
+    const onDraggingTimeout = () => {
         draggingTimeout = null;
         controller.pointerButton(POINTER_BUTTON_LEFT, false);
-    }
+    };
 
-    touchpad.handleTouchstart = function(evt) {
+    touchpad.handleTouchstart = (evt) => {
         // Might get called multiple times for the same touches
         if (ongoingTouches.length == 0) {
             startTimeStamp = evt.timeStamp;
             moved = false;
         }
-        var touches = evt.changedTouches;
-        var foundTouch = false;
-        for (var i = 0; i < touches.length; i += 1) {
-            if (ongoingTouches.length == 0 && !touches[i].target.classList.contains("touch")) {
+        const touches = evt.changedTouches;
+        let foundTouch = false;
+        for (let i = 0; i < touches.length; i += 1) {
+            if (ongoingTouches.length == 0 && !touches[i].target.classList.contains("touch-input")) {
                 continue;
             }
             foundTouch = true;
-            var touch = copyTouch(touches[i], evt.timeStamp);
-            var idx = ongoingTouchIndexById(touch.identifier);
+            const touch = copyTouch(touches[i], evt.timeStamp);
+            const idx = ongoingTouchIndexById(touch.identifier);
             if (idx < 0) {
                 ongoingTouches.push(touch);
             } else {
@@ -304,11 +289,11 @@ var touchpad = (function() {
         controller.pointerScroll(0, 0, true);
     };
 
-    touchpad.handleTouchend = touchpad.handleTouchcancel = function(evt) {
-        var touches = evt.changedTouches;
-        var foundTouch = false;
-        for (var i = 0; i < touches.length; i += 1) {
-            var idx = ongoingTouchIndexById(touches[i].identifier);
+    touchpad.handleTouchend = touchpad.handleTouchcancel = (evt) => {
+        const touches = evt.changedTouches;
+        let foundTouch = false;
+        for (let i = 0; i < touches.length; i += 1) {
+            const idx = ongoingTouchIndexById(touches[i].identifier);
             if (idx < 0) {
                 continue;
             }
@@ -331,7 +316,7 @@ var touchpad = (function() {
                 controller.pointerButton(POINTER_BUTTON_LEFT, false);
             }
             if (!moved && evt.timeStamp - startTimeStamp < TOUCH_TIMEOUT) {
-                var button = 0;
+                let button = 0;
                 if (releasedCount == 1) {
                     button = POINTER_BUTTON_LEFT;
                 } else if (releasedCount == 2) {
@@ -350,19 +335,19 @@ var touchpad = (function() {
         }
     };
 
-    touchpad.handleTouchmove = function(evt) {
-        var sumX = 0;
-        var sumY = 0;
-        var touches = evt.changedTouches;
-        var foundTouch = false;
-        for (var i = 0; i < touches.length; i += 1) {
-            var idx = ongoingTouchIndexById(touches[i].identifier);
+    touchpad.handleTouchmove = (evt) => {
+        let sumX = 0;
+        let sumY = 0;
+        const touches = evt.changedTouches;
+        let foundTouch = false;
+        for (let i = 0; i < touches.length; i += 1) {
+            const idx = ongoingTouchIndexById(touches[i].identifier);
             if (idx < 0) {
                 continue;
             }
             foundTouch = true;
             if (!moved) {
-                var dist = Math.sqrt(Math.pow(touches[i].pageX - ongoingTouches[idx].pageXStart, 2) +
+                const dist = Math.sqrt(Math.pow(touches[i].pageX - ongoingTouches[idx].pageXStart, 2) +
                     Math.pow(touches[i].pageY - ongoingTouches[idx].pageYStart, 2));
                 if (ongoingTouches.length > TOUCH_MOVE_THRESHOLD.length ||
                     dist > TOUCH_MOVE_THRESHOLD[ongoingTouches.length - 1] ||
@@ -370,9 +355,9 @@ var touchpad = (function() {
                     moved = true;
                 }
             }
-            var dx = touches[i].pageX - ongoingTouches[idx].pageX;
-            var dy = touches[i].pageY - ongoingTouches[idx].pageY;
-            var timeDelta = evt.timeStamp - ongoingTouches[idx].timeStamp;
+            const dx = touches[i].pageX - ongoingTouches[idx].pageX;
+            const dy = touches[i].pageY - ongoingTouches[idx].pageY;
+            const timeDelta = evt.timeStamp - ongoingTouches[idx].timeStamp;
             sumX += dx * calculateAccelerationMult(Math.abs(dx) / timeDelta * 1000);
             sumY += dy * calculateAccelerationMult(Math.abs(dy) / timeDelta * 1000);
             ongoingTouches[idx].pageX = touches[i].pageX;
@@ -395,14 +380,14 @@ var touchpad = (function() {
     return touchpad;
 })();
 
-var keyboard = (function() {
-    var keyboard = {};
+const keyboard = (() => {
+    const keyboard = {};
 
-    keyboard.handleKeydown = function(evt) {
+    keyboard.handleKeydown = (evt) => {
         if (evt.ctrlKey || evt.altKey || evt.isComposing) {
             return;
         }
-        var key = null;
+        let key = null;
         if (evt.key == "OS" || evt.key == "Super" || evt.key == "Meta") {
             key = KEY_SUPER;
         } else if (evt.key == "Backspace") {
@@ -438,30 +423,30 @@ var keyboard = (function() {
     return keyboard;
 })();
 
-var mouse = (function() {
-    var mouse = {};
+const mouse = (() => {
+    const mouse = {};
 
-    var buttons = 0;
+    let buttons = 0;
 
-    function updateButtons(newButtons) {
-        for (var button = 0; button < 3; button += 1) {
-            var flag = 1 << button;
+    const updateButtons = (newButtons) => {
+        for (let button = 0; button < 3; button += 1) {
+            const flag = 1 << button;
             if ((newButtons&flag) != (buttons&flag)) {
                 controller.pointerButton(button, newButtons&flag);
             }
         }
         buttons = newButtons;
-    }
+    };
 
-    mouse.handleMousedown = mouse.handleMouseup = function(evt) {
+    mouse.handleMousedown = mouse.handleMouseup = (evt) => {
         updateButtons(evt.buttons);
     };
 
-    mouse.handleMousemove = function(evt) {
+    mouse.handleMousemove = (evt) => {
         controller.pointerMove(evt.movementX*config.mouseMoveSpeed, evt.movementY*config.mouseMoveSpeed);
     };
 
-    mouse.handleWheel = function(evt) {
+    mouse.handleWheel = (evt) => {
         if (evt.deltaMode == WheelEvent.DOM_DELTA_PIXEL) {
             controller.pointerScroll(evt.deltaX*config.mouseScrollSpeed, evt.deltaY*config.mouseScrollSpeed, true);
         } else if (evt.deltaMode == WheelEvent.DOM_DELTA_LINE) {
@@ -472,225 +457,179 @@ var mouse = (function() {
     return mouse;
 })();
 
-function challengeResponse(message) {
-    var shaObj = new jsSHA("SHA-256", "TEXT");
+const challengeResponse = (message) => {
+    const shaObj = new window.jsSHA("SHA-256", "TEXT");
     shaObj.setHMACKey(message, "TEXT");
     shaObj.update(window.location.hash.substr(1));
     return btoa(shaObj.getHMAC("BYTES"));
+};
+
+const scenes = document.querySelectorAll("body > .scene");
+const openingScene = document.getElementById("opening");
+const closedScene = document.getElementById("closed");
+const padScene = document.getElementById("pad");
+const keysScene = document.getElementById("keys");
+const keysPages = keysScene.querySelectorAll(":scope > .page");
+const textInputScene = document.getElementById("text-input");
+const textInput = textInputScene.querySelector("textarea");
+const mouseScene = document.getElementById("mouse");
+
+let ready = false;
+let closed = false;
+let activeScene = null;
+let keysActiveName = "";
+
+const showScene = (scene) => {
+    activeScene = scene;
+    if (compat.fullscreenElement() && !scene.classList.contains("allow-fullscreen")) {
+        compat.exitFullscreen();
+    }
+    if (compat.pointerLockElement() && activeScene != mouseScene) {
+        compat.exitPointerLock();
+    }
+    textInput.value = "";
+    for (const otherScene of scenes) {
+        otherScene.classList.toggle("hidden", otherScene != scene);
+    }
+};
+
+const setKeysPage = (index, relative=false) => {
+    if (relative) {
+        for (let i = 0; i < keysPages.length && keysPages[i].classList.contains("hidden"); i += 1, index += 1);
+    }
+    index = ((index % keysPages.length) + keysPages.length) % keysPages.length;
+    sessionStorage.setItem(keysActiveName, index);
+    for (let i = 0; i < keysPages.length; i += 1) {
+        keysPages[i].classList.toggle("hidden", i != index);
+    }
+};
+
+const showKeys = (name = "", defaultIndex = 0) => {
+    showScene(keysScene);
+    keysActiveName = "keys" + (name ? ":" + name : "");
+    let keysIndex = parseInt(sessionStorage.getItem(keysActiveName));
+    if (isNaN(keysIndex)) {
+        keysIndex = defaultIndex;
+    }
+    setKeysPage(keysIndex);
+    if (history.state != keysActiveName) {
+        history.pushState(keysActiveName, "");
+    }
+};
+
+const showTextInput = () => {
+    showScene(textInputScene);
+    textInput.value = sessionStorage.getItem("text-input") || "";
+    textInput.focus();
+    if (history.state != "text-input") {
+        history.pushState("text-input", "");
+    }
+};
+
+textInput.oninput = () => {
+    sessionStorage.setItem("text-input", textInput.value);
+};
+
+const updateUI = () => {
+    if (!ready) {
+        showScene(closed ? closedScene : openingScene);
+    } else if (compat.pointerLockElement()) {
+        showScene(mouseScene);
+    } else if ((history.state || "").split(":")[0] == "keys") {
+        showKeys(history.state.substr("keys:".length));
+    } else if (history.state == "text-input") {
+        showTextInput();
+    } else {
+        showScene(padScene);
+    }
+};
+
+let authenticated = false;
+ws.onmessage = (evt) => {
+    if (!authenticated) {
+        ws.send(challengeResponse(evt.data));
+        authenticated = true;
+        return;
+    }
+    try {
+        config = JSON.parse(evt.data);
+    } catch (e) {
+        ws.close();
+        throw (e);
+    }
+    ready = true;
+    updateUI();
+};
+
+ws.onclose = () => {
+    ready = false;
+    closed = true;
+    updateUI();
+};
+
+compat.addFullscreenchangeEventListener(() => {
+    updateUI();
+});
+for (const element of document.querySelectorAll(".visble-if-fullscreen-enabled")) {
+    element.classList.toggle("hidden", !compat.fullscreenEnabled());
 }
 
-window.addEventListener("load", function() {
-    var DEFAULT_KEYS_SCENE = {
-        "": 0,
-        "keyboard": 1
-    };
-    var ready = false;
-    var closed = false;
-    var scenes = document.querySelectorAll("body > .scene");
-    var openingScene = document.getElementById("opening");
-    var closedScene = document.getElementById("closed");
-    var padScene = document.getElementById("pad");
-    var keysScene = document.getElementById("keys");
-    var keysSubScenes = keysScene.querySelectorAll(".scene");
-    var keyboardScene = document.getElementById("keyboard");
-    var fullscreenbutton = document.getElementById("fullscreenbutton");
-    var keyboardTextarea = keyboardScene.querySelector("textarea");
-    var mouseScene = document.getElementById("mouse");
-    var activeScene = null;
-    var keysActiveName = "";
-
-    function showScene(scene) {
-        activeScene = scene;
-        if (util.fullscreenElement() && !scene.classList.contains("fullscreen")) {
-            util.exitFullscreen();
-        }
-        if (util.pointerLockElement() && activeScene != mouseScene) {
-            util.exitPointerLock();
-        }
-        keyboardTextarea.value = "";
-        scenes.forEach(function(otherScene) {
-            otherScene.classList.toggle("hidden", otherScene != scene);
-        });
+const toggleFullscreen = () => {
+    if (compat.fullscreenElement()) {
+        compat.exitFullscreen();
+    } else {
+        compat.requestFullscreen(document.documentElement, {navigationUI: "hide"});
     }
+};
 
-    function showKeysScene(index) {
-        if (!Number.isInteger(index) || index < 0 || keysSubScenes.length <= index) {
-            index = 0;
-        }
-        sessionStorage.setItem(keysActiveName, index);
-        for (var i = 0; i < keysSubScenes.length; i += 1) {
-            keysSubScenes[i].classList.toggle("hidden", i != index);
-        }
+document.getElementById("send-text").addEventListener("click", () => {
+    if (textInput.value) {
+        // normalize line endings
+        controller.keyboardText(textInput.value.replace(/\r\n?/g, "\n"));
+        textInput.value = "";
+        textInput.oninput();
     }
-
-    function showKeys(name) {
-        showScene(keysScene);
-        keysActiveName = "keys" + (name ? ":" + name : "");
-        var keysIndex = parseInt(sessionStorage.getItem(keysActiveName));
-        if (isNaN(keysIndex)) {
-            keysIndex = DEFAULT_KEYS_SCENE[name || ""] || 0;
-        }
-        showKeysScene(keysIndex);
-        if (history.state != keysActiveName) {
-            history.pushState(keysActiveName, "");
-        }
-    }
-
-    function showKeyboard() {
-        showScene(keyboardScene);
-        keyboardTextarea.value = sessionStorage.getItem("keyboard") || "";
-        keyboardTextarea.focus();
-        if (history.state != "keyboard") {
-            history.pushState("keyboard", "");
-        }
-    }
-
-    keyboardTextarea.oninput = function() {
-        sessionStorage.setItem("keyboard", keyboardTextarea.value);
-    };
-
-    function updateUI() {
-        if (!ready) {
-            showScene(closed ? closedScene : openingScene);
-        } else if (util.pointerLockElement()) {
-            showScene(mouseScene);
-        } else if ((history.state || "").split(":")[0] == "keys") {
-            showKeys(history.state.substr("keys:".length));
-        } else if (history.state == "keyboard") {
-            showKeyboard();
-        } else {
-            showScene(padScene);
-        }
-    }
-
-    updateUI();
-
-    var wsURL = new URL("ws", location.href);
-    wsURL.protocol = wsURL.protocol == "http:" ? "ws:" : "wss:";
-    ws = new WebSocket(wsURL);
-
-    var authenticated = false;
-    ws.onmessage = function(evt) {
-        if (!authenticated) {
-            ws.send(challengeResponse(evt.data));
-            authenticated = true;
-            return;
-        }
-        try {
-            config = JSON.parse(evt.data);
-        } catch (e) {
-            ws.close();
-            throw (e);
-        }
-        ready = true;
-        updateUI();
-    };
-
-    ws.onclose = function() {
-        ready = false;
-        closed = true;
-        updateUI();
-    };
-
-    document.getElementById("keysbutton").addEventListener("click", function() {
-        showKeys();
-    });
-    document.getElementById("keyboardbutton").addEventListener("click", function() {
-        showKeyboard();
-    });
-    util.addFullscreenchangeEventListener(function() {
-        updateUI();
-    });
-    if (!util.fullscreenEnabled()) {
-        fullscreenbutton.classList.add("hidden");
-    }
-    fullscreenbutton.addEventListener("click", function() {
-        if (util.fullscreenElement()) {
-            util.exitFullscreen();
-        } else {
-            util.requestFullscreen(document.documentElement, {navigationUI: "hide"});
-        }
-    });
-    document.getElementById("switchbutton").addEventListener("click", function() {
-        var keysIndex = 0;
-        for (var i = 0; i < keysSubScenes.length; i += 1) {
-            if (!keysSubScenes[i].classList.contains("hidden")) {
-                keysIndex = i;
-            }
-        }
-        showKeysScene(keysIndex + 1);
-    });
-    [
-        {id: "browserbackbutton", key: KEY_BROWSER_BACK},
-        {id: "superbutton", key: KEY_SUPER},
-        {id: "browserforwardbutton", key: KEY_BROWSER_FORWARD},
-        {id: "prevtrackbutton", key: KEY_MEDIA_PREV_TRACK},
-        {id: "playpausebutton", key: KEY_MEDIA_PLAY_PAUSE},
-        {id: "nexttrackbutton", key: KEY_MEDIA_NEXT_TRACK},
-        {id: "volumedownbutton", key: KEY_VOLUME_DOWN},
-        {id: "volumemutebutton", key: KEY_VOLUME_MUTE},
-        {id: "volumeupbutton", key: KEY_VOLUME_UP},
-        {id: "backspacebutton", key: KEY_BACK_SPACE},
-        {id: "returnbutton", key: KEY_RETURN},
-        {id: "deletebutton", key: KEY_DELETE},
-        {id: "homebutton", key: KEY_HOME},
-        {id: "endbutton", key: KEY_END},
-        {id: "leftbutton", key: KEY_LEFT},
-        {id: "rightbutton", key: KEY_RIGHT},
-        {id: "upbutton", key: KEY_UP},
-        {id: "downbutton", key: KEY_DOWN}
-    ].forEach(function(o) {
-        document.getElementById(o.id).addEventListener("click", function() {
-            controller.keyboardKey(o.key);
-        });
-    });
-    document.getElementById("keyboardkeysbutton").addEventListener("click", function() {
-        showKeys("keyboard");
-    });
-    document.getElementById("sendbutton").addEventListener("click", function() {
-        if (keyboardTextarea.value) {
-            // normalize line endings
-            controller.keyboardText(keyboardTextarea.value.replace(/\r\n?/g, "\n"));
-            keyboardTextarea.value = "";
-            keyboardTextarea.oninput();
-        }
-        history.back();
-    });
-    window.addEventListener("popstate", function() {
-        updateUI();
-    });
-    document.getElementById("reloadbutton").addEventListener("click", function() {
-        location.reload();
-    });
-    document.querySelectorAll(".backbutton").forEach(function(button) {
-        button.addEventListener("click", function() {
-            history.back();
-        });
-    });
-    document.addEventListener("touchstart", touchpad.handleTouchstart);
-    document.addEventListener("touchend", touchpad.handleTouchend);
-    document.addEventListener("touchcancel", touchpad.handleTouchcancel);
-    document.addEventListener("touchmove", touchpad.handleTouchmove);
-    document.addEventListener("keydown", function(evt) {
-        if (activeScene && activeScene.classList.contains("key")) {
-            keyboard.handleKeydown(evt);
-        }
-    });
-    util.addPointerlockchangeEventListener(function() {
-        updateUI();
-    });
-    document.addEventListener("mousedown", function(event) {
-        if (activeScene != mouseScene && event.buttons == 1 && event.target.classList.contains("touch")) {
-            util.requestPointerLock(mouseScene);
-        }
-    });
-    ["touchstart", "touchend", "touchcancel", "touchmove"].forEach(function(type) {
-        mouseScene.addEventListener(type, function(evt) {
-            evt.preventDefault();
-        });
-    });
-    mouseScene.addEventListener("mousedown", mouse.handleMousedown);
-    mouseScene.addEventListener("mouseup", mouse.handleMouseup);
-    mouseScene.addEventListener("mousemove", mouse.handleMousemove);
-    mouseScene.addEventListener("wheel", mouse.handleWheel);
+    history.back();
 });
+window.addEventListener("popstate", () => {
+    updateUI();
+});
+document.addEventListener("touchstart", touchpad.handleTouchstart);
+document.addEventListener("touchend", touchpad.handleTouchend);
+document.addEventListener("touchcancel", touchpad.handleTouchcancel);
+document.addEventListener("touchmove", touchpad.handleTouchmove);
+document.addEventListener("keydown", (evt) => {
+    if (activeScene && activeScene.classList.contains("keyboard-input")) {
+        keyboard.handleKeydown(evt);
+    }
+});
+compat.addPointerlockchangeEventListener(() => {
+    updateUI();
+});
+document.addEventListener("mousedown", (event) => {
+    if (activeScene != mouseScene && event.buttons == 1 && event.target.classList.contains("mouse-input")) {
+        compat.requestPointerLock(mouseScene);
+    }
+});
+for (const type of ["touchstart", "touchend", "touchcancel", "touchmove"]) {
+    mouseScene.addEventListener(type, (evt) => {
+        evt.preventDefault();
+    });
+}
+mouseScene.addEventListener("mousedown", mouse.handleMousedown);
+mouseScene.addEventListener("mouseup", mouse.handleMouseup);
+mouseScene.addEventListener("mousemove", mouse.handleMousemove);
+mouseScene.addEventListener("wheel", mouse.handleWheel);
+
+window.app = {
+    KEY_VOLUME_MUTE, KEY_VOLUME_DOWN, KEY_VOLUME_UP, KEY_MEDIA_PLAY_PAUSE,
+    KEY_MEDIA_PREV_TRACK, KEY_MEDIA_NEXT_TRACK, KEY_BROWSER_BACK, KEY_BROWSER_FORWARD,
+    KEY_SUPER, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_HOME, KEY_END, KEY_BACK_SPACE,
+    KEY_DELETE, KEY_RETURN,
+    showKeys, showTextInput, setKeysPage, toggleFullscreen,
+    key: controller.keyboardKey,
+    text: controller.keyboardText,
+};
+updateUI();
+
+})();
