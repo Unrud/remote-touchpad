@@ -22,6 +22,8 @@ import Mouse from "./mouse.mjs";
 import Touchpad from "./touchpad.mjs";
 import * as compat from "./compat.mjs";
 
+const IGNORE_CLICK_AFTER_TOUCH_DURATION = 1000; // milliseconds
+
 const scenes = document.querySelectorAll("body > .scene");
 const openingScene = document.getElementById("opening");
 const closedScene = document.getElementById("closed");
@@ -38,6 +40,7 @@ export default class UI {
     #keysActiveName = "";
     #ready = false;
     #closed = false;
+    #ignoreClickUntilTimeStamp = Number.MIN_VALUE;
     #inputController;
     #mouse;
     #keyboard;
@@ -51,6 +54,7 @@ export default class UI {
         this.#touchpad = new Touchpad(inputController,
             (target) => target.classList.contains("touch-input"));
         document.addEventListener("mousedown", this.#handleMousedown.bind(this));
+        document.addEventListener("touchend", this.#handleTouchend.bind(this));
         textInput.addEventListener("input", this.#handleTextInput.bind(this));
         sendText.addEventListener("click", this.#handleSendText.bind(this));
         window.addEventListener("popstate", () => { this.#update(); });
@@ -75,8 +79,13 @@ export default class UI {
         this.#update();
     }
 
+    #handleTouchend(event) {
+        this.#ignoreClickUntilTimeStamp = event.timeStamp + IGNORE_CLICK_AFTER_TOUCH_DURATION;
+    }
+    
     #handleMousedown(event) {
         if (this.#activeScene != mouseScene && event.buttons == 1 &&
+            this.#ignoreClickUntilTimeStamp <= event.timeStamp &&
             event.target.classList.contains("mouse-input")) {
             compat.requestPointerLock(mouseScene);
         }
