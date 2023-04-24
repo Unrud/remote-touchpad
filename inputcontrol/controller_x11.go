@@ -61,13 +61,13 @@ func init() {
 func InitX11Controller() (Controller, error) {
 	display := C.XOpenDisplay(nil)
 	if display == nil {
-		return nil, UnsupportedPlatformError{
+		return nil, &UnsupportedPlatformError{
 			errors.New("failed to connect to X server")}
 	}
 	p := &x11Controller{display: display}
 	if p.xIsXwayland() {
 		p.Close()
-		return nil, UnsupportedPlatformError{
+		return nil, &UnsupportedPlatformError{
 			errors.New("X server is Xwayland")}
 	}
 	return p, nil

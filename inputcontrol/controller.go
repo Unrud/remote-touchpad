@@ -70,11 +70,15 @@ func RegisterController(name string, init func() (Controller, error), priority i
 }
 
 type UnsupportedPlatformError struct {
-	err error
+	Err error
 }
 
-func (e UnsupportedPlatformError) Error() string {
-	return e.err.Error()
+func (e *UnsupportedPlatformError) Error() string {
+	return e.Err.Error()
+}
+
+func (e *UnsupportedPlatformError) Unwrap() error {
+	return e.Err
 }
 
 type Controller interface {

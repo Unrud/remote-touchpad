@@ -184,21 +184,25 @@ func main() {
 	}
 	var controller inputcontrol.Controller
 	var controllerName string
-	platformErrors := ""
+	var platformErrs []error
 	for _, controllerInfo := range inputcontrol.Controllers {
 		controllerName = controllerInfo.Name
 		var err error
 		controller, err = controllerInfo.Init()
 		if err == nil {
 			break
-		} else if _, ok := err.(inputcontrol.UnsupportedPlatformError); ok {
-			platformErrors += fmt.Sprintf("%s controller: %v\n", controllerName, err)
 		} else {
-			log.Fatalf("%s controller: %v", controllerName, err)
+			var unsupportedErr *inputcontrol.UnsupportedPlatformError
+			wrappedErr := fmt.Errorf("%v controller: %w", controllerName, err)
+			if errors.As(err, &unsupportedErr) {
+				platformErrs = append(platformErrs, wrappedErr)
+			} else {
+				log.Fatal(wrappedErr)
+			}
 		}
 	}
 	if controller == nil {
-		log.Fatal("unsupported platform:\n" + platformErrors)
+		log.Fatal(fmt.Errorf("unsupported platform:\n%w", errors.Join(platformErrs...)))
 	}
 	defer controller.Close()
 	authenticationChallenges := make(chan challenge, authenticationRateBurst)
@@ -241,7 +245,7 @@ func main() {
 				return
 			}
 			if err := processCommand(controller, message); err != nil {
-				log.Printf("%s controller: %v", controllerName, err)
+				log.Print(fmt.Errorf("%s controller: %w", controllerName, err))
 				return
 			}
 		}

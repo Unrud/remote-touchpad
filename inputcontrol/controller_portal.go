@@ -55,7 +55,7 @@ func init() {
 func InitPortalController() (Controller, error) {
 	bus, err := dbus.SessionBusPrivate()
 	if err != nil {
-		return nil, UnsupportedPlatformError{err}
+		return nil, &UnsupportedPlatformError{err}
 	}
 	cleanupBus := true
 	defer func() {
@@ -65,49 +65,49 @@ func InitPortalController() (Controller, error) {
 	}()
 	err = bus.Auth(nil)
 	if err != nil {
-		return nil, UnsupportedPlatformError{err}
+		return nil, &UnsupportedPlatformError{err}
 	}
 	err = bus.Hello()
 	if err != nil {
-		return nil, UnsupportedPlatformError{err}
+		return nil, &UnsupportedPlatformError{err}
 	}
 	remoteDesktop := bus.Object("org.freedesktop.portal.Desktop",
 		"/org/freedesktop/portal/desktop")
 	availableDeviceTypesV, err := remoteDesktop.GetProperty(
 		"org.freedesktop.portal.RemoteDesktop.AvailableDeviceTypes")
 	if err != nil {
-		return nil, UnsupportedPlatformError{err}
+		return nil, &UnsupportedPlatformError{err}
 	}
 	availableDeviceTypes, ok := availableDeviceTypesV.Value().(uint32)
 	if !ok {
-		return nil, UnsupportedPlatformError{errors.New(
-			"unexpected 'AvailableDeviceTypes' return type")}
+		return nil, &UnsupportedPlatformError{
+			errors.New("unexpected 'AvailableDeviceTypes' return type")}
 	}
 	if availableDeviceTypes&deviceKeyboard == 0 ||
 		availableDeviceTypes&devicePointer == 0 {
-		return nil, UnsupportedPlatformError{errors.New(
-			"keyboard or pointer source type not supported")}
+		return nil, &UnsupportedPlatformError{
+			errors.New("keyboard or pointer source type not supported")}
 	}
 	inVardict := make(map[string]dbus.Variant)
 	inVardict["session_handle_token"] = dbus.MakeVariant("t")
 	result, outVardict, err := getResponse(bus, remoteDesktop,
 		"org.freedesktop.portal.RemoteDesktop.CreateSession", 0, inVardict)
 	if err != nil {
-		return nil, UnsupportedPlatformError{err}
+		return nil, &UnsupportedPlatformError{err}
 	}
 	if result != 0 {
-		return nil, UnsupportedPlatformError{errors.New(fmt.Sprintf(
-			"Calling 'CreateSession' failed (%v)", result))}
+		return nil, &UnsupportedPlatformError{
+			fmt.Errorf("Calling 'CreateSession' failed (%v)", result)}
 	}
 	sessionHandleV, ok := outVardict["session_handle"]
 	if !ok {
-		return nil, UnsupportedPlatformError{errors.New(
-			"'session_handle' missing from 'CreateSession' return value")}
+		return nil, &UnsupportedPlatformError{
+			errors.New("'session_handle' missing from 'CreateSession' return value")}
 	}
 	sessionHandleS, ok := sessionHandleV.Value().(string)
 	if !ok {
-		return nil, UnsupportedPlatformError{errors.New(
-			"unexpected 'session_handle' type in 'CreateSession' return value")}
+		return nil, &UnsupportedPlatformError{
+			errors.New("unexpected 'session_handle' type in 'CreateSession' return value")}
 	}
 	sessionHandle := dbus.ObjectPath(sessionHandleS)
 	inVardict = make(map[string]dbus.Variant)
@@ -115,30 +115,30 @@ func InitPortalController() (Controller, error) {
 	result, outVardict, err = getResponse(bus, remoteDesktop,
 		"org.freedesktop.portal.RemoteDesktop.SelectDevices", 0, sessionHandle, inVardict)
 	if err != nil {
-		return nil, UnsupportedPlatformError{err}
+		return nil, &UnsupportedPlatformError{err}
 	}
 	if result != 0 {
-		return nil, UnsupportedPlatformError{errors.New(fmt.Sprintf(
-			"Calling 'SelectDevices' failed (%v)", result))}
+		return nil, &UnsupportedPlatformError{
+			fmt.Errorf("Calling 'SelectDevices' failed (%v)", result)}
 	}
 	inVardict = make(map[string]dbus.Variant)
 	result, outVardict, err = getResponse(bus, remoteDesktop,
 		"org.freedesktop.portal.RemoteDesktop.Start", 0, sessionHandle, "", inVardict)
 	if err != nil {
-		return nil, UnsupportedPlatformError{err}
+		return nil, &UnsupportedPlatformError{err}
 	}
 	if result != 0 {
 		return nil, errors.New("keyboard or pointer access denied")
 	}
 	devicesV, ok := outVardict["devices"]
 	if !ok {
-		return nil, UnsupportedPlatformError{errors.New(
-			"'devices' missing from 'Start' return value")}
+		return nil, &UnsupportedPlatformError{
+			errors.New("'devices' missing from 'Start' return value")}
 	}
 	devices, ok := devicesV.Value().(uint32)
 	if !ok {
-		return nil, UnsupportedPlatformError{errors.New(
-			"unexpected 'devices' type in 'Start' return value")}
+		return nil, &UnsupportedPlatformError{
+			errors.New("unexpected 'devices' type in 'Start' return value")}
 	}
 	if devices&deviceKeyboard == 0 || devices&devicePointer == 0 {
 		return nil, errors.New("keyboard or pointer access denied")

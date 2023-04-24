@@ -98,7 +98,7 @@ func init() {
 func InitWindowsController() (Controller, error) {
 	p := &windowsController{}
 	if err := sendInputProc.Find(); err != nil {
-		return nil, UnsupportedPlatformError{err}
+		return nil, &UnsupportedPlatformError{err}
 	}
 	return p, nil
 }
