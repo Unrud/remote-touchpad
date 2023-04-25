@@ -85,6 +85,7 @@ export default class UI {
     }
 
     #handleTouchend(event) {
+        // HACK: event.preventDefault doesn't reliably stop click events in Firefox (112)
         this.#ignoreClickUntilTimeStamp = event.timeStamp + IGNORE_CLICK_AFTER_TOUCH_DURATION;
     }
     
