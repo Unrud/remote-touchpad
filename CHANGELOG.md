@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.0 (2023-04-25)
+
+* Add feedback to buttons
+* Add numeric keypad
+* Prevent touch triggering mouse mode
+
 ## 1.3.0 (2023-03-03)
 
 * Initial support for uinput
