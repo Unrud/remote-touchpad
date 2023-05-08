@@ -195,5 +195,5 @@ func (p *uinputController) PointerMove(deltaX, deltaY int) error {
 }
 
 func (p *uinputController) PointerScroll(deltaHorizontal, deltaVertical int, finish bool) error {
-	return errors.Join(p.mouse.Wheel(false, int32(deltaVertical)), p.mouse.Wheel(true, int32(deltaHorizontal)))
+	return errors.Join(p.mouse.Wheel(false, int32(-deltaVertical)), p.mouse.Wheel(true, int32(deltaHorizontal)))
 }
