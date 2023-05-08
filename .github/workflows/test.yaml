@@ -1,0 +1,37 @@
+name: Test
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-stable]
+        go: [stable, oldstable]
+        GOOS: [linux]
+        GOFLAGS: ['', 'null', 'portal', 'uinput', 'x11',
+                  'null,portal,uinput,x11']
+    runs-on: ${{ matrix.os }}
+    env:
+      GOOS: ${{ matrix.GOOS }}
+      GOFLAGS: ${{ matrix.GOFLAGS }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go }}
+          check-latest: true
+
+      - name: Go Format
+        run: gofmt -s -w . && git diff --exit-code
+
+      - name: Go Vet
+        run: go vet ./...
+
+      - name: Go Mod Tidy
+        run: go mod tidy && git diff --exit-code
+
+      - name: Go Build
+        run: go build ./...
+
+      - name: Go Test
+        run: go test -race ./...
