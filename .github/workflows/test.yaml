@@ -1,0 +1,47 @@
+name: Test
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [linux]
+        tags: [[], ['null'], [portal], [uinput], [x11],
+               ['null', portal, uinput, x11]]
+        include:
+          - os: windows
+            tags: []
+          - os: windows
+            tags: ['null']
+    env:
+      GOOS: ${{ matrix.os }}
+      GOFLAGS: -tags=${{ join(matrix.tags, ',') }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: stable
+          check-latest: true
+      - run: sudo apt install libxrandr-dev libxtst-dev
+        if: ${{ contains(matrix.tags, 'x11') }}
+
+      - name: Go Format
+        run: gofmt -s -w . && git diff --exit-code
+
+      - name: Go Mod Tidy
+        run: go mod tidy && git diff --exit-code
+
+      - name: Go Vet
+        run: go vet ./...
+
+      - name: Go Build
+        run: go build ./...
+
+      - name: Go Test
+        run: go test ./...
+        if: ${{ matrix.os != 'linux' }}
+
+      - name: Go Test (with data race detection)
+        run: go test -race ./...
+        if: ${{ matrix.os == 'linux' }}
