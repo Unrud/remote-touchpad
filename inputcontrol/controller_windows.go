@@ -111,12 +111,9 @@ func (p *windowsController) sendInput(inputs []keybdInput) error {
 	if len(inputs) == 0 {
 		return nil
 	}
-	if r, _, err := sendInputProc.Call(uintptr(len(inputs)),
-		uintptr(unsafe.Pointer(&inputs[0])),
-		unsafe.Sizeof(inputs[0])); int(r) != len(inputs) {
-		return err
-	}
-	return nil
+	_, _, err := sendInputProc.Call(uintptr(len(inputs)),
+		uintptr(unsafe.Pointer(&inputs[0])), unsafe.Sizeof(inputs[0]))
+	return err
 }
 
 func (p *windowsController) KeyboardText(text string) error {
@@ -197,11 +194,8 @@ func (p *windowsController) PointerButton(button PointerButton, press bool) erro
 	} else {
 		return fmt.Errorf("unsupported pointer button: %#v", button)
 	}
-	if r, _, err := sendInputProc.Call(1, uintptr(unsafe.Pointer(&input)),
-		unsafe.Sizeof(input)); int(r) != 1 {
-		return err
-	}
-	return nil
+	_, _, err := sendInputProc.Call(1, uintptr(unsafe.Pointer(&input)), unsafe.Sizeof(input))
+	return err
 }
 
 func (p *windowsController) PointerMove(deltaX, deltaY int) error {
@@ -211,11 +205,8 @@ func (p *windowsController) PointerMove(deltaX, deltaY int) error {
 		dy:      int32(deltaY),
 		dwFlags: mouseeventfMove,
 	}
-	if r, _, err := sendInputProc.Call(1, uintptr(unsafe.Pointer(&input)),
-		unsafe.Sizeof(input)); int(r) != 1 {
-		return err
-	}
-	return nil
+	_, _, err := sendInputProc.Call(1, uintptr(unsafe.Pointer(&input)), unsafe.Sizeof(input))
+	return err
 }
 
 func (p *windowsController) PointerScroll(deltaHorizontal, deltaVertical int, finish bool) error {
@@ -237,10 +228,7 @@ func (p *windowsController) PointerScroll(deltaHorizontal, deltaVertical int, fi
 	if len(inputs) == 0 {
 		return nil
 	}
-	if r, _, err := sendInputProc.Call(uintptr(len(inputs)),
-		uintptr(unsafe.Pointer(&inputs[0])),
-		unsafe.Sizeof(inputs[0])); int(r) != len(inputs) {
-		return err
-	}
-	return nil
+	_, _, err := sendInputProc.Call(uintptr(len(inputs)),
+		uintptr(unsafe.Pointer(&inputs[0])), unsafe.Sizeof(inputs[0]))
+	return err
 }

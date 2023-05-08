@@ -25,7 +25,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/godbus/dbus/v5"
-	"sync"
 )
 
 const (
@@ -45,7 +44,6 @@ type portalController struct {
 	bus           *dbus.Conn
 	remoteDesktop dbus.BusObject
 	sessionHandle dbus.ObjectPath
-	lock          sync.RWMutex
 }
 
 func init() {
@@ -177,25 +175,10 @@ func getResponse(bus *dbus.Conn, object dbus.BusObject, method string,
 }
 
 func (p *portalController) Close() error {
-	p.lock.Lock()
-	defer p.lock.Unlock()
-	if p.bus == nil {
-		return errors.New("dbus connection closed")
-	}
-	if err := p.bus.Close(); err != nil {
-		return err
-	}
-	p.bus = nil
-	p.remoteDesktop = nil
-	return nil
+	return p.bus.Close()
 }
 
 func (p *portalController) keyboardKeys(keys []Keysym) error {
-	p.lock.RLock()
-	defer p.lock.RUnlock()
-	if p.bus == nil {
-		return errors.New("dbus connection closed")
-	}
 	inVardict := make(map[string]dbus.Variant)
 	for _, keysym := range keys {
 		for _, state := range [...]uint32{btnPressed, btnReleased} {
@@ -231,11 +214,6 @@ func (p *portalController) KeyboardKey(key Key) error {
 }
 
 func (p *portalController) PointerButton(button PointerButton, press bool) error {
-	p.lock.RLock()
-	defer p.lock.RUnlock()
-	if p.bus == nil {
-		return errors.New("dbus connection closed")
-	}
 	var btn int32
 	switch button {
 	case PointerButtonLeft:
@@ -260,11 +238,6 @@ func (p *portalController) PointerButton(button PointerButton, press bool) error
 }
 
 func (p *portalController) PointerMove(deltaX, deltaY int) error {
-	p.lock.RLock()
-	defer p.lock.RUnlock()
-	if p.bus == nil {
-		return errors.New("dbus connection closed")
-	}
 	inVardict := make(map[string]dbus.Variant)
 	if err := p.remoteDesktop.Call("org.freedesktop.portal.RemoteDesktop.NotifyPointerMotion",
 		0, p.sessionHandle, inVardict, float64(deltaX), float64(deltaY)).Store(); err != nil {
@@ -274,11 +247,6 @@ func (p *portalController) PointerMove(deltaX, deltaY int) error {
 }
 
 func (p *portalController) PointerScroll(deltaHorizontal, deltaVertical int, finish bool) error {
-	p.lock.RLock()
-	defer p.lock.RUnlock()
-	if p.bus == nil {
-		return errors.New("dbus connection closed")
-	}
 	inVardict := make(map[string]dbus.Variant)
 	inVardict["finish"] = dbus.MakeVariant(finish)
 	if err := p.remoteDesktop.Call("org.freedesktop.portal.RemoteDesktop.NotifyPointerAxis",

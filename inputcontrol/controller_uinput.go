@@ -74,11 +74,7 @@ func InitUinputController() (Controller, error) {
 }
 
 func (p *uinputController) Close() error {
-	if err := p.keyboard.Close(); err != nil {
-		p.mouse.Close()
-		return err
-	}
-	return p.mouse.Close()
+	return errors.Join(p.keyboard.Close(), p.mouse.Close())
 }
 
 func (p *uinputController) KeyboardText(text string) error {
@@ -199,8 +195,5 @@ func (p *uinputController) PointerMove(deltaX, deltaY int) error {
 }
 
 func (p *uinputController) PointerScroll(deltaHorizontal, deltaVertical int, finish bool) error {
-	if err := p.mouse.Wheel(false, int32(deltaVertical)); err != nil {
-		return err
-	}
-	return p.mouse.Wheel(true, int32(deltaHorizontal))
+	return errors.Join(p.mouse.Wheel(false, int32(deltaVertical)), p.mouse.Wheel(true, int32(deltaHorizontal)))
 }
