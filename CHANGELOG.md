@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.1 (2023-05-11)
+
+* uinput: Fix vertical scroll direction
+* Update dependencies
+
 ## 1.4.0 (2023-04-25)
 
 * Add feedback to buttons
