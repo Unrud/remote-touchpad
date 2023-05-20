@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.2 (2023-05-20)
+
+* Fix Windows support
+
 ## 1.4.1 (2023-05-11)
 
 * uinput: Fix vertical scroll direction
