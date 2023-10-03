@@ -1,6 +1,6 @@
 app-id: com.github.unrud.RemoteTouchpad
 runtime: org.freedesktop.Platform
-runtime-version: '22.08'
+runtime-version: '23.08'
 sdk: org.freedesktop.Sdk
 command: remote-touchpad
 sdk-extensions:
@@ -28,8 +28,8 @@ modules:
         dest: vendor/github.com/skip2/go-qrcode
       - type: git
         url: https://github.com/golang/net
-        tag: v0.10.0
-        commit: daac0cec0cf964a628a29bb4b82940c225b921ed
+        tag: v0.15.0
+        commit: 2a0da8be5a758b33fa896384d689071e832b4aa2
         dest: vendor/golang.org/x/net
     buildsystem: simple
     build-commands:
