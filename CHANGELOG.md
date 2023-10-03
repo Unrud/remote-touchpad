@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.3 (2023-10-03)
+
+* Update dependencies
+
 ## 1.4.2 (2023-05-20)
 
 * Fix Windows support
