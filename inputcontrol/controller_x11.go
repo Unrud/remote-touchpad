@@ -22,6 +22,7 @@
 package inputcontrol
 
 // #cgo LDFLAGS: -lX11 -lXrandr -lXtst
+// #include <stdlib.h>
 // #include <X11/Xlib.h>
 // #include <X11/Intrinsic.h>
 // #include <X11/extensions/Xrandr.h>
@@ -74,6 +75,17 @@ func InitX11Controller() (Controller, error) {
 }
 
 func (p *x11Controller) xIsXwayland() bool {
+	// Detection method from https://gitlab.freedesktop.org/xorg/app/xisxwayland/-/blob/xisxwayland-2/xisxwayland.c
+	var opcode, event, error, major, minor C.int
+	xwaylandExtensionName := C.CString("XWAYLAND")
+	defer C.free(unsafe.Pointer(xwaylandExtensionName))
+	if C.XQueryExtension(p.display, xwaylandExtensionName, &opcode, &event, &error) != 0 {
+		return true
+	}
+	if C.XRRQueryExtension(p.display, &event, &error) == 0 ||
+		C.XRRQueryVersion(p.display, &major, &minor) == 0 {
+		return false
+	}
 	resources := C.XRRGetScreenResourcesCurrent(p.display, C.MacroDefaultRootWindow(p.display))
 	if resources == nil {
 		return false
