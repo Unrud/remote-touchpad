@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.4 (2024-01-23)
+
+* Fix Xwayland detection on newer servers
+* Fix support for the KDE remote desktop portal
+* Set correct minimum version for Go
+* Update dependencies
+
 ## 1.4.3 (2023-10-03)
 
 * Update dependencies

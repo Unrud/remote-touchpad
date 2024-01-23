@@ -19,6 +19,16 @@
   <url type="homepage">https://github.com/Unrud/remote-touchpad</url>
   <developer_name>Unrud</developer_name>
   <releases>
+    <release version="1.4.4" date="2024-01-23">
+      <description>
+        <ul>
+          <li>Fix Xwayland detection on newer servers</li>
+          <li>Fix support for the KDE remote desktop portal</li>
+          <li>Set correct minimum version for Go</li>
+          <li>Update dependencies</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.4.3" date="2023-10-03">
       <description>
         <ul>
@@ -299,16 +309,16 @@
   </releases>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.3/screenshots/1.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.4/screenshots/1.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.3/screenshots/2.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.4/screenshots/2.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.3/screenshots/3.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.4/screenshots/3.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.3/screenshots/4.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.4/screenshots/4.png</image>
     </screenshot>
   </screenshots>
   <content_rating type="oars-1.1"/>
