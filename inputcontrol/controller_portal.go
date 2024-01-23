@@ -109,7 +109,7 @@ func InitPortalController() (Controller, error) {
 	}
 	sessionHandle := dbus.ObjectPath(sessionHandleS)
 	inVardict = make(map[string]dbus.Variant)
-	inVardict["type"] = dbus.MakeVariant(deviceKeyboard | devicePointer)
+	inVardict["types"] = dbus.MakeVariant(deviceKeyboard | devicePointer)
 	result, outVardict, err = getResponse(bus, remoteDesktop,
 		"org.freedesktop.portal.RemoteDesktop.SelectDevices", 0, sessionHandle, inVardict)
 	if err != nil {
