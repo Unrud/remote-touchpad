@@ -1,6 +1,6 @@
 module github.com/unrud/remote-touchpad
 
-go 1.18
+go 1.20
 
 require (
 	github.com/bendahl/uinput v1.6.2
