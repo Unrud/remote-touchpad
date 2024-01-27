@@ -9,7 +9,7 @@ license: GPL-3.0+
 grade: stable
 adopt-info: remote-touchpad
 
-base: core20
+base: core22
 confinement: strict
 
 apps:
@@ -26,7 +26,7 @@ apps:
       - desktop
       - x11
     common-id: com.github.unrud.RemoteTouchpad
-    desktop: share/applications/com.github.unrud.RemoteTouchpad.desktop
+    desktop: usr/share/applications/com.github.unrud.RemoteTouchpad.desktop
 
 parts:
   remote-touchpad:
@@ -36,6 +36,8 @@ parts:
       - x11
     source: .
     source-type: git
+    build-snaps:
+      - go
     build-packages:
       - gcc
       - libc6-dev
@@ -47,13 +49,13 @@ parts:
       - libxrandr2
       - libxtst6
     override-pull: |
-      snapcraftctl pull
+      craftctl default
       # WORKAROUND: Point icon directly to SVG otherwise snapcraft can't find it
       sed -e 's|Icon=com.github.unrud.RemoteTouchpad|Icon=/usr/share/icons/hicolor/scalable/apps/com.github.unrud.RemoteTouchpad.svg|' -i desktop/com.github.unrud.RemoteTouchpad.desktop
     override-build: |
-      snapcraftctl build
-      install -Dm0755 -t "${SNAPCRAFT_PART_INSTALL}/bin" desktop/remote-touchpad-wait-on-error
-      install -Dm0644 -t "${SNAPCRAFT_PART_INSTALL}/usr/share/metainfo" desktop/com.github.unrud.RemoteTouchpad.metainfo.xml
-      install -Dm0644 -t "${SNAPCRAFT_PART_INSTALL}/usr/share/applications" desktop/com.github.unrud.RemoteTouchpad.desktop
-      install -Dm0644 -t "${SNAPCRAFT_PART_INSTALL}/usr/share/icons/hicolor/scalable/apps" desktop/com.github.unrud.RemoteTouchpad.svg
+      craftctl default
+      install -Dm0755 -t "${CRAFT_PART_INSTALL}/bin" desktop/remote-touchpad-wait-on-error
+      install -Dm0644 -t "${CRAFT_PART_INSTALL}/usr/share/metainfo" desktop/com.github.unrud.RemoteTouchpad.metainfo.xml
+      install -Dm0644 -t "${CRAFT_PART_INSTALL}/usr/share/applications" desktop/com.github.unrud.RemoteTouchpad.desktop
+      install -Dm0644 -t "${CRAFT_PART_INSTALL}/usr/share/icons/hicolor/scalable/apps" desktop/com.github.unrud.RemoteTouchpad.svg
     parse-info: [usr/share/metainfo/com.github.unrud.RemoteTouchpad.metainfo.xml]
