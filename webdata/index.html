@@ -24,11 +24,11 @@
     <button class="bottom right" onclick="app.showTextInput()">⌨</button>
 </div>
 
-<div id="text-input" class="scene">
-    <textarea class="grow" cols=1 rows=1></textarea>
-    <div class="buttons">
+<div id="text-input" class="scene touch-input mouse-input keyboard-input">
+    <textarea placeholder="Touch to type" cols=1 rows=1></textarea>
+    <div class="flex-between">
         <button onclick="app.showKeys('text-input', 1)">≡</button>
-        <button class="grow" id="send-text">➣</button>
+        <button id="send-text">↩</button>
     </div>
 </div>
 
