@@ -147,10 +147,15 @@ textarea {
     border: none;
     resize: none;
     font-size: 2rem;
-    background-color: white;
+    background-color: #303030;
     color: black;
     margin: 0;
     padding: 0 0.5rem;
+    width: 100%;
+}
+
+textarea:focus {
+    outline: none;
 }
 
 #keys {
@@ -175,35 +180,17 @@ textarea {
 
 #text-input {
     align-items: stretch;
+    justify-content: end;
     padding: 0;
     gap: 0;
 }
 
-#text-input .buttons > button {
+#text-input button {
     border-bottom: none;
-    border-right: none;
+    border-top: none;
 }
 
-#text-input .buttons > button:first-child {
-    border-left: none;
-}
-
-@media (min-aspect-ratio: 4/3) {
-    #text-input {
-        flex-direction: row;
-    }
-
-    #text-input .buttons {
-        flex-direction: column;
-    }
-
-    #text-input .buttons > button,
-    #text-input .buttons > button:first-child {
-        border-top: 1px solid black;
-        border-left: 1px solid black;
-    }
-
-    #text-input .buttons > button:first-child {
-        border-top: none;
-    }
+.flex-between {
+    display: flex;
+    justify-content: space-between;
 }
