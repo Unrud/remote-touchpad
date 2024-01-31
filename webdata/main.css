@@ -153,6 +153,10 @@ textarea {
     padding: 0 0.5rem;
 }
 
+textarea:focus {
+    outline: none;
+}
+
 #keys {
     padding: 0;
     justify-content: end;
