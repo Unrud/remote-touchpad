@@ -63,6 +63,7 @@ export default class UI {
         compat.addFullscreenchangeEventListener(() => { this.#update(); });
         compat.addPointerlockchangeEventListener(() => { this.#update(); });
         for (const button of buttons) {
+            button.setAttribute("tabindex", "-1");
             button.addEventListener("click", this.#handleButtonClick.bind(this));
         }
         this.#update();
