@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.5 (2024-01-31)
+
+* Keep text input open after sending
+* Workaround for virtual keyboard covering buttons (Chromium & iOS)
+* Enable hardware keyboard input in mouse mode
+
 ## 1.4.4 (2024-01-23)
 
 * Fix Xwayland detection on newer servers

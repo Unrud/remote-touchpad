@@ -19,6 +19,15 @@
   <url type="homepage">https://github.com/Unrud/remote-touchpad</url>
   <developer_name>Unrud</developer_name>
   <releases>
+    <release version="1.4.5" date="2024-01-31">
+      <description>
+        <ul>
+          <li>Keep text input open after sending</li>
+          <li>Workaround for virtual keyboard covering buttons (Chromium &amp; iOS)</li>
+          <li>Enable hardware keyboard input in mouse mode</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.4.4" date="2024-01-23">
       <description>
         <ul>
@@ -309,16 +318,16 @@
   </releases>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.4/screenshots/1.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.5/screenshots/1.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.4/screenshots/2.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.5/screenshots/2.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.4/screenshots/3.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.5/screenshots/3.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.4/screenshots/4.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.5/screenshots/4.png</image>
     </screenshot>
   </screenshots>
   <content_rating type="oars-1.1"/>
