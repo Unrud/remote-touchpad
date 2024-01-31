@@ -197,7 +197,18 @@ textarea:focus {
     border-bottom: none;
 }
 
-@media (max-aspect-ratio: 4/3) {
+/* Only Safari for iOS */
+@supports (-webkit-touch-callout: none) {
+    /* Virtual keyboard can overlay content */
+    #text-input .buttons > button:last-child {
+        display: flex;
+        padding-top: 0.2em;
+        justify-content: center;
+    }
+}
+
+/* Portrait orientation (not for Safari on iOS) */
+@supports not (-webkit-touch-callout: none) { @media (max-aspect-ratio: 4/3) {
     #text-input {
         flex-direction: column;
     }
@@ -214,4 +225,4 @@ textarea:focus {
     #text-input .buttons > button:first-child {
         border-left: none;
     }
-}
+} }
