@@ -57,7 +57,7 @@ export default class UI {
             (target) => target.classList.contains("touch-input"));
         document.addEventListener("mousedown", this.#handleMousedown.bind(this));
         document.addEventListener("touchend", this.#handleTouchend.bind(this));
-        textInput.addEventListener("input", this.#handleTextInput.bind(this));
+        textInput.addEventListener("input", () => { this.#updateTextInput(); });
         sendText.addEventListener("click", this.#handleSendText.bind(this));
         window.addEventListener("popstate", () => { this.#update(); });
         compat.addFullscreenchangeEventListener(() => { this.#update(); });
@@ -98,8 +98,13 @@ export default class UI {
         }
     }
 
-    #handleTextInput() {
+    #updateTextInput(newValue = null) {
+        if (newValue != null) {
+            textInput.value = newValue;
+        }
         sessionStorage.setItem("text-input", textInput.value);
+        sendText.textContent = sendText.getAttribute(`data-${textInput.value ? "send" : "back"}-content`);
+        textInput.focus();
     }
 
     #handleButtonClick(event) {
@@ -113,10 +118,10 @@ export default class UI {
             // normalize line endings
             const text = textInput.value.replace(/\r\n?/g, "\n");
             this.#inputController.keyboardText(text);
-            textInput.value = "";
-            this.#handleTextInput();
+            this.#updateTextInput("");
+        } else {
+            history.back();
         }
-        history.back();
     }
 
     #showScene(scene) {
@@ -160,8 +165,7 @@ export default class UI {
 
     showTextInput() {
         this.#showScene(textInputScene);
-        textInput.value = sessionStorage.getItem("text-input") || "";
-        textInput.focus();
+        this.#updateTextInput(sessionStorage.getItem("text-input") || "");
         if (history.state != "text-input") {
             history.pushState("text-input", "");
         }
