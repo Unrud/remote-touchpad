@@ -19,6 +19,13 @@
   <url type="homepage">https://github.com/Unrud/remote-touchpad</url>
   <developer_name>Unrud</developer_name>
   <releases>
+    <release version="1.4.6" date="2024-02-06">
+      <description>
+        <ul>
+          <li>Prevent incorrect MIME types</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.4.5" date="2024-01-31">
       <description>
         <ul>
@@ -318,16 +325,16 @@
   </releases>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.5/screenshots/1.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.6/screenshots/1.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.5/screenshots/2.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.6/screenshots/2.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.5/screenshots/3.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.6/screenshots/3.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.5/screenshots/4.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.4.6/screenshots/4.png</image>
     </screenshot>
   </screenshots>
   <content_rating type="oars-1.1"/>

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.6 (2024-02-06)
+
+* Prevent incorrect MIME types
+
 ## 1.4.5 (2024-01-31)
 
 * Keep text input open after sending
