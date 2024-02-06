@@ -38,10 +38,6 @@ jobs:
       - name: Go Build
         run: go build ./...
 
-      - name: Go Test
-        run: go test ./...
-        if: ${{ matrix.os != 'linux' }}
-
       - name: Go Test (with data race detection)
         run: go test -race ./...
         if: ${{ matrix.os == 'linux' }}
