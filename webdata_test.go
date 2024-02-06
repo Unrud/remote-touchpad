@@ -20,33 +20,23 @@
 package main
 
 import (
-	"embed"
+	"fmt"
 	"io/fs"
-	"log"
-	"mime"
+	"path/filepath"
+	"testing"
 )
 
-//go:embed webdata/*
-var webdataFSWithPrefix embed.FS
-var webdataFS fs.FS
-
-var webdataTypes = map[string]string{
-	".css":  "text/css; charset=utf-8",
-	".html": "text/html; charset=utf-8",
-	".mjs":  "text/javascript; charset=utf-8",
-	".png":  "image/png",
-	".woff": "font/woff",
-}
-
-func init() {
-	var err error
-	webdataFS, err = fs.Sub(webdataFSWithPrefix, "webdata")
-	if err != nil {
-		log.Fatal(err)
-	}
-	for ext, typ := range webdataTypes {
-		if err := mime.AddExtensionType(ext, typ); err != nil {
-			log.Fatal(err)
+func TestWebdataTypesCompleteness(t *testing.T) {
+	if err := fs.WalkDir(webdataFS, ".", func(_ string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return err
 		}
+		ext := filepath.Ext(d.Name())
+		if _, haveType := webdataTypes[ext]; !haveType {
+			return fmt.Errorf("missing mime type for extension %#v", ext)
+		}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
 	}
 }
