@@ -17,7 +17,9 @@
   <launchable type="desktop-id">com.github.unrud.RemoteTouchpad.desktop</launchable>
   <url type="bugtracker">https://github.com/Unrud/remote-touchpad/issues</url>
   <url type="homepage">https://github.com/Unrud/remote-touchpad</url>
-  <developer_name>Unrud</developer_name>
+  <developer id="io.github.unrud">
+    <name translate="no">Unrud</name>
+  </developer>
   <releases>
     <release version="1.4.6" date="2024-02-06">
       <description>
