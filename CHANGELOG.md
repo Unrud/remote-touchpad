@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.7 (2024-08-30)
+
+* Update dependencies
+
 ## 1.4.6 (2024-02-06)
 
 * Prevent incorrect MIME types
