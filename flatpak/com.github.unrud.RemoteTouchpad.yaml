@@ -8,6 +8,7 @@ sdk-extensions:
 finish-args:
   - --socket=fallback-x11
   - --socket=wayland
+  - --share=ipc # Required by Flathub linter
   - --share=network
 modules:
   - name: remote-touchpad
