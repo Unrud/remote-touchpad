@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.8 (2024-09-01)
+
+* Update dependencies
+
 ## 1.4.7 (2024-08-30)
 
 * Update dependencies
