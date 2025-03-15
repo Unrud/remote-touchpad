@@ -25,6 +25,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/godbus/dbus/v5"
+	"os"
+	"path/filepath"
 )
 
 const (
@@ -33,6 +35,8 @@ const (
 
 	btnReleased uint32 = 0
 	btnPressed  uint32 = 1
+
+	untilRevoked uint32 = 2
 
 	// linux/input-event-codes.h
 	btnLeft   int32 = 0x110
@@ -50,7 +54,26 @@ func init() {
 	RegisterController("RemoteDesktop portal", InitPortalController, 1)
 }
 
-func InitPortalController() (Controller, error) {
+func InitPortalController(saveRestoreToken bool) (Controller, error) {
+	cacheDirectory, err := os.UserCacheDir()
+	var restoreTokenFilePath string
+	var restoreToken string
+	if err != nil {
+		err = errors.Join(errors.New("Cannot get user cache directory, therefore cannot get restore token file path in order to read or save the restore token. "), err)
+		if saveRestoreToken == true {
+			return nil, err
+		} else {
+			fmt.Println(err.Error())
+		}
+	} else {
+		restoreTokenFilePath = filepath.Join(cacheDirectory, "remote_touchpad_portals_restore_token")
+		restoreTokenBytes, err := os.ReadFile(restoreTokenFilePath)
+		if err != nil {
+			fmt.Printf("Failed to read restore token file: %s\n", err)
+		} else {
+			restoreToken = string(restoreTokenBytes)
+		}
+	}
 	bus, err := dbus.SessionBusPrivate()
 	if err != nil {
 		return nil, &UnsupportedPlatformError{err}
@@ -81,10 +104,18 @@ func InitPortalController() (Controller, error) {
 		return nil, &UnsupportedPlatformError{
 			errors.New("unexpected 'AvailableDeviceTypes' return type")}
 	}
-	if availableDeviceTypes&deviceKeyboard == 0 ||
+	if availableDeviceTypes&deviceKeyboard == 0 &&
 		availableDeviceTypes&devicePointer == 0 {
 		return nil, &UnsupportedPlatformError{
-			errors.New("keyboard or pointer source type not supported")}
+			errors.New("keyboard and pointer source type not supported")}
+	}
+	if availableDeviceTypes&deviceKeyboard == 0 {
+		return nil, &UnsupportedPlatformError{
+			errors.New("keyboard source type not supported")}
+	}
+	if availableDeviceTypes&devicePointer == 0 {
+		return nil, &UnsupportedPlatformError{
+			errors.New("pointer source type not supported")}
 	}
 	inVardict := make(map[string]dbus.Variant)
 	inVardict["session_handle_token"] = dbus.MakeVariant("t")
@@ -110,6 +141,12 @@ func InitPortalController() (Controller, error) {
 	sessionHandle := dbus.ObjectPath(sessionHandleS)
 	inVardict = make(map[string]dbus.Variant)
 	inVardict["types"] = dbus.MakeVariant(deviceKeyboard | devicePointer)
+	if restoreToken != "" {
+		inVardict["restore_token"] = dbus.MakeVariant(restoreToken)
+	}
+	if saveRestoreToken {
+		inVardict["persist_mode"] = dbus.MakeVariant(untilRevoked)
+	}
 	result, outVardict, err = getResponse(bus, remoteDesktop,
 		"org.freedesktop.portal.RemoteDesktop.SelectDevices", 0, sessionHandle, inVardict)
 	if err != nil {
@@ -127,6 +164,17 @@ func InitPortalController() (Controller, error) {
 	}
 	if result != 0 {
 		return nil, errors.New("keyboard or pointer access denied")
+	}
+	if saveRestoreToken {
+		restoreToken, ok := outVardict["restore_token"].Value().(string)
+		if !ok {
+			return nil, errors.New("Failed to get new restore token")
+		} else {
+			err := os.WriteFile(restoreTokenFilePath, []byte(restoreToken), 0644)
+			if err != nil {
+				return nil, errors.Join(errors.New("Failed to write restore token: "), err)
+			}
+		}
 	}
 	devicesV, ok := outVardict["devices"]
 	if !ok {
