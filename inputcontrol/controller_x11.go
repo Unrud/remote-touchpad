@@ -59,7 +59,7 @@ func init() {
 	RegisterController("X11", InitX11Controller, 0)
 }
 
-func InitX11Controller() (Controller, error) {
+func InitX11Controller(saveRestoreToken bool) (Controller, error) {
 	display := C.XOpenDisplay(nil)
 	if display == nil {
 		return nil, &UnsupportedPlatformError{
