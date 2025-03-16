@@ -25,6 +25,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/godbus/dbus/v5"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -55,25 +56,6 @@ func init() {
 }
 
 func InitPortalController(saveRestoreToken bool) (Controller, error) {
-	cacheDirectory, err := os.UserCacheDir()
-	var restoreTokenFilePath string
-	var restoreToken string
-	if err != nil {
-		err = errors.Join(errors.New("Cannot get user cache directory, therefore cannot get restore token file path in order to read or save the restore token. "), err)
-		if saveRestoreToken == true {
-			return nil, err
-		} else {
-			fmt.Println(err.Error())
-		}
-	} else {
-		restoreTokenFilePath = filepath.Join(cacheDirectory, "remote_touchpad_portals_restore_token")
-		restoreTokenBytes, err := os.ReadFile(restoreTokenFilePath)
-		if err != nil {
-			fmt.Printf("Failed to read restore token file: %s\n", err)
-		} else {
-			restoreToken = string(restoreTokenBytes)
-		}
-	}
 	bus, err := dbus.SessionBusPrivate()
 	if err != nil {
 		return nil, &UnsupportedPlatformError{err}
@@ -94,6 +76,30 @@ func InitPortalController(saveRestoreToken bool) (Controller, error) {
 	}
 	remoteDesktop := bus.Object("org.freedesktop.portal.Desktop",
 		"/org/freedesktop/portal/desktop")
+	version, err := remoteDesktop.GetProperty(
+		"org.freedesktop.portal.RemoteDesktop.version")
+	if err != nil {
+		return nil, &UnsupportedPlatformError{err}
+	}
+	supportsRestoreTokens := version.Value().(uint32) >= 2
+	var restoreTokenFilePath string
+	var restoreToken string
+	if supportsRestoreTokens {
+		cacheDirectory, err := os.UserCacheDir()
+		if err != nil {
+			log.Printf("Cannot get user cache directory: %s. Therefore cannot get restore token file path in order to read or save the restore token.\n", err)
+		} else {
+			restoreTokenFilePath = filepath.Join(cacheDirectory, "remote_touchpad_portals_restore_token")
+			restoreTokenBytes, err := os.ReadFile(restoreTokenFilePath)
+			if err != nil {
+				log.Printf("Failed to read restore token file: %s\n", err)
+			} else {
+				restoreToken = string(restoreTokenBytes)
+			}
+		}
+	} else {
+		log.Println("Portals implementation does not support restore tokens")
+	}
 	availableDeviceTypesV, err := remoteDesktop.GetProperty(
 		"org.freedesktop.portal.RemoteDesktop.AvailableDeviceTypes")
 	if err != nil {
@@ -141,11 +147,13 @@ func InitPortalController(saveRestoreToken bool) (Controller, error) {
 	sessionHandle := dbus.ObjectPath(sessionHandleS)
 	inVardict = make(map[string]dbus.Variant)
 	inVardict["types"] = dbus.MakeVariant(deviceKeyboard | devicePointer)
-	if restoreToken != "" {
-		inVardict["restore_token"] = dbus.MakeVariant(restoreToken)
-	}
-	if saveRestoreToken {
-		inVardict["persist_mode"] = dbus.MakeVariant(untilRevoked)
+	if supportsRestoreTokens {
+		if restoreToken != "" {
+			inVardict["restore_token"] = dbus.MakeVariant(restoreToken)
+		}
+		if saveRestoreToken {
+			inVardict["persist_mode"] = dbus.MakeVariant(untilRevoked)
+		}
 	}
 	result, outVardict, err = getResponse(bus, remoteDesktop,
 		"org.freedesktop.portal.RemoteDesktop.SelectDevices", 0, sessionHandle, inVardict)
@@ -165,14 +173,14 @@ func InitPortalController(saveRestoreToken bool) (Controller, error) {
 	if result != 0 {
 		return nil, errors.New("keyboard or pointer access denied")
 	}
-	if saveRestoreToken {
+	if supportsRestoreTokens && saveRestoreToken {
 		restoreToken, ok := outVardict["restore_token"].Value().(string)
 		if !ok {
-			return nil, errors.New("Failed to get new restore token")
-		} else {
-			err := os.WriteFile(restoreTokenFilePath, []byte(restoreToken), 0644)
+			log.Println("Failed to get new restore token")
+		} else if restoreTokenFilePath != "" {
+			err := os.WriteFile(restoreTokenFilePath, []byte(restoreToken), 0600)
 			if err != nil {
-				return nil, errors.Join(errors.New("Failed to write restore token: "), err)
+				log.Printf("Failed to write restore token: %s", err)
 			}
 		}
 	}
