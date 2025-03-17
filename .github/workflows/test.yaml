@@ -23,7 +23,7 @@ jobs:
         with:
           go-version: stable
           check-latest: true
-      - run: sudo apt install libxrandr-dev libxtst-dev
+      - run: sudo apt install libxrandr-dev libxtst-dev libxt-dev
         if: ${{ contains(matrix.tags, 'x11') }}
 
       - name: Go Format
