@@ -83,9 +83,10 @@ func InitPortalController(saveRestoreToken bool) (Controller, error) {
 	}
 	supportsRestoreTokens := version.Value().(uint32) >= 2
 	var restoreTokenFilePath string
+	var cacheDirectory string
 	var restoreToken string
 	if supportsRestoreTokens {
-		cacheDirectory, err := os.UserCacheDir()
+		cacheDirectory, err = os.UserCacheDir()
 		if err != nil {
 			log.Printf("Cannot get user cache directory: %s. Therefore cannot get restore token file path in order to read or save the restore token.\n", err)
 		} else {
@@ -178,9 +179,14 @@ func InitPortalController(saveRestoreToken bool) (Controller, error) {
 		if !ok {
 			log.Println("Failed to get new restore token")
 		} else if restoreTokenFilePath != "" {
-			err := os.WriteFile(restoreTokenFilePath, []byte(restoreToken), 0600)
+			err := os.MkdirAll(cacheDirectory, 0700)
 			if err != nil {
-				log.Printf("Failed to write restore token: %s", err)
+				log.Printf("Failed to create cache directory for restore token: %s\n", err)
+			} else {
+				err := os.WriteFile(restoreTokenFilePath, []byte(restoreToken), 0600)
+				if err != nil {
+					log.Printf("Failed to write restore token: %s\n", err)
+				}
 			}
 		}
 	}
