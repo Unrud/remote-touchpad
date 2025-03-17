@@ -15,9 +15,6 @@ modules:
     sources:
       - type: git
         path: ..
-      - type: shell
-        commands:
-          - . /usr/lib/sdk/golang/enable.sh; go mod vendor -e
       - type: git
         url: https://github.com/godbus/dbus
         tag: v5.1.0
@@ -29,9 +26,12 @@ modules:
         dest: vendor/github.com/skip2/go-qrcode
       - type: git
         url: https://github.com/golang/net
-        tag: v0.28.0
-        commit: 4542a42604cd159f1adb93c58368079ae37b3bf6
+        tag: v0.37.0
+        commit: 99b3ae0643f9a2f9d820fcbba5f9e4c83b23bd48
         dest: vendor/golang.org/x/net
+      - type: file
+        path: modules.txt
+        dest: vendor
     buildsystem: simple
     build-commands:
       - . /usr/lib/sdk/golang/enable.sh; go build -tags portal,x11
