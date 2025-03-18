@@ -55,7 +55,7 @@ const (
 
 type portalController struct {
 	bus           *dbus.Conn
-	remoteDesktop dbus.BusObject
+	portalDesktop dbus.BusObject
 	sessionHandle dbus.ObjectPath
 }
 
@@ -82,15 +82,21 @@ func InitPortalController() (Controller, error) {
 	if err != nil {
 		return nil, &UnsupportedPlatformError{err}
 	}
-	remoteDesktop := bus.Object("org.freedesktop.portal.Desktop",
+	portalDesktop := bus.Object("org.freedesktop.portal.Desktop",
 		"/org/freedesktop/portal/desktop")
-	version, err := remoteDesktop.GetProperty(
+	remoteDesktopVersionV, err := portalDesktop.GetProperty(
 		"org.freedesktop.portal.RemoteDesktop.version")
 	if err != nil {
-		return nil, &UnsupportedPlatformError{err}
+		return nil, &UnsupportedPlatformError{
+			fmt.Errorf("getting 'version' failed: %w", err)}
+	}
+	remoteDesktopVersion, ok := remoteDesktopVersionV.Value().(uint32)
+	if !ok {
+		return nil, &UnsupportedPlatformError{
+			errors.New("unexpected 'version' type")}
 	}
 	restoreTokenStore, err := func() (*secretStore, error) {
-		if version.Value().(uint32) < 2 {
+		if remoteDesktopVersion < 2 {
 			return nil, nil
 		}
 		cacheDirectory, err := os.UserCacheDir()
@@ -110,92 +116,74 @@ func InitPortalController() (Controller, error) {
 	if err != nil {
 		log.Printf("Skipping restore token: %v", err)
 	}
-	availableDeviceTypesV, err := remoteDesktop.GetProperty(
+	availableDeviceTypesV, err := portalDesktop.GetProperty(
 		"org.freedesktop.portal.RemoteDesktop.AvailableDeviceTypes")
 	if err != nil {
-		return nil, &UnsupportedPlatformError{err}
+		return nil, &UnsupportedPlatformError{
+			fmt.Errorf("getting 'AvailableDeviceTypes' failed: %w", err)}
 	}
 	availableDeviceTypes, ok := availableDeviceTypesV.Value().(uint32)
 	if !ok {
 		return nil, &UnsupportedPlatformError{
 			errors.New("unexpected 'AvailableDeviceTypes' return type")}
 	}
-	if availableDeviceTypes&deviceKeyboard == 0 &&
+	if availableDeviceTypes&deviceKeyboard == 0 ||
 		availableDeviceTypes&devicePointer == 0 {
 		return nil, &UnsupportedPlatformError{
-			errors.New("keyboard and pointer source type not supported")}
+			errors.New("keyboard or pointer source type not supported")}
 	}
-	if availableDeviceTypes&deviceKeyboard == 0 {
-		return nil, &UnsupportedPlatformError{
-			errors.New("keyboard source type not supported")}
-	}
-	if availableDeviceTypes&devicePointer == 0 {
-		return nil, &UnsupportedPlatformError{
-			errors.New("pointer source type not supported")}
-	}
-	inVardict := make(map[string]dbus.Variant)
-	inVardict["session_handle_token"] = dbus.MakeVariant("t")
-	result, outVardict, err := getResponse(bus, remoteDesktop,
-		"org.freedesktop.portal.RemoteDesktop.CreateSession", 0, inVardict)
+	createSessionResults, err := checkResponse(getResponse(bus, portalDesktop,
+		"org.freedesktop.portal.RemoteDesktop.CreateSession", 0,
+		map[string]dbus.Variant{"session_handle_token": dbus.MakeVariant("t")},
+	))
 	if err != nil {
-		return nil, &UnsupportedPlatformError{err}
-	}
-	if result != 0 {
 		return nil, &UnsupportedPlatformError{
-			fmt.Errorf("Calling 'CreateSession' failed (%v)", result)}
+			fmt.Errorf("calling 'CreateSession' failed: %w", err)}
 	}
-	sessionHandleV, ok := outVardict["session_handle"]
-	if !ok {
-		return nil, &UnsupportedPlatformError{
-			errors.New("'session_handle' missing from 'CreateSession' return value")}
-	}
-	sessionHandleS, ok := sessionHandleV.Value().(string)
+	sessionHandleString, ok := createSessionResults["session_handle"].Value().(string)
 	if !ok {
 		return nil, &UnsupportedPlatformError{
 			errors.New("unexpected 'session_handle' type in 'CreateSession' return value")}
 	}
-	sessionHandle := dbus.ObjectPath(sessionHandleS)
-	inVardict = make(map[string]dbus.Variant)
-	inVardict["types"] = dbus.MakeVariant(deviceKeyboard | devicePointer)
+	sessionHandle := dbus.ObjectPath(sessionHandleString)
+	selectDevicesOptions := map[string]dbus.Variant{
+		"types": dbus.MakeVariant(deviceKeyboard | devicePointer),
+	}
 	if restoreTokenStore != nil {
 		if restoreToken, err := restoreTokenStore.Load(); err != nil {
 			if !errors.Is(err, os.ErrNotExist) {
 				log.Printf("Failed to load restore token: %v", err)
 			}
 		} else if len(restoreToken) > 0 {
-			inVardict["restore_token"] = dbus.MakeVariant(string(restoreToken))
+			selectDevicesOptions["restore_token"] = dbus.MakeVariant(string(restoreToken))
 		}
-		inVardict["persist_mode"] = dbus.MakeVariant(untilRevoked)
+		selectDevicesOptions["persist_mode"] = dbus.MakeVariant(untilRevoked)
 	}
-	result, outVardict, err = getResponse(bus, remoteDesktop,
-		"org.freedesktop.portal.RemoteDesktop.SelectDevices", 0, sessionHandle, inVardict)
+	_, err = checkResponse(getResponse(bus, portalDesktop,
+		"org.freedesktop.portal.RemoteDesktop.SelectDevices", 0,
+		sessionHandle, selectDevicesOptions,
+	))
 	if err != nil {
-		return nil, &UnsupportedPlatformError{err}
-	}
-	if result != 0 {
 		return nil, &UnsupportedPlatformError{
-			fmt.Errorf("Calling 'SelectDevices' failed (%v)", result)}
+			fmt.Errorf("calling 'SelectDevices' failed: %w", err)}
 	}
-	inVardict = make(map[string]dbus.Variant)
-	result, outVardict, err = getResponse(bus, remoteDesktop,
-		"org.freedesktop.portal.RemoteDesktop.Start", 0, sessionHandle, "", inVardict)
+	startResponseStatus, startResults, err := getResponse(bus, portalDesktop,
+		"org.freedesktop.portal.RemoteDesktop.Start", 0,
+		sessionHandle, "", map[string]dbus.Variant{},
+	)
 	if err != nil {
-		return nil, &UnsupportedPlatformError{err}
+		return nil, &UnsupportedPlatformError{
+			fmt.Errorf("calling 'Start' failed: %w", err)}
 	}
-	if result != 0 {
+	if startResponseStatus != 0 {
 		return nil, errors.New("keyboard or pointer access denied")
 	}
-	if restoreToken, _ := outVardict["restore_token"].Value().(string); restoreTokenStore != nil {
+	if restoreToken, _ := startResults["restore_token"].Value().(string); restoreTokenStore != nil {
 		if err := restoreTokenStore.Store([]byte(restoreToken)); err != nil {
 			log.Printf("Failed to store restore token: %v", err)
 		}
 	}
-	devicesV, ok := outVardict["devices"]
-	if !ok {
-		return nil, &UnsupportedPlatformError{
-			errors.New("'devices' missing from 'Start' return value")}
-	}
-	devices, ok := devicesV.Value().(uint32)
+	devices, ok := startResults["devices"].Value().(uint32)
 	if !ok {
 		return nil, &UnsupportedPlatformError{
 			errors.New("unexpected 'devices' type in 'Start' return value")}
@@ -204,7 +192,7 @@ func InitPortalController() (Controller, error) {
 		return nil, errors.New("keyboard or pointer access denied")
 	}
 	cleanupBus = false
-	return &portalController{bus: bus, remoteDesktop: remoteDesktop,
+	return &portalController{bus: bus, portalDesktop: portalDesktop,
 		sessionHandle: sessionHandle}, nil
 }
 
@@ -217,14 +205,11 @@ func retrieveSecret(bus *dbus.Conn) ([]byte, error) {
 	}
 	defer secretReader.Close()
 	defer secretWriter.Close()
-	if result, _, err := getResponse(bus, portalDesktop,
+	if _, err := checkResponse(getResponse(bus, portalDesktop,
 		"org.freedesktop.portal.Secret.RetrieveSecret", 0,
-		dbus.UnixFD(secretWriter.Fd()),
-		map[string]dbus.Variant{},
-	); err != nil {
-		return nil, err
-	} else if result != 0 {
-		return nil, fmt.Errorf("calling 'RetrieveSecret' failed (%v)", result)
+		dbus.UnixFD(secretWriter.Fd()), map[string]dbus.Variant{},
+	)); err != nil {
+		return nil, fmt.Errorf("calling 'RetrieveSecret' failed: %w", err)
 	}
 	if err := secretWriter.Close(); err != nil {
 		return nil, err
@@ -299,19 +284,26 @@ func getResponse(bus *dbus.Conn, object dbus.BusObject, method string,
 		s := <-ch
 		if s.Path == requestPath && s.Name == "org.freedesktop.portal.Request.Response" {
 			if len(s.Body) != 2 {
-				return 0, nil, errors.New("unexpected 'Response' return length")
+				return 0, nil, fmt.Errorf("unexpected 'Response' return length (%d)", len(s.Body))
 			}
-			result, ok := s.Body[0].(uint32)
+			responseStatus, ok := s.Body[0].(uint32)
 			if !ok {
 				return 0, nil, errors.New("unexpected 'Response' return type")
 			}
-			outVardict, ok := s.Body[1].(map[string]dbus.Variant)
+			results, ok := s.Body[1].(map[string]dbus.Variant)
 			if !ok {
 				return 0, nil, errors.New("unexpected 'Response' return type")
 			}
-			return result, outVardict, nil
+			return responseStatus, results, nil
 		}
 	}
+}
+
+func checkResponse(responseStatus uint32, results map[string]dbus.Variant, err error) (map[string]dbus.Variant, error) {
+	if err == nil && responseStatus != 0 {
+		err = fmt.Errorf("unexpected 'Response' status (%d)", responseStatus)
+	}
+	return results, err
 }
 
 func (p *portalController) Close() error {
@@ -319,12 +311,12 @@ func (p *portalController) Close() error {
 }
 
 func (p *portalController) keyboardKeys(keys []Keysym) error {
-	inVardict := make(map[string]dbus.Variant)
 	for _, keysym := range keys {
 		for _, state := range [...]uint32{btnPressed, btnReleased} {
-			if err := p.remoteDesktop.Call(
-				"org.freedesktop.portal.RemoteDesktop.NotifyKeyboardKeysym",
-				0, p.sessionHandle, inVardict, keysym, state).Store(); err != nil {
+			if err := p.portalDesktop.Call(
+				"org.freedesktop.portal.RemoteDesktop.NotifyKeyboardKeysym", 0,
+				p.sessionHandle, map[string]dbus.Variant{}, keysym, state,
+			).Store(); err != nil {
 				return err
 			}
 		}
@@ -369,28 +361,27 @@ func (p *portalController) PointerButton(button PointerButton, press bool) error
 	if press {
 		state = btnPressed
 	}
-	inVardict := make(map[string]dbus.Variant)
-	if err := p.remoteDesktop.Call("org.freedesktop.portal.RemoteDesktop.NotifyPointerButton",
-		0, p.sessionHandle, inVardict, btn, state).Store(); err != nil {
+	if err := p.portalDesktop.Call("org.freedesktop.portal.RemoteDesktop.NotifyPointerButton", 0,
+		p.sessionHandle, map[string]dbus.Variant{}, btn, state,
+	).Store(); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (p *portalController) PointerMove(deltaX, deltaY int) error {
-	inVardict := make(map[string]dbus.Variant)
-	if err := p.remoteDesktop.Call("org.freedesktop.portal.RemoteDesktop.NotifyPointerMotion",
-		0, p.sessionHandle, inVardict, float64(deltaX), float64(deltaY)).Store(); err != nil {
+	if err := p.portalDesktop.Call("org.freedesktop.portal.RemoteDesktop.NotifyPointerMotion", 0,
+		p.sessionHandle, map[string]dbus.Variant{}, float64(deltaX), float64(deltaY),
+	).Store(); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (p *portalController) PointerScroll(deltaHorizontal, deltaVertical int, finish bool) error {
-	inVardict := make(map[string]dbus.Variant)
-	inVardict["finish"] = dbus.MakeVariant(finish)
-	if err := p.remoteDesktop.Call("org.freedesktop.portal.RemoteDesktop.NotifyPointerAxis",
-		0, p.sessionHandle, inVardict, float64(deltaHorizontal), float64(deltaVertical)).Store(); err != nil {
+	if err := p.portalDesktop.Call("org.freedesktop.portal.RemoteDesktop.NotifyPointerAxis", 0,
+		p.sessionHandle, map[string]dbus.Variant{"finish": dbus.MakeVariant(finish)}, float64(deltaHorizontal), float64(deltaVertical),
+	).Store(); err != nil {
 		return err
 	}
 	return nil
