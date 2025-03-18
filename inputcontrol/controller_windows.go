@@ -95,7 +95,7 @@ func init() {
 	RegisterController("Windows", InitWindowsController, 0)
 }
 
-func InitWindowsController(saveRestoreToken bool) (Controller, error) {
+func InitWindowsController() (Controller, error) {
 	p := &windowsController{}
 	if err := sendInputProc.Find(); err != nil {
 		return nil, &UnsupportedPlatformError{err}

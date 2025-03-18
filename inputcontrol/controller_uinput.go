@@ -43,7 +43,7 @@ func init() {
 	RegisterController("uinput", InitUinputController, 10)
 }
 
-func InitUinputController(saveRestoreToken bool) (Controller, error) {
+func InitUinputController() (Controller, error) {
 	keymapName, keymapSet := os.LookupEnv("REMOTE_TOUCHPAD_UINPUT_KEYMAP")
 	if !keymapSet {
 		keymapName = "defkeymap"

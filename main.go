@@ -152,7 +152,7 @@ func secureRandBase64(length int) string {
 func main() {
 	terminal.SetTitle(prettyAppName)
 	var bind, certFile, keyFile, secret string
-	var showVersion, savePlaintextRestoreToken bool
+	var showVersion bool
 	var config config
 	flag.BoolVar(&showVersion, "version", false, "show program's version number and exit")
 	flag.StringVar(&bind, "bind", defaultBind, "bind server to [HOSTNAME]:PORT")
@@ -164,7 +164,6 @@ func main() {
 	flag.Float64Var(&config.ScrollSpeed, "scroll-speed", 1, "scroll speed multiplier")
 	flag.Float64Var(&config.MouseMoveSpeed, "mouse-move-speed", 1, "mouse move speed multiplier")
 	flag.Float64Var(&config.MouseScrollSpeed, "mouse-scroll-speed", 1, "mouse scroll speed multiplier")
-	flag.BoolVar(&savePlaintextRestoreToken, "save-plaintext-restore-token", false, "save a restore token in plaintext in order to avoid the confirmation dialogue that appears with some implementations of the portals backend on wayland on linux from appearing on the next run of remote-touchpad")
 	flag.Parse()
 	if showVersion {
 		fmt.Println(version)
@@ -189,7 +188,7 @@ func main() {
 	for _, controllerInfo := range inputcontrol.Controllers {
 		controllerName = controllerInfo.Name
 		var err error
-		controller, err = controllerInfo.Init(savePlaintextRestoreToken)
+		controller, err = controllerInfo.Init()
 		if err == nil {
 			break
 		} else {

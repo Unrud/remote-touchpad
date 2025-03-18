@@ -9,6 +9,9 @@ github.com/godbus/dbus/v5
 github.com/skip2/go-qrcode
 github.com/skip2/go-qrcode/bitset
 github.com/skip2/go-qrcode/reedsolomon
+# golang.org/x/crypto v0.36.0
+## explicit; go 1.23.0
+golang.org/x/crypto/hkdf
 # golang.org/x/net v0.37.0
 ## explicit; go 1.23.0
 golang.org/x/net/websocket

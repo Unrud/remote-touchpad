@@ -29,6 +29,11 @@ modules:
         tag: v0.37.0
         commit: 99b3ae0643f9a2f9d820fcbba5f9e4c83b23bd48
         dest: vendor/golang.org/x/net
+      - type: git
+        url: https://github.com/golang/crypto
+        tag: v0.36.0
+        commit: 49bf5b80c8108983f588ecabd7bf996e6e63a515
+        dest: vendor/golang.org/x/crypto
       - type: file
         path: modules.txt
         dest: vendor

@@ -55,14 +55,14 @@ const (
 
 type ControllerInfo struct {
 	Name string
-	Init func(bool) (Controller, error)
+	Init func() (Controller, error)
 
 	priority int
 }
 
 var Controllers []ControllerInfo
 
-func RegisterController(name string, init func(bool) (Controller, error), priority int) {
+func RegisterController(name string, init func() (Controller, error), priority int) {
 	Controllers = append(Controllers, ControllerInfo{name, init, priority})
 	sort.SliceStable(Controllers, func(i, j int) bool {
 		return Controllers[i].priority < Controllers[j].priority

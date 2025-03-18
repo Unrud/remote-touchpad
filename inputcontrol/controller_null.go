@@ -31,7 +31,7 @@ func init() {
 	RegisterController("null", InitNullController, 1000)
 }
 
-func InitNullController(saveRestoreToken bool) (Controller, error) {
+func InitNullController() (Controller, error) {
 	return &nullController{}, nil
 }
 

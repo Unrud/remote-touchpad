@@ -22,12 +22,20 @@
 package inputcontrol
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"crypto/sha256"
 	"errors"
 	"fmt"
-	"github.com/godbus/dbus/v5"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
+	"slices"
+
+	"github.com/godbus/dbus/v5"
+	"golang.org/x/crypto/hkdf"
 )
 
 const (
@@ -55,7 +63,7 @@ func init() {
 	RegisterController("RemoteDesktop portal", InitPortalController, 1)
 }
 
-func InitPortalController(saveRestoreToken bool) (Controller, error) {
+func InitPortalController() (Controller, error) {
 	bus, err := dbus.SessionBusPrivate()
 	if err != nil {
 		return nil, &UnsupportedPlatformError{err}
@@ -81,25 +89,26 @@ func InitPortalController(saveRestoreToken bool) (Controller, error) {
 	if err != nil {
 		return nil, &UnsupportedPlatformError{err}
 	}
-	supportsRestoreTokens := version.Value().(uint32) >= 2
-	var restoreTokenFilePath string
-	var cacheDirectory string
-	var restoreToken string
-	if supportsRestoreTokens {
-		cacheDirectory, err = os.UserCacheDir()
-		if err != nil {
-			log.Printf("Cannot get user cache directory: %s. Therefore cannot get restore token file path in order to read or save the restore token.\n", err)
-		} else {
-			restoreTokenFilePath = filepath.Join(cacheDirectory, "remote_touchpad_portals_restore_token")
-			restoreTokenBytes, err := os.ReadFile(restoreTokenFilePath)
-			if err != nil {
-				log.Printf("Failed to read restore token file: %s\n", err)
-			} else {
-				restoreToken = string(restoreTokenBytes)
-			}
+	restoreTokenStore, err := func() (*secretStore, error) {
+		if version.Value().(uint32) < 2 {
+			return nil, nil
 		}
-	} else {
-		log.Println("Portals implementation does not support restore tokens")
+		cacheDirectory, err := os.UserCacheDir()
+		if err != nil {
+			return nil, err
+		}
+		if err := os.MkdirAll(cacheDirectory, 0700); err != nil {
+			return nil, err
+		}
+		secret, err := retrieveSecret(bus)
+		if err != nil {
+			return nil, err
+		}
+		return newSecretStore(secret,
+			filepath.Join(cacheDirectory, "remote-touchpad.portal-restore-token.bin"))
+	}()
+	if err != nil {
+		log.Printf("Skipping restore token: %v", err)
 	}
 	availableDeviceTypesV, err := remoteDesktop.GetProperty(
 		"org.freedesktop.portal.RemoteDesktop.AvailableDeviceTypes")
@@ -148,13 +157,15 @@ func InitPortalController(saveRestoreToken bool) (Controller, error) {
 	sessionHandle := dbus.ObjectPath(sessionHandleS)
 	inVardict = make(map[string]dbus.Variant)
 	inVardict["types"] = dbus.MakeVariant(deviceKeyboard | devicePointer)
-	if supportsRestoreTokens {
-		if restoreToken != "" {
-			inVardict["restore_token"] = dbus.MakeVariant(restoreToken)
+	if restoreTokenStore != nil {
+		if restoreToken, err := restoreTokenStore.Load(); err != nil {
+			if !errors.Is(err, os.ErrNotExist) {
+				log.Printf("Failed to load restore token: %v", err)
+			}
+		} else if len(restoreToken) > 0 {
+			inVardict["restore_token"] = dbus.MakeVariant(string(restoreToken))
 		}
-		if saveRestoreToken {
-			inVardict["persist_mode"] = dbus.MakeVariant(untilRevoked)
-		}
+		inVardict["persist_mode"] = dbus.MakeVariant(untilRevoked)
 	}
 	result, outVardict, err = getResponse(bus, remoteDesktop,
 		"org.freedesktop.portal.RemoteDesktop.SelectDevices", 0, sessionHandle, inVardict)
@@ -174,20 +185,9 @@ func InitPortalController(saveRestoreToken bool) (Controller, error) {
 	if result != 0 {
 		return nil, errors.New("keyboard or pointer access denied")
 	}
-	if supportsRestoreTokens && saveRestoreToken {
-		restoreToken, ok := outVardict["restore_token"].Value().(string)
-		if !ok {
-			log.Println("Failed to get new restore token")
-		} else if restoreTokenFilePath != "" {
-			err := os.MkdirAll(cacheDirectory, 0700)
-			if err != nil {
-				log.Printf("Failed to create cache directory for restore token: %s\n", err)
-			} else {
-				err := os.WriteFile(restoreTokenFilePath, []byte(restoreToken), 0600)
-				if err != nil {
-					log.Printf("Failed to write restore token: %s\n", err)
-				}
-			}
+	if restoreToken, _ := outVardict["restore_token"].Value().(string); restoreTokenStore != nil {
+		if err := restoreTokenStore.Store([]byte(restoreToken)); err != nil {
+			log.Printf("Failed to store restore token: %v", err)
 		}
 	}
 	devicesV, ok := outVardict["devices"]
@@ -206,6 +206,84 @@ func InitPortalController(saveRestoreToken bool) (Controller, error) {
 	cleanupBus = false
 	return &portalController{bus: bus, remoteDesktop: remoteDesktop,
 		sessionHandle: sessionHandle}, nil
+}
+
+func retrieveSecret(bus *dbus.Conn) ([]byte, error) {
+	portalDesktop := bus.Object("org.freedesktop.portal.Desktop",
+		"/org/freedesktop/portal/desktop")
+	secretReader, secretWriter, err := os.Pipe()
+	if err != nil {
+		return nil, err
+	}
+	defer secretReader.Close()
+	defer secretWriter.Close()
+	if result, _, err := getResponse(bus, portalDesktop,
+		"org.freedesktop.portal.Secret.RetrieveSecret", 0,
+		dbus.UnixFD(secretWriter.Fd()),
+		map[string]dbus.Variant{},
+	); err != nil {
+		return nil, err
+	} else if result != 0 {
+		return nil, fmt.Errorf("calling 'RetrieveSecret' failed (%v)", result)
+	}
+	if err := secretWriter.Close(); err != nil {
+		return nil, err
+	}
+	secret, err := io.ReadAll(secretReader)
+	if err != nil {
+		return nil, err
+	}
+	if len(secret) < 16 {
+		return nil, fmt.Errorf("'RetrieveSecret' returned too few bytes (%d)", len(secret))
+	}
+	return secret, err
+}
+
+type secretStore struct {
+	aesgcm   cipher.AEAD
+	filename string
+}
+
+func newSecretStore(key []byte, filename string) (*secretStore, error) {
+	hkdf := hkdf.New(sha256.New, key, nil, nil)
+	derivedKey := make([]byte, 32)
+	if _, err := io.ReadFull(hkdf, derivedKey); err != nil {
+		return nil, err
+	}
+	block, err := aes.NewCipher(derivedKey)
+	if err != nil {
+		return nil, err
+	}
+	aesgcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, err
+	}
+	return &secretStore{
+		aesgcm:   aesgcm,
+		filename: filename,
+	}, nil
+}
+
+func (s *secretStore) Load() ([]byte, error) {
+	data, err := os.ReadFile(s.filename)
+	if err != nil {
+		return nil, err
+	}
+	if len(data) < s.aesgcm.NonceSize() {
+		return nil, errors.New("invalid ciphertext")
+	}
+	nonce := data[:s.aesgcm.NonceSize()]
+	ciphertext := data[len(nonce):]
+	return s.aesgcm.Open(nil, nonce, ciphertext, nil)
+}
+
+func (s *secretStore) Store(data []byte) error {
+	nonce := make([]byte, s.aesgcm.NonceSize())
+	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		return err
+	}
+	ciphertext := s.aesgcm.Seal(nil, nonce, data, nil)
+	return os.WriteFile(s.filename, slices.Concat(nonce, ciphertext), 0600)
 }
 
 func getResponse(bus *dbus.Conn, object dbus.BusObject, method string,
