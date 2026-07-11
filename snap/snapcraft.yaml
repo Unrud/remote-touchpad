@@ -12,6 +12,10 @@ adopt-info: remote-touchpad
 base: core24
 confinement: strict
 
+platforms:
+  amd64:
+  arm64:
+
 apps:
   remote-touchpad:
     command: bin/remote-touchpad
