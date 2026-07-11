@@ -1,15 +1,15 @@
-# Build by running "snapcraft".
+# Build by running `snapcraft`.
 
 # WARNING:
 # Snapcraft uses caching for already build steps but it's buggy and can cause strange problems.
-# Clean the cache by running "snapcraft clean".
+# Clean the cache by running `snapcraft clean`.
 
 name: remote-touchpad
 license: GPL-3.0+
 grade: stable
 adopt-info: remote-touchpad
 
-base: core22
+base: core24
 confinement: strict
 
 apps:
@@ -48,10 +48,6 @@ parts:
       - libxt6
       - libxrandr2
       - libxtst6
-    override-pull: |
-      craftctl default
-      # WORKAROUND: Point icon directly to SVG otherwise snapcraft can't find it
-      sed -e 's|Icon=com.github.unrud.RemoteTouchpad|Icon=/usr/share/icons/hicolor/scalable/apps/com.github.unrud.RemoteTouchpad.svg|' -i desktop/com.github.unrud.RemoteTouchpad.desktop
     override-build: |
       craftctl default
       install -Dm0755 -t "${CRAFT_PART_INSTALL}/bin" desktop/remote-touchpad-wait-on-error
