@@ -42,7 +42,9 @@ import (
 )
 
 const (
-	keyboardMappingDelay time.Duration = 500 * time.Millisecond
+	keyboardMappingDelay time.Duration = 50 * time.Millisecond
+	keyMappingTimeout    time.Duration = 200 * time.Millisecond
+	keyMappingPoll       time.Duration = 5 * time.Millisecond
 	scrollDiv            int           = 20
 )
 
@@ -150,6 +152,35 @@ func (p *x11Controller) changeKeyMappingLocked(keysymsPerKeycode C.int,
 	C.XFlush(p.display)
 }
 
+func (p *x11Controller) verifyKeyMappingLocked(keycode C.KeyCode,
+	keysymsPerKeycode C.int, keysym Keysym) {
+	deadline := time.Now().Add(keyMappingTimeout)
+	for {
+		var currentKeysymsPerKeycode C.int
+		currentKeysyms := C.XGetKeyboardMapping(p.display, keycode, 1,
+			&currentKeysymsPerKeycode)
+		if currentKeysyms != nil {
+			found := false
+			for i := 0; i < int(currentKeysymsPerKeycode); i++ {
+				ks := *(*C.KeySym)(unsafe.Pointer(uintptr(unsafe.Pointer(currentKeysyms)) +
+					uintptr(i)*unsafe.Sizeof(*currentKeysyms)))
+				if ks == C.KeySym(keysym) {
+					found = true
+					break
+				}
+			}
+			C.XFree(unsafe.Pointer(currentKeysyms))
+			if found {
+				return
+			}
+		}
+		if time.Now().After(deadline) {
+			return
+		}
+		time.Sleep(keyMappingPoll)
+	}
+}
+
 func (p *x11Controller) getModKeycodesLocked() map[uint]C.KeyCode {
 	modKeymap := C.XGetModifierMapping(p.display)
 	defer C.XFreeModifiermap(modKeymap)
@@ -253,8 +284,7 @@ func (p *x11Controller) keyboardKeys(keys []Keysym) error {
 			}
 			keycode = emptyKeycode
 			p.changeKeyMappingLocked(keysymsPerKeycode, keycode, keysym)
-			// race condition!
-			time.Sleep(keyboardMappingDelay)
+			p.verifyKeyMappingLocked(keycode, keysymsPerKeycode, keysym)
 		} else {
 			pressMods = mods & ^activeMods
 			releaseMods = activeMods & ^mods
@@ -267,7 +297,7 @@ func (p *x11Controller) keyboardKeys(keys []Keysym) error {
 		p.sendModsLocked(modKeycodes, releaseMods, true)
 		C.XFlush(p.display)
 		if keycode == emptyKeycode {
-			// race condition!
+			// Wait for clients to process MappingNotify before next remap
 			time.Sleep(keyboardMappingDelay)
 		}
 	}
