@@ -23,6 +23,14 @@
     <name translate="no">Unrud</name>
   </developer>
   <releases>
+    <release version="1.5.4" date="2026-08-02">
+      <description>
+        <ul>
+          <li>Improve X11 keyboard input</li>
+          <li>Update dependencies</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.5.3" date="2025-12-24">
       <description>
         <ul>
@@ -365,16 +373,16 @@
   </releases>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.5.3/screenshots/1.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.5.4/screenshots/1.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.5.3/screenshots/2.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.5.4/screenshots/2.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.5.3/screenshots/3.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.5.4/screenshots/3.png</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.5.3/screenshots/4.png</image>
+      <image>https://raw.githubusercontent.com/Unrud/remote-touchpad/v1.5.4/screenshots/4.png</image>
     </screenshot>
   </screenshots>
   <content_rating type="oars-1.1"/>

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.4 (2026-08-02)
+
+* Improve X11 keyboard input
+* Update dependencies
+
 ## 1.5.3 (2025-12-24)
 
 * Update dependencies
