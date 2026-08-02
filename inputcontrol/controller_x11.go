@@ -125,7 +125,7 @@ func (p *x11Controller) findEmptyKeycodeLocked() (C.KeyCode, C.int, error) {
 	defer C.XFree(unsafe.Pointer(keysyms))
 keycodes:
 	for keycode := C.KeyCode(minKeycodes); keycode <= C.KeyCode(maxKeycodes); keycode++ {
-		for i := 0; i < int(keysymsPerKeycode); i++ {
+		for i := range int(keysymsPerKeycode) {
 			keysymsIndex := int(keycode-
 				C.KeyCode(minKeycodes))*int(keysymsPerKeycode) + i
 			keysym := *(*C.KeySym)(unsafe.Pointer(uintptr(unsafe.Pointer(keysyms)) +
@@ -155,7 +155,7 @@ func (p *x11Controller) getModKeycodesLocked() map[uint]C.KeyCode {
 	defer C.XFreeModifiermap(modKeymap)
 	modKeycodes := make(map[uint]C.KeyCode)
 	for _, modIndex := range modifierIndices {
-		for i := 0; i < int(modKeymap.max_keypermod); i++ {
+		for i := range int(modKeymap.max_keypermod) {
 			keycode := *(*C.KeyCode)(unsafe.Pointer(uintptr(unsafe.Pointer(modKeymap.modifiermap)) +
 				uintptr(uint(modIndex)*uint(modKeymap.max_keypermod)+uint(i))))
 			if keycode != 0 {
@@ -354,7 +354,7 @@ func (p *x11Controller) PointerScroll(deltaHorizontal, deltaVertical int, finish
 		buttonHorizontal = 6
 		stepsHorizontal = -stepsHorizontal
 	}
-	for i := 0; i < stepsHorizontal; i++ {
+	for range stepsHorizontal {
 		if err := p.sendButton(buttonHorizontal, true); err != nil {
 			return err
 		}
@@ -367,7 +367,7 @@ func (p *x11Controller) PointerScroll(deltaHorizontal, deltaVertical int, finish
 		buttonVertical = 4
 		stepsVertical = -stepsVertical
 	}
-	for i := 0; i < stepsVertical; i++ {
+	for range stepsVertical {
 		if err := p.sendButton(buttonVertical, true); err != nil {
 			return err
 		}
