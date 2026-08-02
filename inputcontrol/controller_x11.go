@@ -47,9 +47,13 @@ const (
 	scrollDiv            int           = 20
 )
 
-var modifierIndices [6]uint = [...]uint{
-	C.ShiftMapIndex, C.Mod1MapIndex,
-	C.Mod2MapIndex, C.Mod3MapIndex, C.Mod4MapIndex, C.Mod5MapIndex,
+var modifierIndexes = [...]int{
+	C.ShiftMapIndex,
+	C.Mod1MapIndex,
+	C.Mod2MapIndex,
+	C.Mod3MapIndex,
+	C.Mod4MapIndex,
+	C.Mod5MapIndex,
 }
 
 type x11Controller struct {
@@ -118,41 +122,52 @@ func (p *x11Controller) Close() error {
 	return nil
 }
 
-func (p *x11Controller) findEmptyKeycodeLocked() (C.KeyCode, C.int, error) {
+func (p *x11Controller) findEmptyKeycodeLocked() (keycode C.KeyCode, keysymsPerKeycode int, err error) {
 	var minKeycodes, maxKeycodes C.int
 	C.XDisplayKeycodes(p.display, &minKeycodes, &maxKeycodes)
-	var keysymsPerKeycode C.int
-	keysyms := C.XGetKeyboardMapping(p.display, C.KeyCode(minKeycodes),
-		maxKeycodes-minKeycodes+1, &keysymsPerKeycode)
+	var keysymsPerKeycodeC C.int
+	keysyms := C.XGetKeyboardMapping(
+		p.display,
+		C.KeyCode(minKeycodes),
+		maxKeycodes-minKeycodes+1,
+		&keysymsPerKeycodeC,
+	)
 	if keysyms == nil {
 		return 0, 0, errors.New("failed to get keyboard mapping")
 	}
 	defer C.XFree(unsafe.Pointer(keysyms))
+	keysymsPerKeycode = int(keysymsPerKeycodeC)
 keycodes:
-	for keycode := C.KeyCode(minKeycodes); keycode <= C.KeyCode(maxKeycodes); keycode++ {
-		for i := range int(keysymsPerKeycode) {
-			keysymsIndex := int(keycode-
-				C.KeyCode(minKeycodes))*int(keysymsPerKeycode) + i
-			keysym := *(*C.KeySym)(unsafe.Pointer(uintptr(unsafe.Pointer(keysyms)) +
-				uintptr(keysymsIndex)*unsafe.Sizeof(*keysyms)))
+	for keycode := int(minKeycodes); keycode <= int(maxKeycodes); keycode++ {
+		for i := range keysymsPerKeycode {
+			keysymsIndex := (keycode-int(minKeycodes))*keysymsPerKeycode + i
+			keysym := *(*C.KeySym)(unsafe.Pointer(
+				uintptr(unsafe.Pointer(keysyms)) +
+					uintptr(keysymsIndex)*unsafe.Sizeof(*keysyms),
+			))
 			if keysym != 0 {
 				continue keycodes
 			}
 		}
-		return keycode, keysymsPerKeycode, nil
+		return C.KeyCode(keycode), keysymsPerKeycode, nil
 	}
 	return 0, 0, errors.New("no empty keycode found")
 }
 
-func (p *x11Controller) changeKeyMappingLocked(keysymsPerKeycode C.int,
-	keycode C.KeyCode, keysym Keysym,
+func (p *x11Controller) changeKeyMappingLocked(
+	keycode C.KeyCode, keysymsPerKeycode int, keysym Keysym,
 ) {
 	keycodeMapping := make([]C.KeySym, keysymsPerKeycode)
 	for i := range keycodeMapping {
 		keycodeMapping[i] = C.KeySym(keysym)
 	}
-	C.XChangeKeyboardMapping(p.display, C.int(keycode), keysymsPerKeycode,
-		(*C.KeySym)(unsafe.Pointer(&keycodeMapping[0])), 1)
+	C.XChangeKeyboardMapping(
+		p.display,
+		C.int(keycode),
+		C.int(keysymsPerKeycode),
+		(*C.KeySym)(unsafe.Pointer(&keycodeMapping[0])),
+		1,
+	)
 	C.XSync(p.display, C.False)
 }
 
@@ -160,12 +175,15 @@ func (p *x11Controller) getModKeycodesLocked() map[uint]C.KeyCode {
 	modKeymap := C.XGetModifierMapping(p.display)
 	defer C.XFreeModifiermap(modKeymap)
 	modKeycodes := make(map[uint]C.KeyCode)
-	for _, modIndex := range modifierIndices {
+	for _, modIndex := range modifierIndexes {
 		for i := range int(modKeymap.max_keypermod) {
-			keycode := *(*C.KeyCode)(unsafe.Pointer(uintptr(unsafe.Pointer(modKeymap.modifiermap)) +
-				uintptr(uint(modIndex)*uint(modKeymap.max_keypermod)+uint(i))))
+			keycodeIndex := modIndex*int(modKeymap.max_keypermod) + i
+			keycode := *(*C.KeyCode)(unsafe.Pointer(
+				uintptr(unsafe.Pointer(modKeymap.modifiermap)) +
+					uintptr(keycodeIndex)*unsafe.Sizeof(*modKeymap.modifiermap),
+			))
 			if keycode != 0 {
-				modKeycodes[1<<uint(modIndex)] = keycode
+				modKeycodes[1<<modIndex] = keycode
 				break
 			}
 		}
@@ -173,35 +191,34 @@ func (p *x11Controller) getModKeycodesLocked() map[uint]C.KeyCode {
 	return modKeycodes
 }
 
-func (p *x11Controller) findKeycodeLocked(keyboard C.XkbDescPtr,
-	modKeycodes map[uint]C.KeyCode, activeMods C.uint,
-	keysym Keysym,
-) (C.KeyCode, C.uint) {
-	keycode := C.XKeysymToKeycode(p.display, C.KeySym(keysym))
+func (p *x11Controller) findKeycodeLocked(
+	keyboard C.XkbDescPtr, modKeycodes map[uint]C.KeyCode, activeMods uint, keysym Keysym,
+) (keycode C.KeyCode, mods uint) {
+	keycode = C.XKeysymToKeycode(p.display, C.KeySym(keysym))
 	if keycode == 0 {
 		return 0, 0
 	}
-	var alwaysActiveMods C.uint
-	for modIndex := uint(0); modIndex < 8; modIndex++ {
+	var alwaysActiveMods uint
+	for _, modIndex := range modifierIndexes {
 		mod := uint(1) << modIndex
 		if _, modAvailable := modKeycodes[mod]; !modAvailable {
-			alwaysActiveMods |= activeMods & C.uint(mod)
+			alwaysActiveMods |= activeMods & mod
 		}
 	}
 	_, shiftModAvailable := modKeycodes[C.ShiftMask]
-	for _, modIndex := range modifierIndices {
-		var mod C.uint
+	for _, modIndex := range modifierIndexes {
+		var mod uint
 		if modIndex != C.ShiftMapIndex {
 			mod = 1 << modIndex
 		}
-		for _, shiftMod := range [...]C.uint{0, C.ShiftMask} {
+		for _, shiftMod := range [...]uint{0, C.ShiftMask} {
 			if shiftMod != 0 && !shiftModAvailable {
 				continue
 			}
 			mods := alwaysActiveMods | shiftMod | mod
 			var retMods C.uint
 			var retKeysym C.KeySym
-			C.XkbTranslateKeyCode(keyboard, keycode, mods, &retMods, &retKeysym)
+			C.XkbTranslateKeyCode(keyboard, keycode, C.uint(mods), &retMods, &retKeysym)
 			if retKeysym == C.KeySym(keysym) {
 				return keycode, mods
 			}
@@ -210,15 +227,15 @@ func (p *x11Controller) findKeycodeLocked(keyboard C.XkbDescPtr,
 	return 0, 0
 }
 
-func (p *x11Controller) sendModsLocked(modKeycodes map[uint]C.KeyCode, mods C.uint,
-	press bool,
+func (p *x11Controller) sendModsLocked(
+	modKeycodes map[uint]C.KeyCode, mods uint, press bool,
 ) {
 	var pressC C.int = C.False
 	if press {
 		pressC = C.True
 	}
 	for mod, keycode := range modKeycodes {
-		if mods&C.uint(mod) != 0 {
+		if mods&mod != 0 {
 			C.XTestFakeKeyEvent(p.display, C.uint(keycode), pressC, 0)
 		}
 	}
@@ -239,16 +256,22 @@ func (p *x11Controller) keyboardKeys(keys []Keysym) error {
 		C.XkbCompatMapMask|C.XkbGeometryMask, C.XkbUseCoreKbd)
 	defer C.XkbFreeKeyboard(keyboard, C.XkbAllComponentsMask, C.True)
 	var emptyKeycode C.KeyCode
-	var keysymsPerKeycode C.int
+	var keysymsPerKeycode int
 	for _, keysym := range keys {
 		var root, child C.Window
 		var rootX, rootY, x, y C.int
-		var activeMods C.uint
-		C.XQueryPointer(p.display, rootWindow, &root, &child, &rootX, &rootY,
-			&x, &y, &activeMods)
-		keycode, mods := p.findKeycodeLocked(keyboard, modKeycodes, activeMods,
-			keysym)
-		var pressMods, releaseMods C.uint
+		var activeModsC C.uint
+		C.XQueryPointer(
+			p.display,
+			rootWindow,
+			&root, &child,
+			&rootX, &rootY,
+			&x, &y,
+			&activeModsC,
+		)
+		activeMods := uint(activeModsC)
+		keycode, mods := p.findKeycodeLocked(keyboard, modKeycodes, activeMods, keysym)
+		var pressMods, releaseMods uint
 		if keycode == 0 {
 			if emptyKeycode == 0 {
 				var err error
@@ -256,10 +279,10 @@ func (p *x11Controller) keyboardKeys(keys []Keysym) error {
 				if err != nil {
 					return err
 				}
-				defer p.changeKeyMappingLocked(keysymsPerKeycode, emptyKeycode, 0)
+				defer p.changeKeyMappingLocked(emptyKeycode, keysymsPerKeycode, 0)
 			}
 			keycode = emptyKeycode
-			p.changeKeyMappingLocked(keysymsPerKeycode, keycode, keysym)
+			p.changeKeyMappingLocked(keycode, keysymsPerKeycode, keysym)
 			// race condition!
 			time.Sleep(keyboardMappingDelay)
 		} else {
