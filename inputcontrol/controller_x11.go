@@ -36,6 +36,8 @@ import "C"
 import (
 	"errors"
 	"fmt"
+	"maps"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -198,30 +200,18 @@ func (p *x11Controller) findKeycodeLocked(
 	if keycode == 0 {
 		return 0, 0
 	}
-	var alwaysActiveMods uint
-	for _, modIndex := range modifierIndexes {
-		mod := uint(1) << modIndex
-		if _, modAvailable := modKeycodes[mod]; !modAvailable {
-			alwaysActiveMods |= activeMods & mod
-		}
-	}
-	_, shiftModAvailable := modKeycodes[C.ShiftMask]
-	for _, modIndex := range modifierIndexes {
-		var mod uint
-		if modIndex != C.ShiftMapIndex {
-			mod = 1 << modIndex
-		}
-		for _, shiftMod := range [...]uint{0, C.ShiftMask} {
-			if shiftMod != 0 && !shiftModAvailable {
-				continue
+	for activeModBitmap := range uint(1) << len(modKeycodes) {
+		mods := activeMods
+		for i, mod := range slices.Sorted(maps.Keys(modKeycodes)) {
+			if activeModBitmap&(1<<i) != 0 {
+				mods ^= mod
 			}
-			mods := alwaysActiveMods | shiftMod | mod
-			var retMods C.uint
-			var retKeysym C.KeySym
-			C.XkbTranslateKeyCode(keyboard, keycode, C.uint(mods), &retMods, &retKeysym)
-			if retKeysym == C.KeySym(keysym) {
-				return keycode, mods
-			}
+		}
+		var retMods C.uint
+		var retKeysym C.KeySym
+		C.XkbTranslateKeyCode(keyboard, keycode, C.uint(mods), &retMods, &retKeysym)
+		if retKeysym == C.KeySym(keysym) {
+			return keycode, mods
 		}
 	}
 	return 0, 0
