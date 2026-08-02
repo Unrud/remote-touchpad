@@ -21,8 +21,10 @@ package inputcontrol
 
 import "sort"
 
-type PointerButton int
-type Key int
+type (
+	PointerButton int
+	Key           int
+)
 
 const (
 	PointerButtonLeft PointerButton = iota

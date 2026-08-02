@@ -27,9 +27,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/unrud/remote-touchpad/inputcontrol"
-	"github.com/unrud/remote-touchpad/terminal"
-	"golang.org/x/net/websocket"
 	"log"
 	mathrand "math/rand"
 	"net"
@@ -39,6 +36,10 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/unrud/remote-touchpad/inputcontrol"
+	"github.com/unrud/remote-touchpad/terminal"
+	"golang.org/x/net/websocket"
 )
 
 const (

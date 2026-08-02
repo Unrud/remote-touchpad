@@ -32,6 +32,7 @@ package inputcontrol
 //     return DefaultRootWindow(dpy);
 // }
 import "C"
+
 import (
 	"errors"
 	"fmt"
@@ -46,8 +47,10 @@ const (
 	scrollDiv            int           = 20
 )
 
-var modifierIndices [6]uint = [...]uint{C.ShiftMapIndex, C.Mod1MapIndex,
-	C.Mod2MapIndex, C.Mod3MapIndex, C.Mod4MapIndex, C.Mod5MapIndex}
+var modifierIndices [6]uint = [...]uint{
+	C.ShiftMapIndex, C.Mod1MapIndex,
+	C.Mod2MapIndex, C.Mod3MapIndex, C.Mod4MapIndex, C.Mod5MapIndex,
+}
 
 type x11Controller struct {
 	display                          *C.Display
@@ -63,13 +66,15 @@ func InitX11Controller() (Controller, error) {
 	display := C.XOpenDisplay(nil)
 	if display == nil {
 		return nil, &UnsupportedPlatformError{
-			errors.New("failed to connect to X server")}
+			errors.New("failed to connect to X server"),
+		}
 	}
 	p := &x11Controller{display: display}
 	if p.xIsXwayland() {
 		p.Close()
 		return nil, &UnsupportedPlatformError{
-			errors.New("X server is Xwayland")}
+			errors.New("X server is Xwayland"),
+		}
 	}
 	return p, nil
 }
@@ -140,7 +145,8 @@ keycodes:
 }
 
 func (p *x11Controller) changeKeyMappingLocked(keysymsPerKeycode C.int,
-	keycode C.KeyCode, keysym Keysym) {
+	keycode C.KeyCode, keysym Keysym,
+) {
 	keycodeMapping := make([]C.KeySym, keysymsPerKeycode)
 	for i := range keycodeMapping {
 		keycodeMapping[i] = C.KeySym(keysym)
@@ -169,7 +175,8 @@ func (p *x11Controller) getModKeycodesLocked() map[uint]C.KeyCode {
 
 func (p *x11Controller) findKeycodeLocked(keyboard C.XkbDescPtr,
 	modKeycodes map[uint]C.KeyCode, activeMods C.uint,
-	keysym Keysym) (C.KeyCode, C.uint) {
+	keysym Keysym,
+) (C.KeyCode, C.uint) {
 	keycode := C.XKeysymToKeycode(p.display, C.KeySym(keysym))
 	if keycode == 0 {
 		return 0, 0
@@ -204,7 +211,8 @@ func (p *x11Controller) findKeycodeLocked(keyboard C.XkbDescPtr,
 }
 
 func (p *x11Controller) sendModsLocked(modKeycodes map[uint]C.KeyCode, mods C.uint,
-	press bool) {
+	press bool,
+) {
 	var pressC C.int = C.False
 	if press {
 		pressC = C.True

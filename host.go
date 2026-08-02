@@ -74,7 +74,8 @@ func findDefaultHost() string {
 				continue
 			}
 			for _, linkLocalPrefix := range []string{
-				"169.254.", "fe8", "fe9", "fea", "feb"} {
+				"169.254.", "fe8", "fe9", "fea", "feb",
+			} {
 				if strings.HasPrefix(ip.String(), linkLocalPrefix) {
 					addIP(20, ip)
 					continue addrs

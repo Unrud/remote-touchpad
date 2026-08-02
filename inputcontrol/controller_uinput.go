@@ -25,10 +25,11 @@ package inputcontrol
 import (
 	"errors"
 	"fmt"
-	"github.com/bendahl/uinput"
 	"log"
 	"os"
 	"time"
+
+	"github.com/bendahl/uinput"
 )
 
 const shiftKeysDelay time.Duration = 50 * time.Millisecond
