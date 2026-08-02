@@ -45,7 +45,7 @@ import (
 )
 
 const (
-	keyboardMappingDelay time.Duration = 500 * time.Millisecond
+	keyboardMappingDelay time.Duration = 200 * time.Millisecond
 	scrollDiv            int           = 20
 )
 
@@ -273,8 +273,6 @@ func (p *x11Controller) keyboardKeys(keys []Keysym) error {
 			}
 			keycode = emptyKeycode
 			p.changeKeyMappingLocked(keycode, keysymsPerKeycode, keysym)
-			// race condition!
-			time.Sleep(keyboardMappingDelay)
 		} else {
 			pressMods = mods & ^activeMods
 			releaseMods = activeMods & ^mods
