@@ -147,7 +147,7 @@ func (p *x11Controller) changeKeyMappingLocked(keysymsPerKeycode C.int,
 	}
 	C.XChangeKeyboardMapping(p.display, C.int(keycode), keysymsPerKeycode,
 		(*C.KeySym)(unsafe.Pointer(&keycodeMapping[0])), 1)
-	C.XFlush(p.display)
+	C.XSync(p.display, C.False)
 }
 
 func (p *x11Controller) getModKeycodesLocked() map[uint]C.KeyCode {
@@ -236,7 +236,6 @@ func (p *x11Controller) keyboardKeys(keys []Keysym) error {
 		var root, child C.Window
 		var rootX, rootY, x, y C.int
 		var activeMods C.uint
-		C.XSync(p.display, C.False)
 		C.XQueryPointer(p.display, rootWindow, &root, &child, &rootX, &rootY,
 			&x, &y, &activeMods)
 		keycode, mods := p.findKeycodeLocked(keyboard, modKeycodes, activeMods,
@@ -265,7 +264,7 @@ func (p *x11Controller) keyboardKeys(keys []Keysym) error {
 		C.XTestFakeKeyEvent(p.display, C.uint(keycode), C.False, 0)
 		p.sendModsLocked(modKeycodes, pressMods, false)
 		p.sendModsLocked(modKeycodes, releaseMods, true)
-		C.XFlush(p.display)
+		C.XSync(p.display, C.False)
 		if keycode == emptyKeycode {
 			// race condition!
 			time.Sleep(keyboardMappingDelay)
@@ -309,7 +308,7 @@ func (p *x11Controller) sendButton(button uint, press bool) error {
 		pressC = C.True
 	}
 	C.XTestFakeButtonEvent(p.display, C.uint(button), pressC, 0)
-	C.XFlush(p.display)
+	C.XSync(p.display, C.False)
 	return nil
 }
 
@@ -333,7 +332,7 @@ func (p *x11Controller) PointerMove(deltaX, deltaY int) error {
 		return errors.New("X server connection closed")
 	}
 	C.XTestFakeRelativeMotionEvent(p.display, C.int(deltaX), C.int(deltaY), 0)
-	C.XFlush(p.display)
+	C.XSync(p.display, C.False)
 	return nil
 }
 
