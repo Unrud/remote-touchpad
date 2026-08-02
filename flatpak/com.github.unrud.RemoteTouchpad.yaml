@@ -17,8 +17,8 @@ modules:
         path: ..
       - type: git
         url: https://github.com/godbus/dbus
-        tag: v5.2.1
-        commit: 20d95a3d9a57a5cb72cbdafb3fd9ecb6d2ccd038
+        tag: v5.2.2
+        commit: a8ac15ba63645f02ffd57f4b443203279ab40b30
         dest: vendor/github.com/godbus/dbus/v5
       - type: git
         url: https://github.com/skip2/go-qrcode
@@ -26,13 +26,13 @@ modules:
         dest: vendor/github.com/skip2/go-qrcode
       - type: git
         url: https://github.com/golang/net
-        tag: v0.48.0
-        commit: 35e1306bddd863f360fb94480c5fed84229953f0
+        tag: v0.57.0
+        commit: b8f09f6f062ceb4531b7af4bd17a5c8fe9c4b2b5
         dest: vendor/golang.org/x/net
       - type: git
         url: https://github.com/golang/sys
-        tag: v0.39.0
-        commit: 08e54827f6706016347e1e4f4866b84126842b20
+        tag: v0.47.0
+        commit: 9e7e939dcafac07e8ab4cffa6e5fc74908413f00
         dest: vendor/golang.org/x/sys
       - type: file
         path: modules.txt
