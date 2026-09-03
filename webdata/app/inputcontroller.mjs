@@ -40,6 +40,13 @@ export const KEY_BACK_SPACE = 15;
 export const KEY_DELETE = 16;
 export const KEY_RETURN = 17;
 
+const COMMAND_KEYBOARD_TEXT = "t";
+const COMMAND_KEYBOARD_KEY = "k";
+const COMMAND_POINTER_SCROLL_IN_PROGRESS = "s";
+const COMMAND_POINTER_SCROLL_FINISHED = "S";
+const COMMAND_POINTER_MOVE = "m";
+const COMMAND_POINTER_BUTTON = "b";
+
 export default class InputController {
     #updateRate = 0;
 
@@ -60,7 +67,7 @@ export default class InputController {
         this.#updateRate = config.updateRate;
     }
 
-    #startUpdate(fromTimeout) {
+    #startUpdate(fromTimeout = false) {
         if (this.#updateTimeoutActive && !fromTimeout) {
             return;
         }
@@ -69,7 +76,7 @@ export default class InputController {
         const xInt = Math.trunc(this.#moveXSum);
         const yInt = Math.trunc(this.#moveYSum);
         if (xInt != 0 || yInt != 0) {
-            this.#socket.send("m" + xInt + ";" + yInt);
+            this.#socket.send(`${COMMAND_POINTER_MOVE}${xInt};${yInt}`);
             this.#moveXSum -= xInt;
             this.#moveYSum -= yInt;
             finished = false;
@@ -77,14 +84,18 @@ export default class InputController {
         const hInt = Math.trunc(this.#scrollHSum);
         const vInt = Math.trunc(this.#scrollVSum);
         if (hInt != 0 || vInt != 0) {
-            this.#socket.send((this.#scrollFinish ? "S" : "s") + hInt + ";" + vInt);
+            if (this.#scrollFinish) {
+                this.#socket.send(`${COMMAND_POINTER_SCROLL_FINISHED}${hInt};${vInt}`);
+            } else {
+                this.#socket.send(`${COMMAND_POINTER_SCROLL_IN_PROGRESS}${hInt};${vInt}`);
+            }
             this.#scrollHSum -= hInt;
             this.#scrollVSum -= vInt;
             this.#scrolling = !this.#scrollFinish;
             this.#scrollFinish = false;
             finished = false;
         } else if (this.#scrollFinish && this.#scrolling) {
-            this.#socket.send("S");
+            this.#socket.send(COMMAND_POINTER_SCROLL_FINISHED);
             this.#scrolling = false;
             this.#scrollFinish = false;
         }
@@ -108,14 +119,14 @@ export default class InputController {
     };
 
     pointerButton(button, press) {
-        this.#socket.send("b" + button + ";" + (press ? 1 : 0));
+        this.#socket.send(`${COMMAND_POINTER_BUTTON}${button};${press ? 1 : 0}`);
     }
 
     keyboardKey(key) {
-        this.#socket.send("k" + key);
+        this.#socket.send(`${COMMAND_KEYBOARD_KEY}${key}`);
     }
 
     keyboardText(text) {
-        this.#socket.send("t" + text);
+        this.#socket.send(`${COMMAND_KEYBOARD_TEXT}${text}`);
     }
 }

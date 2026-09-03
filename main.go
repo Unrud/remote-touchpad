@@ -60,59 +60,79 @@ type config struct {
 	MouseMoveSpeed   float64 `json:"mouseMoveSpeed"`
 }
 
-func processCommand(controller inputcontrol.Controller, command string) error {
-	if len(command) == 0 {
+const (
+	commandKeyboardText            byte = 't'
+	commandKeyboardKey             byte = 'k'
+	commandPointerScrollInProgress byte = 's'
+	commandPointerScrollFinished   byte = 'S'
+	commandPointerMove             byte = 'm'
+	commandPointerButton           byte = 'b'
+)
+
+func processCommand(controller inputcontrol.Controller, commandWithArg string) error {
+	if len(commandWithArg) == 0 {
 		return errors.New("empty command")
 	}
-	if command == "S" {
-		return controller.PointerScroll(0, 0, true)
+	command := commandWithArg[0]
+	arg := commandWithArg[1:]
+	parseInts := func(s string, targets ...*int) error {
+		parts := strings.Split(s, ";")
+		if len(parts) != len(targets) {
+			return errors.New("wrong number of arguments")
+		}
+		for i, part := range parts {
+			var err error
+			if *targets[i], err = strconv.Atoi(part); err != nil {
+				return fmt.Errorf("argument %d: %w", i, err)
+			}
+		}
+		return nil
 	}
-	if command[0] == 't' {
-		text := command[1:]
-		if !utf8.ValidString(text) {
+	switch command {
+	case commandKeyboardText:
+		if !utf8.ValidString(arg) {
 			return errors.New("invalid utf-8")
 		}
-		return controller.KeyboardText(text)
-	}
-	arguments := strings.Split(command[1:], ";")
-	if command[0] == 'k' && len(arguments) != 1 ||
-		command[0] != 'k' && len(arguments) != 2 {
-		return errors.New("wrong number of arguments")
-	}
-	x, err := strconv.ParseInt(arguments[0], 10, 32)
-	if err != nil {
-		return err
-	}
-	if command[0] == 'k' {
-		if x < 0 || x >= int64(inputcontrol.KeyLimit) {
+		return controller.KeyboardText(arg)
+	case commandKeyboardKey:
+		var key inputcontrol.Key
+		if err := parseInts(arg, (*int)(&key)); err != nil {
+			return err
+		}
+		if key < 0 || key >= inputcontrol.KeyLimit {
 			return errors.New("unsupported key")
 		}
-		return controller.KeyboardKey(inputcontrol.Key(x))
-	}
-	y, err := strconv.ParseInt(arguments[1], 10, 32)
-	if err != nil {
-		return err
-	}
-	if command[0] == 'm' {
-		return controller.PointerMove(int(x), int(y))
-	}
-	if command[0] == 's' {
-		return controller.PointerScroll(int(x), int(y), false)
-	}
-	if command[0] == 'S' {
-		return controller.PointerScroll(int(x), int(y), true)
-	}
-	if command[0] == 'b' {
-		if x < 0 || x >= int64(inputcontrol.PointerButtonLimit) {
+		return controller.KeyboardKey(key)
+	case commandPointerScrollInProgress, commandPointerScrollFinished, commandPointerMove:
+		var x, y int
+		if len(arg) != 0 {
+			if err := parseInts(arg, &x, &y); err != nil {
+				return err
+			}
+		}
+		switch command {
+		case commandPointerScrollInProgress:
+			return controller.PointerScroll(x, y, false)
+		case commandPointerScrollFinished:
+			return controller.PointerScroll(x, y, true)
+		case commandPointerMove:
+			return controller.PointerMove(x, y)
+		default:
+			panic("unreachable")
+		}
+	case commandPointerButton:
+		var button inputcontrol.PointerButton
+		var pressed int
+		if err := parseInts(arg, (*int)(&button), &pressed); err != nil {
+			return err
+		}
+		if button < 0 || button >= inputcontrol.PointerButtonLimit {
 			return errors.New("unsupported pointer button")
 		}
-		b := true
-		if y == 0 {
-			b = false
-		}
-		return controller.PointerButton(inputcontrol.PointerButton(x), b)
+		return controller.PointerButton(button, pressed != 0)
+	default:
+		return errors.New("unsupported command")
 	}
-	return errors.New("unsupported command")
 }
 
 type challenge struct {
@@ -193,9 +213,8 @@ func main() {
 		if err == nil {
 			break
 		} else {
-			var unsupportedErr *inputcontrol.UnsupportedPlatformError
 			wrappedErr := fmt.Errorf("%v controller: %w", controllerName, err)
-			if errors.As(err, &unsupportedErr) {
+			if _, ok := errors.AsType[*inputcontrol.UnsupportedPlatformError](err); ok {
 				platformErrs = append(platformErrs, wrappedErr)
 			} else {
 				log.Fatal(wrappedErr)
