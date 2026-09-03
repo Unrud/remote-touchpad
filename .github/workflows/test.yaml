@@ -18,11 +18,10 @@ jobs:
       GOOS: ${{ matrix.os }}
       GOFLAGS: -tags=${{ join(matrix.tags, ',') }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version: stable
-          check-latest: true
       - run: sudo apt install libxrandr-dev libxtst-dev libxt-dev
         if: ${{ contains(matrix.tags, 'x11') }}
 
