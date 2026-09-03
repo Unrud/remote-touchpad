@@ -114,7 +114,7 @@ export default class InputController {
     pointerScroll(deltaHorizontal, deltaVertical, finish) {
         this.#scrollHSum += deltaHorizontal;
         this.#scrollVSum += deltaVertical;
-        this.#scrollFinish |= finish;
+        this.#scrollFinish = this.#scrolling && this.#scrollFinish || finish;
         this.#startUpdate();
     };
 
