@@ -24,7 +24,8 @@ import UI from "./ui.mjs";
 const url = new URL("ws", location.href);
 url.protocol = url.protocol == "http:" ? "ws:" : "wss:";
 
-const socket = new Socket(url, window.location.hash.substr(1));
+const secret = location.hash.substr(1);
+const socket = new Socket(url, secret);
 const inputController = new InputController(socket);
 const ui = new UI(inputController);
 
@@ -36,6 +37,12 @@ socket.addEventListener("config", (event) => {
 
 socket.addEventListener("close", () => {
     ui.close();
+});
+
+window.addEventListener("hashchange", () => {
+    if (secret !== location.hash.substr(1)) {
+        location.reload();
+    }
 });
 
 window.app = {
