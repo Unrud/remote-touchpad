@@ -43,10 +43,10 @@ import (
 )
 
 const (
-	defaultSecretLength     int           = 8
+	defaultSecretLength     int           = 12
 	authenticationRateLimit time.Duration = time.Second / 10
 	authenticationRateBurst int           = 10
-	challengeLength         int           = 8
+	challengeLength         int           = 12
 	defaultBind             string        = ":0"
 	version                 string        = "1.5.4"
 	prettyAppName           string        = "Remote Touchpad"
