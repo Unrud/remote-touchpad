@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.5 (2026-09-04)
+
+* Reload page when hash changes
+* Prevent superfluous finish of first scroll event
+* Align secret/challenge lengths to Base64 size
+* Update dependencies
+
 ## 1.5.4 (2026-08-02)
 
 * Improve X11 keyboard input
