@@ -2,21 +2,38 @@ name: Test
 on: [push, pull_request]
 
 jobs:
-  test:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+      - name: Go Format
+        run: gofmt -s -w . && git diff --exit-code
+      - name: Go Mod Tidy
+        run: go mod tidy && git diff --exit-code
+
+  test-linux:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [linux]
-        tags: [[], ['null'], [portal], [uinput], [x11],
-               ['null', portal, uinput, x11]]
-        include:
-          - os: windows
-            tags: []
-          - os: windows
-            tags: ['null']
+        os:
+          - linux
+        arch:
+          - amd64
+        tags:
+          - []
+          - ['null']
+          - [portal]
+          - [uinput]
+          - [x11]
+          - ['null', portal, uinput, x11]
     env:
       GOOS: ${{ matrix.os }}
+      GOARCH: ${{ matrix.arch }}
       GOFLAGS: -tags=${{ join(matrix.tags, ',') }}
+      CGO_ENABLED: '1'
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
@@ -24,19 +41,37 @@ jobs:
           go-version: stable
       - run: sudo apt install libxrandr-dev libxtst-dev libxt-dev
         if: ${{ contains(matrix.tags, 'x11') }}
-
-      - name: Go Format
-        run: gofmt -s -w . && git diff --exit-code
-
-      - name: Go Mod Tidy
-        run: go mod tidy && git diff --exit-code
-
       - name: Go Vet
         run: go vet ./...
-
       - name: Go Build
         run: go build ./...
-
-      - name: Go Test (with data race detection)
+      - name: Go Test
         run: go test -race ./...
-        if: ${{ matrix.os == 'linux' }}
+
+  test-windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        os:
+          - windows
+        arch:
+          - amd64
+        tags:
+          - []
+          - ['null']
+    env:
+      GOOS: ${{ matrix.os }}
+      GOARCH: ${{ matrix.arch }}
+      GOFLAGS: -tags=${{ join(matrix.tags, ',') }}
+      CGO_ENABLED: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+      - name: Go Vet
+        run: go vet ./...
+      - name: Go Build
+        run: go build ./...
+      - name: Go Test
+        run: go test -race ./...
