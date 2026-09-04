@@ -23,6 +23,11 @@ Supports Flatpak's RemoteDesktop portal (for Wayland), Windows and X11.
     go install github.com/unrud/remote-touchpad@latest
     ```
 
+## Command line options
+    
+    # For see command line option (sensitive, static QR-code and secrets, ecetra)
+    $ remote-touchpad --help
+
 ## Screenshots
 
 ![screenshot 1](https://raw.githubusercontent.com/Unrud/remote-touchpad/master/screenshots/1.png)
