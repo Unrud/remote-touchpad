@@ -21,73 +21,27 @@
 
 package inputcontrol
 
+/*
+#include <windows.h>
+MOUSEINPUT* GetMouseInput(INPUT* input) {
+  return input ? &input->mi : NULL;
+}
+KEYBDINPUT* GetKeyboardInput(INPUT* input) {
+  return input ? &input->ki : NULL;
+}
+HARDWAREINPUT* GetHardwareInput(INPUT* input) {
+  return input ? &input->hi : NULL;
+}
+*/
+import "C"
+
 import (
 	"fmt"
 	"syscall"
 	"unsafe"
 )
 
-const (
-	inputMouse    uintptr = 0x0
-	inputKeyboard uintptr = 0x1
-
-	keyeventfKeyup   uint32 = 0x2
-	keyeventfUnicode uint32 = 0x4
-
-	vkBack           uint16 = 0x8
-	vkReturn         uint16 = 0xD
-	vkEnd            uint16 = 0x23
-	vkHome           uint16 = 0x24
-	vkLeft           uint16 = 0x25
-	vkUp             uint16 = 0x26
-	vkRight          uint16 = 0x27
-	vkDown           uint16 = 0x28
-	vkDelete         uint16 = 0x2E
-	vkLwin           uint16 = 0x5B
-	vkBrowserBack    uint16 = 0xA6
-	vkBrowserForward uint16 = 0xA7
-	vkVolumeMute     uint16 = 0xAD
-	vkVolumeDown     uint16 = 0xAE
-	vkVolumeUp       uint16 = 0xAF
-	vkMediaNextTrack uint16 = 0xB0
-	vkMediaPrevTrack uint16 = 0xB1
-	vkMediaPlayPause uint16 = 0xB3
-
-	mouseeventfMove       uint32 = 0x1
-	mouseeventfLeftdown   uint32 = 0x2
-	mouseeventfLeftup     uint32 = 0x4
-	mouseeventfRightdown  uint32 = 0x8
-	mouseeventfRightup    uint32 = 0x10
-	mouseeventfMiddledown uint32 = 0x20
-	mouseeventfMiddleup   uint32 = 0x40
-	mouseeventfWheel      uint32 = 0x800
-	mouseeventfHwheel     uint32 = 0x1000
-
-	scrollMult int = 6
-)
-
-var (
-	user32DLL     = syscall.NewLazyDLL("user32.dll")
-	sendInputProc = user32DLL.NewProc("SendInput")
-)
-
-type mouseInput struct {
-	typ uintptr // HACK: padded uint32
-
-	dx, dy                   int32
-	mouseData, dwFlags, time uint32
-	dwExtraInfo              uintptr
-}
-
-type keybdInput struct {
-	typ uintptr // HACK: padded uint32
-
-	wVk, wScan    uint16
-	dwFlags, time uint32
-	dwExtraInfo   uintptr
-
-	padding [8]byte
-}
+const scrollMult int = 6
 
 type windowsController struct{}
 
@@ -96,149 +50,129 @@ func init() {
 }
 
 func InitWindowsController() (Controller, error) {
-	p := &windowsController{}
-	if err := sendInputProc.Find(); err != nil {
-		return nil, &UnsupportedPlatformError{err}
-	}
-	return p, nil
+	return &windowsController{}, nil
 }
 
 func (p *windowsController) Close() error {
 	return nil
 }
 
-func (p *windowsController) sendInput(inputs []keybdInput) error {
+func (p *windowsController) sendInput(inputs []C.INPUT) error {
 	if len(inputs) == 0 {
 		return nil
 	}
-	if sent, _, err := sendInputProc.Call(uintptr(len(inputs)),
-		uintptr(unsafe.Pointer(&inputs[0])), unsafe.Sizeof(inputs[0])); int(sent) != len(inputs) {
-		return err
+	if sent := C.SendInput(C.UINT(len(inputs)), &inputs[0], C.int(unsafe.Sizeof(inputs[0]))); int(sent) != len(inputs) {
+		return fmt.Errorf("SendInput: sent %d of %d inputs: %w", int(sent), len(inputs), syscall.Errno(C.GetLastError()))
 	}
 	return nil
 }
 
 func (p *windowsController) KeyboardText(text string) error {
-	inputs := make([]keybdInput, 0, len(text)*2)
+	inputs := make([]C.INPUT, 0, len(text)*2)
 	for _, runeValue := range text {
-		in := keybdInput{typ: inputKeyboard, wScan: uint16(runeValue), dwFlags: keyeventfUnicode}
-		inputs = append(inputs, in)
-		in.dwFlags |= keyeventfKeyup
-		inputs = append(inputs, in)
-	}
-	if len(inputs) == 0 {
-		return nil
+		input := C.INPUT{_type: C.INPUT_KEYBOARD}
+		*C.GetKeyboardInput(&input) = C.KEYBDINPUT{wScan: C.WORD(runeValue), dwFlags: C.KEYEVENTF_UNICODE}
+		inputs = append(inputs, input)
+		C.GetKeyboardInput(&input).dwFlags |= C.KEYEVENTF_KEYUP
+		inputs = append(inputs, input)
 	}
 	return p.sendInput(inputs)
 }
 
 func (p *windowsController) KeyboardKey(key Key) error {
-	input := keybdInput{typ: inputKeyboard}
+	input := C.INPUT{_type: C.INPUT_KEYBOARD}
 	switch key {
 	case KeyBackSpace:
-		input.wVk = vkBack
+		C.GetKeyboardInput(&input).wVk = C.VK_BACK
 	case KeyReturn:
-		input.wVk = vkReturn
+		C.GetKeyboardInput(&input).wVk = C.VK_RETURN
 	case KeyEnd:
-		input.wVk = vkEnd
+		C.GetKeyboardInput(&input).wVk = C.VK_END
 	case KeyHome:
-		input.wVk = vkHome
+		C.GetKeyboardInput(&input).wVk = C.VK_HOME
 	case KeyLeft:
-		input.wVk = vkLeft
+		C.GetKeyboardInput(&input).wVk = C.VK_LEFT
 	case KeyUp:
-		input.wVk = vkUp
+		C.GetKeyboardInput(&input).wVk = C.VK_UP
 	case KeyRight:
-		input.wVk = vkRight
+		C.GetKeyboardInput(&input).wVk = C.VK_RIGHT
 	case KeyDown:
-		input.wVk = vkDown
+		C.GetKeyboardInput(&input).wVk = C.VK_DOWN
 	case KeyDelete:
-		input.wVk = vkDelete
+		C.GetKeyboardInput(&input).wVk = C.VK_DELETE
 	case KeySuper:
-		input.wVk = vkLwin
+		C.GetKeyboardInput(&input).wVk = C.VK_LWIN
 	case KeyBrowserBack:
-		input.wVk = vkBrowserBack
+		C.GetKeyboardInput(&input).wVk = C.VK_BROWSER_BACK
 	case KeyBrowserForward:
-		input.wVk = vkBrowserForward
+		C.GetKeyboardInput(&input).wVk = C.VK_BROWSER_FORWARD
 	case KeyVolumeMute:
-		input.wVk = vkVolumeMute
+		C.GetKeyboardInput(&input).wVk = C.VK_VOLUME_MUTE
 	case KeyVolumeDown:
-		input.wVk = vkVolumeDown
+		C.GetKeyboardInput(&input).wVk = C.VK_VOLUME_DOWN
 	case KeyVolumeUp:
-		input.wVk = vkVolumeUp
+		C.GetKeyboardInput(&input).wVk = C.VK_VOLUME_UP
 	case KeyMediaNextTrack:
-		input.wVk = vkMediaNextTrack
+		C.GetKeyboardInput(&input).wVk = C.VK_MEDIA_NEXT_TRACK
 	case KeyMediaPrevTrack:
-		input.wVk = vkMediaPrevTrack
+		C.GetKeyboardInput(&input).wVk = C.VK_MEDIA_PREV_TRACK
 	case KeyMediaPlayPause:
-		input.wVk = vkMediaPlayPause
+		C.GetKeyboardInput(&input).wVk = C.VK_MEDIA_PLAY_PAUSE
 	default:
 		return fmt.Errorf("key not mapped to virtual-key code: %#v", key)
 	}
-	inputs := [...]keybdInput{input, input}
-	inputs[1].dwFlags |= keyeventfKeyup
-	return p.sendInput(inputs[:])
+	inputs := []C.INPUT{input, input}
+	C.GetKeyboardInput(&inputs[1]).dwFlags |= C.KEYEVENTF_KEYUP
+	return p.sendInput(inputs)
 }
 
 func (p *windowsController) PointerButton(button PointerButton, press bool) error {
-	input := mouseInput{typ: inputMouse}
+	input := C.INPUT{_type: C.INPUT_MOUSE}
 	if button == PointerButtonLeft && press {
-		input.dwFlags = mouseeventfLeftdown
+		C.GetMouseInput(&input).dwFlags = C.MOUSEEVENTF_LEFTDOWN
 	} else if button == PointerButtonLeft {
-		input.dwFlags = mouseeventfLeftup
+		C.GetMouseInput(&input).dwFlags = C.MOUSEEVENTF_LEFTUP
 	} else if button == PointerButtonMiddle && press {
-		input.dwFlags = mouseeventfMiddledown
+		C.GetMouseInput(&input).dwFlags = C.MOUSEEVENTF_MIDDLEDOWN
 	} else if button == PointerButtonMiddle {
-		input.dwFlags = mouseeventfMiddleup
+		C.GetMouseInput(&input).dwFlags = C.MOUSEEVENTF_MIDDLEUP
 	} else if button == PointerButtonRight && press {
-		input.dwFlags = mouseeventfRightdown
+		C.GetMouseInput(&input).dwFlags = C.MOUSEEVENTF_RIGHTDOWN
 	} else if button == PointerButtonRight {
-		input.dwFlags = mouseeventfRightup
+		C.GetMouseInput(&input).dwFlags = C.MOUSEEVENTF_RIGHTUP
 	} else {
 		return fmt.Errorf("unsupported pointer button: %#v", button)
 	}
-	if sent, _, err := sendInputProc.Call(1, uintptr(unsafe.Pointer(&input)),
-		unsafe.Sizeof(input)); int(sent) != 1 {
-		return err
-	}
-	return nil
+	return p.sendInput([]C.INPUT{input})
 }
 
 func (p *windowsController) PointerMove(deltaX, deltaY int) error {
-	input := mouseInput{
-		typ:     inputMouse,
-		dx:      int32(deltaX),
-		dy:      int32(deltaY),
-		dwFlags: mouseeventfMove,
+	input := C.INPUT{_type: C.INPUT_MOUSE}
+	*C.GetMouseInput(&input) = C.MOUSEINPUT{
+		dx:      C.LONG(deltaX),
+		dy:      C.LONG(deltaY),
+		dwFlags: C.MOUSEEVENTF_MOVE,
 	}
-	if sent, _, err := sendInputProc.Call(1, uintptr(unsafe.Pointer(&input)),
-		unsafe.Sizeof(input)); int(sent) != 1 {
-		return err
-	}
-	return nil
+	return p.sendInput([]C.INPUT{input})
 }
 
 func (p *windowsController) PointerScroll(deltaHorizontal, deltaVertical int, finish bool) error {
-	inputs := make([]mouseInput, 0, 2)
+	inputs := make([]C.INPUT, 0, 2)
 	if deltaHorizontal != 0 {
-		inputs = append(inputs, mouseInput{
-			typ:       inputMouse,
-			dwFlags:   mouseeventfHwheel,
-			mouseData: uint32(deltaHorizontal * scrollMult),
-		})
+		input := C.INPUT{_type: C.INPUT_MOUSE}
+		*C.GetMouseInput(&input) = C.MOUSEINPUT{
+			dwFlags:   C.MOUSEEVENTF_HWHEEL,
+			mouseData: C.DWORD(deltaHorizontal * scrollMult),
+		}
+		inputs = append(inputs, input)
 	}
 	if deltaVertical != 0 {
-		inputs = append(inputs, mouseInput{
-			typ:       inputMouse,
-			dwFlags:   mouseeventfWheel,
-			mouseData: uint32(-deltaVertical * scrollMult),
-		})
+		input := C.INPUT{_type: C.INPUT_MOUSE}
+		*C.GetMouseInput(&input) = C.MOUSEINPUT{
+			dwFlags:   C.MOUSEEVENTF_WHEEL,
+			mouseData: C.DWORD(-deltaVertical * scrollMult),
+		}
+		inputs = append(inputs, input)
 	}
-	if len(inputs) == 0 {
-		return nil
-	}
-	if sent, _, err := sendInputProc.Call(uintptr(len(inputs)),
-		uintptr(unsafe.Pointer(&inputs[0])), unsafe.Sizeof(inputs[0])); int(sent) != len(inputs) {
-		return err
-	}
-	return nil
+	return p.sendInput(inputs)
 }
