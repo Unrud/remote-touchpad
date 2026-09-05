@@ -1,0 +1,33 @@
+name: Build release
+on: [pull_request]
+# on:
+#   release:
+#     types: [published]
+
+jobs:
+  release-windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        os:
+          - windows
+        arch:
+          - amd64
+        tags:
+          - []
+    env:
+      GOOS: ${{ matrix.os }}
+      GOARCH: ${{ matrix.arch }}
+      GOFLAGS: -tags=${{ join(matrix.tags, ',') }}
+      CGO_ENABLED: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+      - name: Go Build
+        run: go build -o remote-touchpad_${{ matrix.os }}_${{ matrix.arch }}.exe .
+      - uses: actions/upload-artifact@v7
+        with:
+          path: remote-touchpad_${{ matrix.os }}_${{ matrix.arch }}.exe
+          archive: false
