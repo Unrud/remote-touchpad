@@ -1,17 +1,20 @@
 name: Build release
 on:
+  push:
   release:
-    types: [published]
+    types:
+      - published
 
 jobs:
   release-windows:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.arch == 'arm64' && 'windows-11-vs2026-arm' || 'windows-latest' }}
     strategy:
       matrix:
         os:
           - windows
         arch:
           - amd64
+          - arm64
         tags:
           - []
     env:

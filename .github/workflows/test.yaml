@@ -1,5 +1,7 @@
 name: Test
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
 
 jobs:
   lint:
@@ -24,10 +26,6 @@ jobs:
           - amd64
         tags:
           - []
-          - ['null']
-          - [portal]
-          - [uinput]
-          - [x11]
           - ['null', portal, uinput, x11]
     env:
       GOOS: ${{ matrix.os }}
@@ -49,16 +47,16 @@ jobs:
         run: go test -race ./...
 
   test-windows:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.arch == 'arm64' && 'windows-11-vs2026-arm' || 'windows-latest' }}
     strategy:
       matrix:
         os:
           - windows
         arch:
           - amd64
+          - arm64
         tags:
           - []
-          - ['null']
     env:
       GOOS: ${{ matrix.os }}
       GOARCH: ${{ matrix.arch }}
