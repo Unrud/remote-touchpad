@@ -1,23 +1,31 @@
 name: Test
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
-          go-version: stable
+          go-version: '1.27'
       - name: Go Format
         run: gofmt -s -w . && git diff --exit-code
       - name: Go Mod Tidy
         run: go mod tidy && git diff --exit-code
 
-  test-linux:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ${{ matrix.runtime }}
     strategy:
       matrix:
+        runtime:
+          - ubuntu-24.04
         os:
           - linux
         arch:
@@ -29,6 +37,19 @@ jobs:
           - [uinput]
           - [x11]
           - ['null', portal, uinput, x11]
+        include:
+          - runtime: windows-2025-vs2026
+            os: windows
+            arch: amd64
+            tags: []
+          - runtime: macos-26-intel
+            os: darwin
+            arch: amd64
+            tags: []
+          - runtime: macos-26
+            os: darwin
+            arch: arm64
+            tags: []
     env:
       GOOS: ${{ matrix.os }}
       GOARCH: ${{ matrix.arch }}
@@ -38,37 +59,9 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
-          go-version: stable
+          go-version: '1.27'
       - run: sudo apt install libxrandr-dev libxtst-dev libxt-dev
-        if: ${{ contains(matrix.tags, 'x11') }}
-      - name: Go Vet
-        run: go vet ./...
-      - name: Go Build
-        run: go build ./...
-      - name: Go Test
-        run: go test -race ./...
-
-  test-windows:
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        os:
-          - windows
-        arch:
-          - amd64
-        tags:
-          - []
-          - ['null']
-    env:
-      GOOS: ${{ matrix.os }}
-      GOARCH: ${{ matrix.arch }}
-      GOFLAGS: -tags=${{ join(matrix.tags, ',') }}
-      CGO_ENABLED: '1'
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v7
-        with:
-          go-version: stable
+        if: ${{ startsWith(matrix.runtime, 'ubuntu-') && contains(matrix.tags, 'x11') }}
       - name: Go Vet
         run: go vet ./...
       - name: Go Build

@@ -4,13 +4,13 @@ Control mouse and keyboard from the webbrowser of a smartphone
 (or any other device with a touchscreen).
 To take control open the displayed URL or scan the QR code.
 
-Supports Flatpak's RemoteDesktop portal (for Wayland), Windows and X11.
+Supports Flatpak's RemoteDesktop portal (for Wayland), X11, macOS and Windows.
 
 ## Installation
 
 * [Flatpak](https://flathub.org/apps/details/com.github.unrud.RemoteTouchpad)
 * [Snap](https://snapcraft.io/remote-touchpad)
-* [Windows](https://github.com/Unrud/remote-touchpad/releases/latest)
+* [macOS & Windows](https://github.com/Unrud/remote-touchpad/releases/latest)
 * Golang:
   * Portal & uinput & X11:
 

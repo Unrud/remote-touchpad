@@ -4,29 +4,37 @@ on:
     types: [published]
 
 jobs:
-  release-windows:
-    runs-on: windows-latest
+  release:
+    runs-on: ${{ matrix.runtime }}
     strategy:
       matrix:
-        os:
-          - windows
-        arch:
-          - amd64
-        tags:
-          - []
+        include:
+          - runtime: windows-2025-vs2026
+            os: windows
+            arch: amd64
+            tags: []
+          - runtime: macos-26-intel
+            os: darwin
+            arch: amd64
+            tags: []
+          - runtime: macos-26
+            os: darwin
+            arch: arm64
+            tags: []
     env:
       GOOS: ${{ matrix.os }}
       GOARCH: ${{ matrix.arch }}
       GOFLAGS: -tags=${{ join(matrix.tags, ',') }}
       CGO_ENABLED: '1'
+      OUTPUT_FILE: remote-touchpad_${{ matrix.os }}_${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
           go-version: stable
       - name: Go Build
-        run: go build -o remote-touchpad_${{ matrix.os }}_${{ matrix.arch }}.exe .
+        run: go build -o '${{ env.OUTPUT_FILE }}' .
       - uses: actions/upload-artifact@v7
         with:
-          path: remote-touchpad_${{ matrix.os }}_${{ matrix.arch }}.exe
+          path: ${{ env.OUTPUT_FILE }}
           archive: false
