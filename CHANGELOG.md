@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.5.5 (2026-09-12)
+
+* Add macOS support
+* Reload page on URL hash change
+* Increase default secret to 12 bytes to avoid Base64 padding
+* Fix unnecessary finish of the first scroll event
+* Switch Windows backend from syscall to cgo
+* Automate Windows/macOS releases via GitHub Actions
+* Update dependencies
+
 ## 1.5.4 (2026-08-02)
 
 * Improve X11 keyboard input
