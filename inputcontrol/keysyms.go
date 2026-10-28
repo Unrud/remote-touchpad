@@ -37,6 +37,8 @@ const (
 	xkUp        Keysym = 0xff52
 	xkRight     Keysym = 0xff53
 	xkDown      Keysym = 0xff54
+	xkPrior     Keysym = 0xff55
+	xkNext      Keysym = 0xff56
 	xkEnd       Keysym = 0xff57
 	xkSuperL    Keysym = 0xffeb
 	// X11/XF86keysym.h
@@ -106,4 +108,19 @@ func KeyToKeysym(key Key) (Keysym, error) {
 	default:
 		return 0, fmt.Errorf("key not mapped to keysym: %#v", key)
 	}
+}
+
+// KeyToKeysyms returns the keysyms of a key combination in press order
+func KeyToKeysyms(key Key) ([]Keysym, error) {
+	switch key {
+	case KeyWorkspacePrev:
+		return []Keysym{xkSuperL, xkPrior}, nil
+	case KeyWorkspaceNext:
+		return []Keysym{xkSuperL, xkNext}, nil
+	}
+	keysym, err := KeyToKeysym(key)
+	if err != nil {
+		return nil, err
+	}
+	return []Keysym{keysym}, nil
 }

@@ -81,6 +81,7 @@ func (p *windowsController) KeyboardText(text string) error {
 
 func (p *windowsController) KeyboardKey(key Key) error {
 	input := C.INPUT{_type: C.INPUT_KEYBOARD}
+	var modifiers []C.WORD
 	switch key {
 	case KeyBackSpace:
 		C.GetKeyboardInput(&input).wVk = C.VK_BACK
@@ -118,11 +119,32 @@ func (p *windowsController) KeyboardKey(key Key) error {
 		C.GetKeyboardInput(&input).wVk = C.VK_MEDIA_PREV_TRACK
 	case KeyMediaPlayPause:
 		C.GetKeyboardInput(&input).wVk = C.VK_MEDIA_PLAY_PAUSE
+	case KeyWorkspacePrev:
+		modifiers = []C.WORD{C.VK_LCONTROL, C.VK_LWIN}
+		C.GetKeyboardInput(&input).wVk = C.VK_LEFT
+	case KeyWorkspaceNext:
+		modifiers = []C.WORD{C.VK_LCONTROL, C.VK_LWIN}
+		C.GetKeyboardInput(&input).wVk = C.VK_RIGHT
 	default:
 		return fmt.Errorf("key not mapped to virtual-key code: %#v", key)
 	}
-	inputs := []C.INPUT{input, input}
-	C.GetKeyboardInput(&inputs[1]).dwFlags |= C.KEYEVENTF_KEYUP
+	modifierInput := func(vk C.WORD, keyUp bool) C.INPUT {
+		input := C.INPUT{_type: C.INPUT_KEYBOARD}
+		C.GetKeyboardInput(&input).wVk = vk
+		if keyUp {
+			C.GetKeyboardInput(&input).dwFlags |= C.KEYEVENTF_KEYUP
+		}
+		return input
+	}
+	inputs := make([]C.INPUT, 0, 2*len(modifiers)+2)
+	for _, vk := range modifiers {
+		inputs = append(inputs, modifierInput(vk, false))
+	}
+	inputs = append(inputs, input, input)
+	C.GetKeyboardInput(&inputs[len(inputs)-1]).dwFlags |= C.KEYEVENTF_KEYUP
+	for i := len(modifiers) - 1; i >= 0; i-- {
+		inputs = append(inputs, modifierInput(modifiers[i], true))
+	}
 	return p.sendInput(inputs)
 }
 

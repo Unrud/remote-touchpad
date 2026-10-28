@@ -292,6 +292,32 @@ func (p *x11Controller) keyboardKeys(keys []Keysym) error {
 	return nil
 }
 
+func (p *x11Controller) keyboardKeyCombo(keys []Keysym) error {
+	if len(keys) <= 1 {
+		return p.keyboardKeys(keys)
+	}
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	if p.display == nil {
+		return errors.New("X server connection closed")
+	}
+	keycodes := make([]C.KeyCode, len(keys))
+	for i, keysym := range keys {
+		keycodes[i] = C.XKeysymToKeycode(p.display, C.KeySym(keysym))
+		if keycodes[i] == 0 {
+			return fmt.Errorf("keysym not mapped to keycode: %#x", keysym)
+		}
+	}
+	for _, keycode := range keycodes {
+		C.XTestFakeKeyEvent(p.display, C.uint(keycode), C.True, 0)
+	}
+	for _, keycode := range slices.Backward(keycodes) {
+		C.XTestFakeKeyEvent(p.display, C.uint(keycode), C.False, 0)
+	}
+	C.XSync(p.display, C.False)
+	return nil
+}
+
 func (p *x11Controller) KeyboardText(text string) error {
 	keys := make([]Keysym, 0, len(text))
 	for _, runeValue := range text {
@@ -305,12 +331,11 @@ func (p *x11Controller) KeyboardText(text string) error {
 }
 
 func (p *x11Controller) KeyboardKey(key Key) error {
-	keysym, err := KeyToKeysym(key)
+	keys, err := KeyToKeysyms(key)
 	if err != nil {
 		return err
 	}
-	keys := [...]Keysym{keysym}
-	return p.keyboardKeys(keys[:])
+	return p.keyboardKeyCombo(keys)
 }
 
 func (p *x11Controller) sendButton(button uint, press bool) error {

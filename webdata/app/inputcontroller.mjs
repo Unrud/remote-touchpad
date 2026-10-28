@@ -39,6 +39,8 @@ export const KEY_END = 14;
 export const KEY_BACK_SPACE = 15;
 export const KEY_DELETE = 16;
 export const KEY_RETURN = 17;
+export const KEY_WORKSPACE_PREV = 18;
+export const KEY_WORKSPACE_NEXT = 19;
 
 const COMMAND_KEYBOARD_TEXT = "t";
 const COMMAND_KEYBOARD_KEY = "k";

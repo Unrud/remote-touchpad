@@ -173,6 +173,10 @@ func (p *darwinController) KeyboardKey(key Key) error {
 		return p.sendKeyboardKeyPress(C.kVK_LeftArrow, C.kCGEventFlagMaskCommand, nil)
 	case KeyEnd, KeyBrowserForward:
 		return p.sendKeyboardKeyPress(C.kVK_RightArrow, C.kCGEventFlagMaskCommand, nil)
+	case KeyWorkspacePrev:
+		return p.sendKeyboardKeyPress(C.kVK_LeftArrow, C.kCGEventFlagMaskControl, nil)
+	case KeyWorkspaceNext:
+		return p.sendKeyboardKeyPress(C.kVK_RightArrow, C.kCGEventFlagMaskControl, nil)
 	case KeyVolumeMute:
 		return p.sendSpecialKeyPress(C.NX_KEYTYPE_MUTE)
 	case KeyVolumeDown:

@@ -128,7 +128,7 @@ func (p *uinputController) KeyboardText(text string) error {
 }
 
 func (p *uinputController) KeyboardKey(key Key) error {
-	var uinputKey int
+	var uinputKey, uinputModifier int
 	switch key {
 	case KeyBackSpace:
 		uinputKey = uinput.KeyBackspace
@@ -166,10 +166,23 @@ func (p *uinputController) KeyboardKey(key Key) error {
 		uinputKey = uinput.KeyBack
 	case KeyBrowserForward:
 		uinputKey = uinput.KeyForward
+	case KeyWorkspacePrev:
+		uinputModifier, uinputKey = uinput.KeyLeftmeta, uinput.KeyPageup
+	case KeyWorkspaceNext:
+		uinputModifier, uinputKey = uinput.KeyLeftmeta, uinput.KeyPagedown
 	default:
 		return fmt.Errorf("unsupported key: %#v", key)
 	}
-	return p.keyboard.KeyPress(uinputKey)
+	if uinputModifier == 0 {
+		return p.keyboard.KeyPress(uinputKey)
+	}
+	if err := p.keyboard.KeyDown(uinputModifier); err != nil {
+		return err
+	}
+	time.Sleep(shiftKeysDelay)
+	err := p.keyboard.KeyPress(uinputKey)
+	time.Sleep(shiftKeysDelay)
+	return errors.Join(err, p.keyboard.KeyUp(uinputModifier))
 }
 
 func (p *uinputController) PointerButton(button PointerButton, press bool) error {

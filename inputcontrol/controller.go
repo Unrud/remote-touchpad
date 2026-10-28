@@ -52,6 +52,8 @@ const (
 	KeyBackSpace
 	KeyDelete
 	KeyReturn
+	KeyWorkspacePrev
+	KeyWorkspaceNext
 	KeyLimit
 )
 
