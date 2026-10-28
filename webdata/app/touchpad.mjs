@@ -17,12 +17,17 @@
  *    along with Remote-Touchpad.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {POINTER_BUTTON_LEFT, POINTER_BUTTON_MIDDLE, POINTER_BUTTON_RIGHT} from "./inputcontroller.mjs";
+import {
+    POINTER_BUTTON_LEFT, POINTER_BUTTON_MIDDLE, POINTER_BUTTON_RIGHT,
+    KEY_SUPER, KEY_WORKSPACE_PREV, KEY_WORKSPACE_NEXT,
+} from "./inputcontroller.mjs";
 
 // [1 Touch, 2 Touches, 3 Touches] (as pixel)
 const TOUCH_MOVE_THRESHOLD = [10, 15, 15];
 // Max time between consecutive touches for clicking or dragging (as milliseconds)
 const TOUCH_TIMEOUT = 250;
+// Min. average distance of 3 touches for a swipe (as pixel)
+const SWIPE_THRESHOLD = 50;
 // [[pixel/second, multiplicator], ...]
 const POINTER_ACCELERATION = [
     [0, 0],
@@ -71,6 +76,9 @@ export default class Touchpad {
     #ongoingTouches = [];
     #dragging = false;
     #draggingTimeout = null;
+    #swipeX = 0;
+    #swipeY = 0;
+    #swiped = false;
     #inputController;
     #checkAllowedCallback;
 
@@ -107,6 +115,7 @@ export default class Touchpad {
         if (this.#ongoingTouches.length == 0) {
             this.#startTimeStamp = event.timeStamp;
             this.#moved = false;
+            this.#swiped = false;
         }
         const touches = event.changedTouches;
         let foundTouch = false;
@@ -129,6 +138,7 @@ export default class Touchpad {
         }
         event.preventDefault();
         this.#lastEndTimeStamp = 0;
+        this.#resetSwipe();
         if (this.#draggingTimeout != null) {
             clearTimeout(this.#draggingTimeout);
             this.#draggingTimeout = null;
@@ -154,6 +164,7 @@ export default class Touchpad {
         }
         event.preventDefault();
         this.#lastEndTimeStamp = event.timeStamp;
+        this.#resetSwipe();
         this.#inputController.pointerScroll(0, 0, true);
         if (this.#releasedCount > TOUCH_MOVE_THRESHOLD.length) {
             this.#moved = true;
@@ -184,9 +195,30 @@ export default class Touchpad {
         }
     }
 
+    #resetSwipe() {
+        this.#swipeX = 0;
+        this.#swipeY = 0;
+    }
+
+    #handleSwipe() {
+        if (Math.max(Math.abs(this.#swipeX), Math.abs(this.#swipeY)) < SWIPE_THRESHOLD) {
+            return;
+        }
+        this.#swiped = true;
+        if (Math.abs(this.#swipeX) >= Math.abs(this.#swipeY)) {
+            // Content follows the touches
+            this.#inputController.keyboardKey(
+                this.#swipeX < 0 ? KEY_WORKSPACE_NEXT : KEY_WORKSPACE_PREV);
+        } else {
+            this.#inputController.keyboardKey(KEY_SUPER);
+        }
+    }
+
     #handleTouchmove(event) {
         let sumX = 0;
         let sumY = 0;
+        let rawSumX = 0;
+        let rawSumY = 0;
         const touches = event.changedTouches;
         let foundTouch = false;
         for (let i = 0; i < touches.length; i += 1) {
@@ -211,6 +243,8 @@ export default class Touchpad {
             const timeDelta = event.timeStamp - this.#ongoingTouches[idx].timeStamp;
             sumX += dx * calculateAccelerationMult(Math.abs(dx) / timeDelta * 1000);
             sumY += dy * calculateAccelerationMult(Math.abs(dy) / timeDelta * 1000);
+            rawSumX += dx;
+            rawSumY += dy;
             this.#ongoingTouches[idx].pageX = touches[i].pageX;
             this.#ongoingTouches[idx].pageY = touches[i].pageY;
             this.#ongoingTouches[idx].timeStamp = event.timeStamp;
@@ -219,13 +253,21 @@ export default class Touchpad {
             return;
         }
         event.preventDefault();
+        if (this.#ongoingTouches.length == 3) {
+            this.#swipeX += rawSumX / 3;
+            this.#swipeY += rawSumY / 3;
+        }
         if (this.#moved && event.timeStamp - this.#lastEndTimeStamp >= TOUCH_TIMEOUT) {
-            if (this.#ongoingTouches.length == 1 || this.#dragging) {
+            if (this.#swiped) {
+                // Ignore remaining touches until all are released
+            } else if (this.#ongoingTouches.length == 1 || this.#dragging) {
                 this.#inputController.pointerMove(
                     sumX * this.#moveSpeed, sumY * this.#moveSpeed);
             } else if (this.#ongoingTouches.length == 2) {
                 this.#inputController.pointerScroll(
                     -sumX * this.#scrollSpeed, -sumY * this.#scrollSpeed, false);
+            } else if (this.#ongoingTouches.length == 3) {
+                this.#handleSwipe();
             }
         }
     }

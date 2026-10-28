@@ -336,6 +336,29 @@ func (p *portalController) keyboardKeys(keys []Keysym) error {
 	return nil
 }
 
+func (p *portalController) keyboardKeyCombo(keys []Keysym) error {
+	notify := func(keysym Keysym, state uint32) error {
+		return p.portalDesktop.Call(
+			"org.freedesktop.portal.RemoteDesktop.NotifyKeyboardKeysym", 0,
+			p.sessionHandle, map[string]dbus.Variant{}, keysym, state,
+		).Store()
+	}
+	for i, keysym := range keys {
+		if err := notify(keysym, btnPressed); err != nil {
+			for _, pressed := range slices.Backward(keys[:i]) {
+				err = errors.Join(err, notify(pressed, btnReleased))
+			}
+			return err
+		}
+	}
+	for _, keysym := range slices.Backward(keys) {
+		if err := notify(keysym, btnReleased); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (p *portalController) KeyboardText(text string) error {
 	keys := make([]Keysym, 0, len(text))
 	for _, runeValue := range text {
@@ -349,12 +372,11 @@ func (p *portalController) KeyboardText(text string) error {
 }
 
 func (p *portalController) KeyboardKey(key Key) error {
-	keysym, err := KeyToKeysym(key)
+	keys, err := KeyToKeysyms(key)
 	if err != nil {
 		return err
 	}
-	keys := [...]Keysym{keysym}
-	return p.keyboardKeys(keys[:])
+	return p.keyboardKeyCombo(keys)
 }
 
 func (p *portalController) PointerButton(button PointerButton, press bool) error {
